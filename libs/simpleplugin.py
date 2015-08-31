@@ -528,6 +528,7 @@ class Plugin(Addon):
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('content'):
             xbmcplugin.setContent(self._handle, context['content'])
+        listing = []
         for item in context['listing']:
             list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                          label2=item.get('label2', ''),
@@ -554,14 +555,10 @@ class Plugin(Addon):
                 is_folder = item.get('is_folder', True)
             if item.get('subtitles'):
                 list_item.setSubtitles(item['subtitles'])
-            xbmcplugin.addDirectoryItem(self._handle,
-                                        item['url'],
-                                        list_item,
-                                        is_folder,
-                                        len(context['listing']))
+            listing.append((item['url'], list_item, is_folder))
+        xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context['sort_methods'] is not None:
-            for method in context['sort_methods']:
-                xbmcplugin.addSortMethod(self._handle, method)
+            [xbmcplugin.addSortMethod(self._handle, method) for method in context['sort_methods']]
         xbmcplugin.endOfDirectory(self._handle,
                                   context['succeeded'],
                                   context['update_listing'],
