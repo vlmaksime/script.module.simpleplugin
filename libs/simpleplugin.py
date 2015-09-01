@@ -106,6 +106,7 @@ class Storage(object):
         """
         Flush storage to disk
 
+        This method invalidates a Storage instance.
         :return:
         """
         self._file.seek(0)
