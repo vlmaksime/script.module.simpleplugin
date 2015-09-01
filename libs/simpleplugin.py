@@ -263,7 +263,17 @@ class Addon(object):
 
     def get_storage(self, filename='storage.pcl'):
         """
-        Get persistent Storage instance for storing arbitrary values between addon calls.
+        Get a persistent Storage instance for storing arbitrary values between addon calls.
+
+        A Storage instance can be used as a context manager.
+        Example:
+        =====================================
+        with plugin.get_storage() as storage:
+            storage['param1'] = value1
+            value2 = storage['param2']
+        ...
+        =====================================
+        Note that after exiting 'with' block a Storage instance is invalidated.
         """
         return Storage(self.config_dir, filename)
 
