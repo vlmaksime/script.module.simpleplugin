@@ -379,7 +379,7 @@ class Plugin(Addon):
         Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
         and the 2-nd is a boolean value for replacing items. If True, context menu will contain only
         the provided items, if False - the items are added to an existing context menu.
-        context_meunu param is optional.
+        context_menu param is optional.
     url - a callback URL for this list item.
     is_playable - if True, then this item is playable and must return a playable path or
         be resolved via plugin.resolve_url() (default: False).
@@ -387,8 +387,8 @@ class Plugin(Addon):
         the item either is a playable media or a general-purpose script
         which neither creates a virtual folder nor points to a playable media (default: True).
         if is_playable is set to True, then is_folder value automatically assumed to be False.
-    subtitles - the list of paths to subtitle files.
-    mime - item's mime type.
+    subtitles - the list of paths to subtitle files (optional).
+    mime - item's mime type (optional).
     Example:
     listing = [{    'label': 'Label',
                     'label2': 'Label 2',
