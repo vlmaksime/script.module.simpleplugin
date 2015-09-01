@@ -377,6 +377,7 @@ class Plugin(Addon):
         which neither creates a virtual folder nor points to a playable media (default: True).
         if is_playable is set to True, then is_folder value automatically assumed to be False.
     subtitles - the list of paths to subtitle files.
+    mime - item's mime type.
     Example:
     listing = [{    'label': 'Label',
                     'label2': 'Label 2',
@@ -391,7 +392,8 @@ class Plugin(Addon):
                     'url': 'plugin:/plugin.video.test/?action=play',
                     'is_playable': True,
                     'is_folder': False,
-                    'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt']
+                    'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],
+                    'mime': 'video/mp4'
                     }]
 
     Alternatively, an action callable can use Plugin.create_listing() and Plugin.resolve_url()
@@ -555,6 +557,8 @@ class Plugin(Addon):
                 is_folder = item.get('is_folder', True)
             if item.get('subtitles'):
                 list_item.setSubtitles(item['subtitles'])
+            if item.get('mime'):
+                list_item.setMimeType(item['mime'])
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context['sort_methods'] is not None:
