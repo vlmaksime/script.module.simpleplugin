@@ -112,3 +112,4 @@ _docs/
 epydoc.cfg
 epydoc.cmd
 *.zip
+publish.py
