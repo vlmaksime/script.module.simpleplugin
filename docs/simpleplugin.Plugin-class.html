@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>simpleplugin.Plugin</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="simpleplugin-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >Kodi SimplePlugin micro-framework</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="simpleplugin-module.html">Module&nbsp;simpleplugin</a> ::
+        Class&nbsp;Plugin
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Plugin</h1><p class="nomargin-top"><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+    
+         |    
+     <a href="simpleplugin.Addon-class.html">Addon</a> --+
+             |
+            <strong class="uidshort">Plugin</strong>
+</pre>
+
+<hr />
+<pre class="literalblock">
+
+Plugin class
+
+It provides a simplified API to create virtual directories of playable items
+in Kodi content plugins.
+simpleplugin.Plugin uses a concept of callable plugin actions (functions or methods)
+that are mapped to 'action' parameters via actions instance property.
+A Plugin instance must have at least one action for its root section
+mapped to 'root' string.
+
+Minimal example::
+
+    from simpleplugin import Plugin
+
+    plugin = Plugin()
+
+    def root_action(params):
+        return [{'label': 'Foo',
+                'url': plugin.get_url(action='some_action', param='Foo')},
+                {'label': 'Bar',
+                'url': plugin.get_url(action='some_action', param='Bar'}]
+
+    def some_action(params):
+        return [{'label': param['param']}]
+
+    plugin.actions['root'] = root_action  # Mandatory item!
+    plugin.actions['some_action'] = some_action
+    plugin.run()
+
+B{IMPORTANT}: You need to map function or method objects without round brackets!
+
+E.g.::
+
+    plugin.actions['some_action'] = some_action  # Correct :)
+    plugin.actions['some_action'] = some_action()  # Wrong! :(
+
+An action callable receives 1 parameter - params.
+params is a dict containing plugin call parameters (including action string)
+The action callable can return
+either a list of dictionaries representing Kodi virtual directory items
+or a resolved playable path (str or unicode) for Kodi to play.
+
+Example 1::
+
+    def list_action(params):
+        listing = get_listing(params)  # Some external function to create listing
+        return listing
+
+Example 2::
+
+    def play_action(params):
+        path = get_path(params)  # Some external function to get a playable path
+        return path
+
+listing is a Python list of dict items.
+
+Each dict item can contain the following properties:
+    - label - item's label (default: '').
+    - label2 - item's label2 (default: '').
+    - thumb - item's thumbnail (default: '').
+    - icon - item's icon (default: '').
+    - path - item's path (default: '').
+    - fanart - item's fanart (optional).
+    - art - a dict containing all item's graphic
+        (see U{ListItem.setArt&lt;http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setArt&gt;}
+        for more info) - optional.
+    - stream_info - a dictionary of C{{stream_type: {param: value}}} items (see
+        U{ListItem.addStreamInfo
+        &lt;http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#addStreamInfo&gt;}) - optional.
+    - info -  a dictionary of C{{media: {param: value}}} items
+        (see U{ListItem.setInfo&lt;http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setInfo&gt;}) -
+        optional
+    - context_menu - a list or a tuple. A list must contain 2-item tuples C{('Menu label', 'Action')}.
+        If a list is provided then the items from the tuples are added to the item's context menu.
+        Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
+        and the 2-nd is a boolean value for replacing items. If C{True}, context menu will contain only
+        the provided items, if False - the items are added to an existing context menu.
+        context_menu param is optional.
+    - url - a callback URL for this list item.
+    - is_playable - if C{True}, then this item is playable and must return a playable path or
+        be resolved via plugin.resolve_url() (default: C{False}).
+    - is_folder - if C{True} then the item will open a lower-level sub-listing. if C{False},
+        the item either is a playable media or a general-purpose script
+        which neither creates a virtual folder nor points to a playable media (default: C{True}).
+        if is_playable is set to C{True}, then is_folder value automatically assumed to be C{False}.
+    - subtitles - the list of paths to subtitle files (optional).
+    - mime - item's mime type (optional).
+    - list_item - an U{xbmcgui.ListItem&lt;http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html&gt;}
+    instance (optional). It is used when you want to set all list item properties by yourself.
+        If C{'list_item'} property is present, all other properties,
+        except for C{'url'} and C{'is_folder'}, are ignored.
+
+Example::
+
+    listing = [{    'label': 'Label',
+                    'label2': 'Label 2',
+                    'thumb': 'thumb.png',
+                    'icon': 'icon.png',
+                    'fanart': 'fanart.jpg',
+                    'art': {'clearart': 'clearart.png'},
+                    'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
+                                    'audio': {'codec': 'ac3', 'language': 'en'}},
+                    'info': {'video': {'genre': 'Comedy', 'year': 2005}},
+                    'context_menu': ([('Menu Item', 'Action')], True),
+                    'url': 'plugin:/plugin.video.test/?action=play',
+                    'is_playable': True,
+                    'is_folder': False,
+                    'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],
+                    'mime': 'video/mp4'
+                    }]
+
+Alternatively, an action callable can use Plugin.create_listing() and Plugin.resolve_url()
+static methods to set additional parameters for Kodi.
+
+Example 3::
+
+    def list_action(params):
+        listing = get_listing(params)  # Some external function to create listing
+        return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
+
+Example 4::
+
+    def play_action(params):
+        path = get_path(params)  # Some external function to get a playable path
+        return Plugin.resolve_url(path, succeeded=True)
+
+If an action callable performs any actions other than creating a listing or
+resolving a playable URL, it must return None.
+
+</pre>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">id_</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span><br />
+      Class constructor</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">str</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#get_url" class="summary-sig-name">get_url</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">plugin_url</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>,
+        <span class="summary-sig-arg">**kwargs</span>)</span><br />
+      Construct a callable URL for a virtual directory item</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.get_url">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#run" class="summary-sig-name">run</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">category</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span><br />
+      Run plugin</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.run">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#_create_listing" class="summary-sig-name" onclick="show_private();">_create_listing</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">context</span>)</span><br />
+      Create a virtual folder listing</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin._create_listing">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#_resolve_url" class="summary-sig-name" onclick="show_private();">_resolve_url</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">context</span>)</span><br />
+      Resolve a playable URL</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin._resolve_url">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#__getattr__" class="summary-sig-name">__getattr__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">item</span>)</span><br />
+      Get addon setting as an Addon instance attribute
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.__getattr__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#cached" class="summary-sig-name">cached</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">duration</span>=<span class="summary-sig-default">10</span>)</span><br />
+      Cached decorator
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.cached">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">unicode</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#get_localized_string" class="summary-sig-name">get_localized_string</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">id_</span>)</span><br />
+      Get localized UI string
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.get_localized_string">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#get_setting" class="summary-sig-name">get_setting</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">id_</span>,
+        <span class="summary-sig-arg">convert</span>=<span class="summary-sig-default">True</span>)</span><br />
+      Get addon setting
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.get_setting">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#get_storage" class="summary-sig-name">get_storage</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">storage.pcl</code><code class="variable-quote">'</code></span>)</span><br />
+      Get a persistent Storage instance for storing arbitrary values 
+      between addon calls.
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.get_storage">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#log" class="summary-sig-name">log</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">message</span>,
+        <span class="summary-sig-arg">level</span>=<span class="summary-sig-default">2</span>)</span><br />
+      Add message to Kodi log starting with Addon ID
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.log">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Addon-class.html#set_setting" class="summary-sig-name">set_setting</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">id_</span>,
+        <span class="summary-sig-arg">value</span>)</span><br />
+      Set addon setting
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Addon.set_setting">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== STATIC METHODS ==================== -->
+<a name="section-StaticMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">dict</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#get_params" class="summary-sig-name">get_params</a>(<span class="summary-sig-arg">paramstring</span>)</span><br />
+      Convert a URL-encoded paramstring to a Python dict</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.get_params">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">dict</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#create_listing" class="summary-sig-name">create_listing</a>(<span class="summary-sig-arg">listing</span>,
+        <span class="summary-sig-arg">succeeded</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">update_listing</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">cache_to_disk</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">sort_methods</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">view_mode</span>=<span class="summary-sig-default">50</span>,
+        <span class="summary-sig-arg">content</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Create and return a context dict for a virtual folder listing</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.create_listing">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">dict</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#resolve_url" class="summary-sig-name">resolve_url</a>(<span class="summary-sig-arg">path</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>,
+        <span class="summary-sig-arg">play_item</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">succeeded</span>=<span class="summary-sig-default">True</span>)</span><br />
+      Create and return a context dict to resolve a playable URL</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.resolve_url">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">ListItem</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="simpleplugin.Plugin-class.html#create_list_item" class="summary-sig-name">create_list_item</a>(<span class="summary-sig-arg">item</span>)</span><br />
+      Create an xbmcgui.ListItem instance from an item dict</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.create_list_item">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#addon" class="summary-name">addon</a><br />
+      Kodi Addon instance that represents this Addon
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#config_dir" class="summary-name">config_dir</a><br />
+      Addon config dir
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#fanart" class="summary-name">fanart</a><br />
+      Addon fanart
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#icon" class="summary-name">icon</a><br />
+      Addon icon
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#id" class="summary-name">id</a><br />
+      Addon ID
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="simpleplugin.Addon-class.html#path" class="summary-name">path</a><br />
+      Addon path
+      <em>(Inherited from <a href="simpleplugin.Addon-class.html">simpleplugin.Addon</a>)</em>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">id_</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Class constructor</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>id_</code></strong> (str) - plugin's id, e.g. 'plugin.video.foo' (optional)</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_params"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_params</span>(<span class="sig-arg">paramstring</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.get_params">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Convert a URL-encoded paramstring to a Python dict</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>paramstring</code></strong> (str) - URL-encoded paramstring</li>
+    </ul></dd>
+    <dt>Returns: dict</dt>
+        <dd>parsed paramstring</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_url"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_url</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">plugin_url</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>,
+        <span class="sig-arg">**kwargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.get_url">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Construct a callable URL for a virtual directory item</p>
+  <p>If plugin_url is empty, a current plugin URL is used. kwargs are 
+  converted to a URL-encoded string of plugin call parameters To call a 
+  plugin action, 'action' parameter must be used, if 'action' parameter is 
+  missing, then the plugin root action is called If the action is not added
+  to Plugin actions, PluginError will be raised.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>plugin_url</code></strong> (str) - plugin URL with trailing / (optional)</li>
+        <li><strong class="pname"><code>kwargs</code></strong> - pairs if key=value items</li>
+    </ul></dd>
+    <dt>Returns: str</dt>
+        <dd>a full plugin callback URL</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="run"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">run</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">category</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.run">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Run plugin</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>category</code></strong> (str) - str - plugin sub-category, e.g. 'Comedy'. see <a 
+          href="http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setPluginCategory"
+          target="_top">xbmcplugin.setPluginCategory</a> for more info</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="create_listing"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">create_listing</span>(<span class="sig-arg">listing</span>,
+        <span class="sig-arg">succeeded</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">update_listing</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">cache_to_disk</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">sort_methods</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">view_mode</span>=<span class="sig-default">50</span>,
+        <span class="sig-arg">content</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.create_listing">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create and return a context dict for a virtual folder listing</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>listing</code></strong> (list) - the list of the plugin virtual folder items</li>
+        <li><strong class="pname"><code>succeeded</code></strong> (bool) - if False Kodi won't open a new listing and stays on the current 
+          level.</li>
+        <li><strong class="pname"><code>update_listing</code></strong> (bool) - if True, Kodi won't open a sub-listing but refresh the current 
+          one.</li>
+        <li><strong class="pname"><code>cache_to_disk</code></strong> (bool) - cache this view to disk.</li>
+        <li><strong class="pname"><code>sort_methods</code></strong> (tuple) - the list of integer constants representing virtual folder sort 
+          methods.</li>
+        <li><strong class="pname"><code>view_mode</code></strong> (int) - a numeric code for a skin view mode. View mode codes are 
+          different in different skins except for 50 (basic listing).</li>
+        <li><strong class="pname"><code>content</code></strong> (str) - string - current plugin content, e.g. 'movies' or 'episodes'. See
+          <a 
+          href="http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setContent"
+          target="_top">xbmcplugin.setContent()</a> for more info.</li>
+    </ul></dd>
+    <dt>Returns: dict</dt>
+        <dd>context dictionary containing necessary parameters to create 
+          virtual folder listing in Kodi UI.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="resolve_url"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">resolve_url</span>(<span class="sig-arg">path</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>,
+        <span class="sig-arg">play_item</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">succeeded</span>=<span class="sig-default">True</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.resolve_url">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create and return a context dict to resolve a playable URL</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>path</code></strong> (str or unicode) - the path to a playable media.</li>
+        <li><strong class="pname"><code>play_item</code></strong> (dict) - a dict of item properties as described in the class docstring. It
+          allows to set additional properties for the item being played, 
+          like graphics, metadata etc.</li>
+        <li><strong class="pname"><code>succeeded</code></strong> (bool) - if False, Kodi won't play anything</li>
+    </ul></dd>
+    <dt>Returns: dict</dt>
+        <dd>context dictionary containing necessary parameters for Kodi to 
+          play the selected media.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="create_list_item"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">create_list_item</span>(<span class="sig-arg">item</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin.create_list_item">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create an xbmcgui.ListItem instance from an item dict</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>item</code></strong> (dict) - a dict of ListItem properties</li>
+    </ul></dd>
+    <dt>Returns: ListItem</dt>
+        <dd><a 
+          href="http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html"
+          target="_top">xbmcgui.ListItem</a> instance</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="_create_listing"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">_create_listing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">context</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin._create_listing">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create a virtual folder listing</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>context</code></strong> (dict) - context dictionary</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="_resolve_url"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">_resolve_url</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">context</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="simpleplugin-pysrc.html#Plugin._resolve_url">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Resolve a playable URL</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>context</code></strong> (dict) - context dictionary</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="simpleplugin-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >Kodi SimplePlugin micro-framework</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Sep 25 12:51:44 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
