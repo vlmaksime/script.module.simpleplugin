@@ -125,7 +125,12 @@ class Addon(object):
     Provides access to basic addon parameters
     """
     def __init__(self, id_=''):
-        """Class constructor"""
+        """
+        Class constructor
+
+        @param id_: addon id, e.g. 'plugin.video.foo' (optional)
+        @type id_: str
+        """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath('special://profile/addon_data/{0}'.format(self.id)).decode('utf-8')
         if not os.path.exists(self._configdir):
@@ -137,6 +142,7 @@ class Addon(object):
 
         E.g. addon.my_setting is equal to addon.get_setting('my_setting')
         @param item:
+        @type item: str
         @return:
         """
         return self.get_setting(item)
@@ -147,6 +153,7 @@ class Addon(object):
         Kodi Addon instance that represents this Addon
 
         @return: Addon instance
+        @rtype: xbmcaddon.Addon
         """
         return self._addon
 
@@ -164,7 +171,8 @@ class Addon(object):
         """
         Addon path
 
-        @return: str
+        @return:
+        @rtype: str
         """
         return self._addon.getAddonInfo('path').decode('utf-8')
 
@@ -173,7 +181,8 @@ class Addon(object):
         """
         Addon icon
 
-        @return: str
+        @return:
+        @rtype: str
         """
         icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
@@ -186,7 +195,8 @@ class Addon(object):
         """
         Addon fanart
 
-        @return: str
+        @return:
+        @rtype: str
         """
         fanart = os.path.join(self.path, 'fanart.jpg')
         if os.path.exists(fanart):
@@ -199,7 +209,8 @@ class Addon(object):
         """
         Addon config dir
 
-        @return: str
+        @return:
+        @rtype: str
         """
         return self._configdir
 
@@ -209,7 +220,8 @@ class Addon(object):
 
         @param id_: UI string ID
         @type id_: str
-        @return: str - UI string in current language
+        @return: UI string in current language
+        @rtype: unicode
         """
         return self._addon.getLocalizedString(id_).encode('utf-8')
 
@@ -263,7 +275,7 @@ class Addon(object):
 
         @param message: message to be written into Kodi log
         @type message: str
-        @param level: log level
+        @param level: log level. xbmc module provides the necessary symbolic constants.
         @type level: int
         @return:
         """
@@ -410,9 +422,10 @@ class Plugin(Addon):
             if is_playable is set to C{True}, then is_folder value automatically assumed to be C{False}.
         - subtitles - the list of paths to subtitle files (optional).
         - mime - item's mime type (optional).
-        - list_item - an xbmcgui.ListItem instance (optional). It is used when you want to set
-            all list item properties by yourself. If C{'list_item'} property is present,
-            all other properties, except for C{'url'} and C{'is_folder'}, are ignored.
+        - list_item - an U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>}
+            instance (optional). It is used when you want to set all list item properties by yourself.
+            If C{'list_item'} property is present, all other properties,
+            except for C{'url'} and C{'is_folder'}, are ignored.
 
     Example::
 
@@ -455,6 +468,7 @@ class Plugin(Addon):
         """
         Class constructor
         @param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+        @type id_: str
         """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
@@ -468,7 +482,8 @@ class Plugin(Addon):
 
         @param paramstring: URL-encoded paramstring
         @type paramstring: str
-        @return: dict
+        @return: parsed paramstring
+        @rtype: dict
         """
         params = parse_qs(paramstring)
         for key, value in params.iteritems():
@@ -488,7 +503,8 @@ class Plugin(Addon):
         @param plugin_url: plugin URL with trailing / (optional)
         @type plugin_url: str
         @param kwargs: pairs if key=value items
-        @return: str - a full plugin callback URL
+        @return: a full plugin callback URL
+        @rtype: str
         """
         url = plugin_url or self._url
         if kwargs:
@@ -555,8 +571,9 @@ class Plugin(Addon):
             <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setContent>}
             for more info.
         @type content: str
-        @return: dict - context dictionary containing necessary parameters
+        @return: context dictionary containing necessary parameters
             to create virtual folder listing in Kodi UI.
+        @rtype: dict
         """
         return {'listing': listing, 'succeeded': succeeded, 'update_listing': update_listing,
                 'cache_to_disk': cache_to_disk, 'sort_methods': sort_methods, 'view_mode': view_mode,
@@ -574,8 +591,9 @@ class Plugin(Addon):
         @type play_item: dict
         @param succeeded: if False, Kodi won't play anything
         @type succeeded: bool
-        @return: dict - context dictionary containing necessary parameters
+        @return: context dictionary containing necessary parameters
             for Kodi to play the selected media.
+        @rtype: dict
         """
         return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
 
@@ -586,7 +604,8 @@ class Plugin(Addon):
 
         @param item: a dict of ListItem properties
         @type item: dict
-        @return:
+        @return: U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>} instance
+        @rtype: xbmcgui.ListItem
         """
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
@@ -620,7 +639,6 @@ class Plugin(Addon):
         @param context: context dictionary
         @type context: dict
         @return:
-
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
         listing = []
