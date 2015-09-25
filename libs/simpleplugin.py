@@ -384,6 +384,7 @@ class Plugin(Addon):
         - label2 - item's label2 (default: '').
         - thumb - item's thumbnail (default: '').
         - icon - item's icon (default: '').
+        - path - item's path (default: '').
         - fanart - item's fanart (optional).
         - art - a dict containing all item's graphic
             (see U{ListItem.setArt<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setArt>}
@@ -409,6 +410,9 @@ class Plugin(Addon):
             if is_playable is set to C{True}, then is_folder value automatically assumed to be C{False}.
         - subtitles - the list of paths to subtitle files (optional).
         - mime - item's mime type (optional).
+        - list_item - an xbmcgui.ListItem instance (optional). It is used when you want to set
+            all list item properties by yourself. If C{'list_item'} property is present,
+            all other properties, except for C{'url'} and C{'is_folder'}, are ignored.
 
     Example::
 
@@ -559,18 +563,55 @@ class Plugin(Addon):
                 'content': content}
 
     @staticmethod
-    def resolve_url(path, succeeded=True):
+    def resolve_url(path='', play_item=None, succeeded=True):
         """
         Create and return a context dict to resolve a playable URL
 
         @param path: the path to a playable media.
         @type path: str or unicode
+        @param play_item: a dict of item properties as described in the class docstring.
+            It allows to set additional properties for the item being played, like graphics, metadata etc.
+        @type play_item: dict
         @param succeeded: if False, Kodi won't play anything
         @type succeeded: bool
         @return: dict - context dictionary containing necessary parameters
             for Kodi to play the selected media.
         """
-        return {'path': path, 'succeeded': succeeded}
+        return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
+
+    @staticmethod
+    def create_list_item(item):
+        """
+        Create an xbmcgui.ListItem instance from an item dict
+
+        @param item: a dict of ListItem properties
+        @type item: dict
+        @return:
+        """
+        list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                     label2=item.get('label2', ''),
+                                     thumbnailImage=item.get('thumb', ''),
+                                     iconImage=item.get('icon', ''),
+                                     path=item.get('path', ''))
+        if item.get('fanart'):
+            list_item.setProperty('fanart_image', item['fanart'])
+        if item.get('art'):
+            list_item.setArt(item['art'])
+        if item.get('stream_info'):
+            for stream, stream_info in item['stream_info'].iteritems():
+                list_item.addStreamInfo(stream, stream_info)
+        if item.get('info'):
+            for media, info in item['info'].iteritems():
+                list_item.setInfo(media, info)
+        if item.get('context_menu') and isinstance(item['context_menu'], list):
+            list_item.addContextMenuItems(item['context_menu'])
+        elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
+            list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
+        if item.get('subtitles'):
+            list_item.setSubtitles(item['subtitles'])
+        if item.get('mime'):
+            list_item.setMimeType(item['mime'])
+        return list_item
 
     def _create_listing(self, context):
         """
@@ -582,37 +623,18 @@ class Plugin(Addon):
 
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
-        if context.get('content'):
-            xbmcplugin.setContent(self._handle, context['content'])
         listing = []
         for item in context['listing']:
-            list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                         label2=item.get('label2', ''),
-                                         thumbnailImage=item.get('thumb', ''),
-                                         iconImage=item.get('icon', ''))
-            if item.get('fanart'):
-                list_item.setProperty('fanart_image', item['fanart'])
-            if item.get('art'):
-                list_item.setArt(item['art'])
-            if item.get('stream_info'):
-                for stream, stream_info in item['stream_info'].iteritems():
-                    list_item.addStreamInfo(stream, stream_info)
-            if item.get('info'):
-                for media, info in item['info'].iteritems():
-                    list_item.setInfo(media, info)
-            if item.get('context_menu') and isinstance(item['context_menu'], list):
-                list_item.addContextMenuItems(item['context_menu'])
-            elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
-                list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
-            if item.get('is_playable'):
-                list_item.setProperty('IsPlayable', 'true')
-                is_folder = False
-            else:
+            if item.get('list_item') is not None:
+                list_item = item['list_item']
                 is_folder = item.get('is_folder', True)
-            if item.get('subtitles'):
-                list_item.setSubtitles(item['subtitles'])
-            if item.get('mime'):
-                list_item.setMimeType(item['mime'])
+            else:
+                list_item = self.create_list_item(item)
+                if item.get('is_playable'):
+                    list_item.setProperty('IsPlayable', 'true')
+                    is_folder = False
+                else:
+                    is_folder = item.get('is_folder', True)
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context['sort_methods'] is not None:
@@ -621,6 +643,8 @@ class Plugin(Addon):
                                   context['succeeded'],
                                   context['update_listing'],
                                   context['cache_to_disk'])
+        if context.get('content'):
+            xbmcplugin.setContent(self._handle, context['content'])
         if context['view_mode'] != 50:
             xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
 
@@ -633,5 +657,8 @@ class Plugin(Addon):
         @return:
         """
         self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
-        list_item = xbmcgui.ListItem(path=context['path'])
+        if context.get('play_item') is None:
+            list_item = xbmcgui.ListItem(path=context['path'])
+        else:
+            list_item = self.create_list_item(context['play_item'])
         xbmcplugin.setResolvedUrl(self._handle, context['succeeded'], list_item)
