@@ -588,6 +588,8 @@ class Plugin(Addon):
         @type path: str or unicode
         @param play_item: a dict of item properties as described in the class docstring.
             It allows to set additional properties for the item being played, like graphics, metadata etc.
+            if C{play_item} parameter is present, then C{path} value is ignored, and the path must be set via
+            C{'path'} property of a C{play_item} dict.
         @type play_item: dict
         @param succeeded: if False, Kodi won't play anything
         @type succeeded: bool
