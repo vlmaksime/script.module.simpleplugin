@@ -643,6 +643,8 @@ class Plugin(Addon):
         @return:
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        if context.get('content'):
+            xbmcplugin.setContent(self._handle, context['content'])  # This must be at the beginning
         listing = []
         for item in context['listing']:
             if item.get('list_item') is not None:
@@ -663,8 +665,6 @@ class Plugin(Addon):
                                   context['succeeded'],
                                   context['update_listing'],
                                   context['cache_to_disk'])
-        if context.get('content'):
-            xbmcplugin.setContent(self._handle, context['content'])
         if context['view_mode'] != 50:
             xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
 
