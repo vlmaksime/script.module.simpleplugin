@@ -132,7 +132,7 @@ class Addon(object):
         @type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
-        self._configdir = xbmc.translatePath('special://profile/addon_data/{0}'.format(self.id)).decode('utf-8')
+        self._config_dir = os.path.normpath(xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8'))
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
 
