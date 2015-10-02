@@ -174,7 +174,7 @@ class Addon(object):
         @return:
         @rtype: str
         """
-        return self._addon.getAddonInfo('path').decode('utf-8')
+        return os.path.normpath(xbmc.translatePath(self._addon.getAddonInfo('path')).decode('utf-8'))
 
     @property
     def icon(self):
