@@ -15,8 +15,8 @@
     <language></language>
     <license>GNU GPL v.3</license>
     <forum></forum>
-    <website></website>
+    <website>https://github.com/romanvm/script.module.simpleplugin/wiki</website>
     <email>romanvm@yandex.ua</email>
-    <source></source>
+    <source>https://github.com/romanvm/script.module.simpleplugin</source>
   </extension>
 </addon>
