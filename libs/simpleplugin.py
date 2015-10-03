@@ -132,7 +132,7 @@ class Addon(object):
         @type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
-        self._config_dir = os.path.normpath(xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8'))
+        self._configdir = xbmc.translatePath('special://profile/addon_data/{0}'.format(self.id)).decode('utf-8')
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
 
@@ -174,7 +174,7 @@ class Addon(object):
         @return:
         @rtype: str
         """
-        return os.path.normpath(xbmc.translatePath(self._addon.getAddonInfo('path')).decode('utf-8'))
+        return self._addon.getAddonInfo('path').decode('utf-8')
 
     @property
     def icon(self):
@@ -580,19 +580,24 @@ class Plugin(Addon):
                 'content': content}
 
     @staticmethod
-    def resolve_url(path='', succeeded=True):
+    def resolve_url(path='', play_item=None, succeeded=True):
         """
         Create and return a context dict to resolve a playable URL
 
         @param path: the path to a playable media.
         @type path: str or unicode
+        @param play_item: a dict of item properties as described in the class docstring.
+            It allows to set additional properties for the item being played, like graphics, metadata etc.
+            if C{play_item} parameter is present, then C{path} value is ignored, and the path must be set via
+            C{'path'} property of a C{play_item} dict.
+        @type play_item: dict
         @param succeeded: if False, Kodi won't play anything
         @type succeeded: bool
         @return: context dictionary containing necessary parameters
             for Kodi to play the selected media.
         @rtype: dict
         """
-        return {'path': path, 'succeeded': succeeded}
+        return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
 
     @staticmethod
     def create_list_item(item):
@@ -671,5 +676,9 @@ class Plugin(Addon):
         @type context: dict
         @return:
         """
-        list_item = xbmcgui.ListItem(path=context['path'])
+        self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        if context.get('play_item') is None:
+            list_item = xbmcgui.ListItem(path=context['path'])
+        else:
+            list_item = self.create_list_item(context['play_item'])
         xbmcplugin.setResolvedUrl(self._handle, context['succeeded'], list_item)
