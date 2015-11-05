@@ -549,7 +549,7 @@ class Plugin(Addon):
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
-                       view_mode=50, content=None):
+                       view_mode=None, content=None):
         """
         Create and return a context dict for a virtual folder listing
 
@@ -665,7 +665,7 @@ class Plugin(Addon):
                                   context['succeeded'],
                                   context['update_listing'],
                                   context['cache_to_disk'])
-        if context['view_mode'] != 50:
+        if context['view_mode'] is not None:
             xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
 
     def _resolve_url(self, context):
