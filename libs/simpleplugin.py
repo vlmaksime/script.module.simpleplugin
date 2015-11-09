@@ -219,7 +219,7 @@ class Addon(object):
         Get localized UI string
 
         @param id_: UI string ID
-        @type id_: str
+        @type id_: int
         @return: UI string in current language
         @rtype: unicode
         """
