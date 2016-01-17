@@ -4,8 +4,9 @@
 """
 SimplePlugin micro-framework for Kodi content plugins
 
-@author: Roman Miroshnychenko aka Roman V.M.
-@license: GPL v.3 U{https://www.gnu.org/copyleft/gpl.html}
+Author: Roman Miroshnychenko aka Roman V.M.
+
+License: GPL v.3 <https://www.gnu.org/copyleft/gpl.html>
 """
 
 import os
@@ -33,21 +34,20 @@ class Storage(object):
     It is designed as a context manager and better be used
     with 'with' statement.
 
+    :param storage_dir: directory for storage
+    :type storage_dir: str
+    :param filename: the name of a storage file (optional)
+    :type filename: str
+
     Usage::
 
-        with Storage('c:\\storage\\') as storage
+        with Storage('c:\\storage\\') as storage:
             storage[key1] = value1
             value2 = storage[key2]
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
         Class constructor
-
-        @param storage_dir: directory for storage
-        @type storage_dir: str
-        @param filename: the name of a storage file (optional)
-        @type filename: str
-        @return:
         """
         self._storage = {}
         filename = os.path.join(storage_dir, filename)
@@ -62,11 +62,9 @@ class Storage(object):
             pass
 
     def __enter__(self):
-        """Create context manager"""
         return self
 
     def __exit__(self, *args):
-        """Clean up context manager"""
         self.flush()
         return False
 
@@ -107,8 +105,7 @@ class Storage(object):
         """
         Flush storage to disk
 
-        This method invalidates a Storage instance.
-        @return:
+        This method invalidates a :class:`Storage` instance.
         """
         self._file.seek(0)
         dump(self._storage, self._file)
@@ -123,13 +120,14 @@ class Addon(object):
     Base addon class
 
     Provides access to basic addon parameters
+
+
+    :param id_: addon id, e.g. 'plugin.video.foo' (optional)
+    :type id_: str
     """
     def __init__(self, id_=''):
         """
         Class constructor
-
-        @param id_: addon id, e.g. 'plugin.video.foo' (optional)
-        @type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
@@ -141,9 +139,10 @@ class Addon(object):
         Get addon setting as an Addon instance attribute
 
         E.g. addon.my_setting is equal to addon.get_setting('my_setting')
-        @param item:
-        @type item: str
-        @return:
+
+        :param item:
+        :type item: str
+        :return:
         """
         return self.get_setting(item)
 
@@ -152,8 +151,8 @@ class Addon(object):
         """
         Kodi Addon instance that represents this Addon
 
-        @return: Addon instance
-        @rtype: xbmcaddon.Addon
+        :return: Addon instance
+        :rtype: :class:`xbmcaddon.Addon`
         """
         return self._addon
 
@@ -162,7 +161,8 @@ class Addon(object):
         """
         Addon ID
 
-        @return: str, e.g. 'plugin.video.foo'
+        :return: Addon ID, e.g. 'plugin.video.foo'
+        :rtype: str
         """
         return self._addon.getAddonInfo('id')
 
@@ -171,8 +171,8 @@ class Addon(object):
         """
         Addon path
 
-        @return:
-        @rtype: str
+        :return: path to the addon folder
+        :rtype: str
         """
         return self._addon.getAddonInfo('path').decode('utf-8')
 
@@ -181,8 +181,8 @@ class Addon(object):
         """
         Addon icon
 
-        @return:
-        @rtype: str
+        :return: path to the addon icon image
+        :rtype: str
         """
         icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
@@ -195,8 +195,8 @@ class Addon(object):
         """
         Addon fanart
 
-        @return:
-        @rtype: str
+        :return: path to the addon fanart image
+        :rtype: str
         """
         fanart = os.path.join(self.path, 'fanart.jpg')
         if os.path.exists(fanart):
@@ -209,8 +209,8 @@ class Addon(object):
         """
         Addon config dir
 
-        @return:
-        @rtype: str
+        :return: path to the addon config dir
+        :rtype: str
         """
         return self._configdir
 
@@ -218,10 +218,10 @@ class Addon(object):
         """
         Get localized UI string
 
-        @param id_: UI string ID
-        @type id_: int
-        @return: UI string in current language
-        @rtype: unicode
+        :param id_: UI string ID
+        :type id_: int
+        :return: UI string in the current language
+        :rtype: unicode
         """
         return self._addon.getLocalizedString(id_).encode('utf-8')
 
@@ -229,15 +229,15 @@ class Addon(object):
         """
         Get addon setting
 
-        If convert=True, 'bool' settings are converted to Python bool values,
-        and numeric strings to Python long or float depending on their format.
+        If ``convert=True``, 'bool' settings are converted to Python :class:`bool` values,
+        and numeric strings to Python :class:`long` or :class:`float` depending on their format.
 
-        @param id_: setting ID
-        @type id_: str
-        @param convert: try to guess and convert the setting to an appropriate type
-            E.g. '1.0' will be converted to float 1.0 number, 'true' to True and so on.
-        @type convert: bool
-        @return: setting value
+        :param id_: setting ID
+        :type id_: str
+        :param convert: try to guess and convert the setting to an appropriate type
+            E.g. ``'1.0'`` will be converted to float ``1.0`` number, ``'true'`` to ``True`` and so on.
+        :type convert: bool
+        :return: setting value
         """
         setting = self._addon.getSetting(id_)
         if convert:
@@ -255,13 +255,13 @@ class Addon(object):
         """
         Set addon setting
 
-        Python bool type are converted to 'true' or 'false'
+        Python :class:`bool` type are converted to ``'true'`` or ``'false'``
         Non-string/non-unicode values are converted to strings.
 
-        @param id_: setting ID
-        @type id_: str
-        @param value: setting value
-        @return:
+        :param id_: setting ID
+        :type id_: str
+        :param value: setting value
+        :return:
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
@@ -269,23 +269,23 @@ class Addon(object):
             value = str(value)
         self._addon.setSetting(id_, value)
 
-    def log(self, message, level=xbmc.LOGNOTICE):
+    def log(self, message, level=xbmc.LOGDEBUG):
         """
         Add message to Kodi log starting with Addon ID
 
-        @param message: message to be written into Kodi log
-        @type message: str
-        @param level: log level. xbmc module provides the necessary symbolic constants.
-        @type level: int
-        @return:
+        :param message: message to be written into the Kodi log
+        :type message: str
+        :param level: log level. xbmc module provides the necessary symbolic constants.
+            Default: ``xbmc.LOGDEBUG``
+        :type level: int
         """
         xbmc.log('{0}: {1}'.format(self.id, message), level)
 
     def get_storage(self, filename='storage.pcl'):
         """
-        Get a persistent Storage instance for storing arbitrary values between addon calls.
+        Get a persistent :class`Storage` instance for storing arbitrary values between addon calls.
 
-        A Storage instance can be used as a context manager.
+        A :class:`Storage` instance can be used as a context manager.
 
         Example::
 
@@ -294,9 +294,11 @@ class Addon(object):
                 value2 = storage['param2']
 
         Note that after exiting 'with' block a Storage instance is invalidated.
-        @param filename: the name of a storage file (optional)
-        @type filename: str
-        @return: L{Storage} object
+
+        :param filename: the name of a storage file (optional)
+        :type filename: str
+        :return: Storage object
+        :rtype: :class:`Storage`
         """
         return Storage(self.config_dir, filename)
 
@@ -313,9 +315,8 @@ class Addon(object):
                 # Do some stuff
                 return value
 
-        @param duration: cache time in min, negative value - cache indefinitely
-        @type duration: int
-        @return:
+        :param duration: cache time in min, negative value - cache indefinitely
+        :type duration: int
         """
         def outer_wrapper(func):
             def inner_wrapper(*args, **kwargs):
@@ -338,9 +339,12 @@ class Plugin(Addon):
     """
     Plugin class
 
-    It provides a simplified API to create virtual directories of playable items
-    in Kodi content plugins.
-    simpleplugin.Plugin uses a concept of callable plugin actions (functions or methods)
+    :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+    :type id_: str
+
+    This class provides a simplified API to create virtual directories of playable items
+    for Kodi content plugins.
+    :class:`simpleplugin.Plugin` uses a concept of callable plugin actions (functions or methods)
     that are mapped to 'action' parameters via actions instance property.
     A Plugin instance must have at least one action for its root section
     mapped to 'root' string.
@@ -364,7 +368,7 @@ class Plugin(Addon):
         plugin.actions['some_action'] = some_action
         plugin.run()
 
-    B{IMPORTANT}: You need to map function or method objects without round brackets!
+    .. warning:: You need to map function or method objects without round brackets!
 
     E.g.::
 
@@ -375,7 +379,7 @@ class Plugin(Addon):
     params is a dict containing plugin call parameters (including action string)
     The action callable can return
     either a list of dictionaries representing Kodi virtual directory items
-    or a resolved playable path (str or unicode) for Kodi to play.
+    or a resolved playable path (:class:`str` or :class:`unicode`) for Kodi to play.
 
     Example 1::
 
@@ -392,40 +396,37 @@ class Plugin(Addon):
     listing is a Python list of dict items.
 
     Each dict item can contain the following properties:
-        - label - item's label (default: '').
-        - label2 - item's label2 (default: '').
-        - thumb - item's thumbnail (default: '').
-        - icon - item's icon (default: '').
-        - path - item's path (default: '').
-        - fanart - item's fanart (optional).
-        - art - a dict containing all item's graphic
-            (see U{ListItem.setArt<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setArt>}
-            for more info) - optional.
-        - stream_info - a dictionary of C{{stream_type: {param: value}}} items (see
-            U{ListItem.addStreamInfo
-            <http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#addStreamInfo>}) - optional.
-        - info -  a dictionary of C{{media: {param: value}}} items
-            (see U{ListItem.setInfo<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setInfo>}) -
-            optional
-        - context_menu - a list or a tuple. A list must contain 2-item tuples C{('Menu label', 'Action')}.
-            If a list is provided then the items from the tuples are added to the item's context menu.
-            Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
-            and the 2-nd is a boolean value for replacing items. If C{True}, context menu will contain only
-            the provided items, if False - the items are added to an existing context menu.
-            context_menu param is optional.
-        - url - a callback URL for this list item.
-        - is_playable - if C{True}, then this item is playable and must return a playable path or
-            be resolved via plugin.resolve_url() (default: C{False}).
-        - is_folder - if C{True} then the item will open a lower-level sub-listing. if C{False},
-            the item either is a playable media or a general-purpose script
-            which neither creates a virtual folder nor points to a playable media (default: C{True}).
-            if is_playable is set to C{True}, then is_folder value automatically assumed to be C{False}.
-        - subtitles - the list of paths to subtitle files (optional).
-        - mime - item's mime type (optional).
-        - list_item - an U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>}
-            instance (optional). It is used when you want to set all list item properties by yourself.
-            If C{'list_item'} property is present, all other properties,
-            except for C{'url'} and C{'is_folder'}, are ignored.
+
+    - label -- item's label (default: '').
+    - label2 -- item's label2 (default: '').
+    - thumb -- item's thumbnail (default: '').
+    - icon -- item's icon (default: '').
+    - path -- item's path (default: '').
+    - fanart -- item's fanart (optional).
+    - art -- a dict containing all item's graphic (see :meth:`xbmcgui.ListItem.setArt` for more info) -- optional.
+    - stream_info -- a dictionary of ``{stream_type: {param: value}}`` items
+      (see :meth:`xbmcgui.ListItem.addStreamInfo`) -- optional.
+    - info --  a dictionary of ``{media: {param: value}}`` items
+      (see :meth:`xbmcgui.ListItem.setInfo`) -- optional
+    - context_menu - a list or a tuple. A list must contain 2-item tuples ``('Menu label', 'Action')``.
+      If a list is provided then the items from the tuples are added to the item's context menu.
+      Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
+      and the 2-nd is a boolean value for replacing items. If ``True``, context menu will contain only
+      the provided items, if ``False`` - the items are added to an existing context menu.
+      context_menu param is optional.
+    - url -- a callback URL for this list item.
+    - is_playable -- if ``True``, then this item is playable and must return a playable path or
+     be resolved via :meth:`Plugin.resolve_url` (default: ``False``).
+    - is_folder - if ``True`` then the item will open a lower-level sub-listing. if ``False``,
+      the item either is a playable media or a general-purpose script
+      which neither creates a virtual folder nor points to a playable media (default: C{True}).
+      if ``'is_playable'`` is set to ``True``, then ``'is_folder'`` value automatically assumed to be ``False``.
+    - subtitles -- the list of paths to subtitle files (optional).
+    - mime -- item's mime type (optional).
+    - list_item -- an 'class:`xbmcgui.ListItem` instance (optional).
+      It is used when you want to set all list item properties by yourself.
+      If ``'list_item'`` property is present, all other properties,
+      except for ``'url'`` and ``'is_folder'``, are ignored.
 
     Example::
 
@@ -446,7 +447,7 @@ class Plugin(Addon):
                         'mime': 'video/mp4'
                         }]
 
-    Alternatively, an action callable can use Plugin.create_listing() and Plugin.resolve_url()
+    Alternatively, an action callable can use :meth:`Plugin.create_listing`` and :meth:`Plugin.resolve_url`
     static methods to set additional parameters for Kodi.
 
     Example 3::
@@ -462,13 +463,11 @@ class Plugin(Addon):
             return Plugin.resolve_url(path, succeeded=True)
 
     If an action callable performs any actions other than creating a listing or
-    resolving a playable URL, it must return None.
+    resolving a playable URL, it must return ``None``.
     """
     def __init__(self, id_=''):
         """
         Class constructor
-        @param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
-        @type id_: str
         """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
@@ -480,10 +479,10 @@ class Plugin(Addon):
         """
         Convert a URL-encoded paramstring to a Python dict
 
-        @param paramstring: URL-encoded paramstring
-        @type paramstring: str
-        @return: parsed paramstring
-        @rtype: dict
+        :param paramstring: URL-encoded paramstring
+        :type paramstring: str
+        :return: parsed paramstring
+        :rtype: dict
         """
         params = parse_qs(paramstring)
         for key, value in params.iteritems():
@@ -498,13 +497,13 @@ class Plugin(Addon):
         kwargs are converted to a URL-encoded string of plugin call parameters
         To call a plugin action, 'action' parameter must be used,
         if 'action' parameter is missing, then the plugin root action is called
-        If the action is not added to Plugin actions, PluginError will be raised.
+        If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
 
-        @param plugin_url: plugin URL with trailing / (optional)
-        @type plugin_url: str
-        @param kwargs: pairs if key=value items
-        @return: a full plugin callback URL
-        @rtype: str
+        :param plugin_url: plugin URL with trailing / (optional)
+        :type plugin_url: str
+        :param kwargs: pairs of key=value items
+        :return: a full plugin callback URL
+        :rtype: str
         """
         url = plugin_url or self._url
         if kwargs:
@@ -515,12 +514,9 @@ class Plugin(Addon):
         """
         Run plugin
 
-        @param category: str - plugin sub-category, e.g. 'Comedy'.
-            see U{xbmcplugin.setPluginCategory
-            <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setPluginCategory>}
-            for more info
-        @type category: str
-        @return:
+        :param category: str - plugin sub-category, e.g. 'Comedy'.
+            See :func:`xbmcplugin.setPluginCategory` for more info.
+        :type category: str
         """
         self._handle = int(sys.argv[1])
         if category:
@@ -553,27 +549,25 @@ class Plugin(Addon):
         """
         Create and return a context dict for a virtual folder listing
 
-        @param listing: the list of the plugin virtual folder items
-        @type listing: list
-        @param succeeded: if False Kodi won't open a new listing and stays on the current level.
-        @type succeeded: bool
-        @param update_listing: if True, Kodi won't open a sub-listing but refresh the current one.
-        @type update_listing: bool
-        @param cache_to_disk: cache this view to disk.
-        @type cache_to_disk: bool
-        @param sort_methods: the list of integer constants representing virtual folder sort methods.
-        @type sort_methods: tuple
-        @param view_mode: a numeric code for a skin view mode.
-            View mode codes are different in different skins except for 50 (basic listing).
-        @type view_mode: int
-        @param content: string - current plugin content, e.g. 'movies' or 'episodes'.
-            See U{xbmcplugin.setContent()
-            <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setContent>}
-            for more info.
-        @type content: str
-        @return: context dictionary containing necessary parameters
+        :param listing: the list of the plugin virtual folder items
+        :type listing: list
+        :param succeeded: if ``False`` Kodi won't open a new listing and stays on the current level.
+        :type succeeded: bool
+        :param update_listing: if ``True``, Kodi won't open a sub-listing but refresh the current one.
+        :type update_listing: bool
+        :param cache_to_disk: cache this view to disk.
+        :type cache_to_disk: bool
+        :param sort_methods: the list of integer constants representing virtual folder sort methods.
+        :type sort_methods: tuple
+        :param view_mode: a numeric code for a skin view mode.
+            View mode codes are different in different skins except for ``50`` (basic listing).
+        :type view_mode: int
+        :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
+            See :func:`xbmcplugin.setContent` for more info.
+        :type content: str
+        :return: context dictionary containing necessary parameters
             to create virtual folder listing in Kodi UI.
-        @rtype: dict
+        :rtype: dict
         """
         return {'listing': listing, 'succeeded': succeeded, 'update_listing': update_listing,
                 'cache_to_disk': cache_to_disk, 'sort_methods': sort_methods, 'view_mode': view_mode,
@@ -584,30 +578,30 @@ class Plugin(Addon):
         """
         Create and return a context dict to resolve a playable URL
 
-        @param path: the path to a playable media.
-        @type path: str or unicode
-        @param play_item: a dict of item properties as described in the class docstring.
+        :param path: the path to a playable media.
+        :type path: str or unicode
+        :param play_item: a dict of item properties as described in the class docstring.
             It allows to set additional properties for the item being played, like graphics, metadata etc.
-            if C{play_item} parameter is present, then C{path} value is ignored, and the path must be set via
-            C{'path'} property of a C{play_item} dict.
-        @type play_item: dict
-        @param succeeded: if False, Kodi won't play anything
-        @type succeeded: bool
-        @return: context dictionary containing necessary parameters
+            if ``play_item`` parameter is present, then ``path`` value is ignored, and the path must be set via
+            ``'path'`` property of a ``play_item`` dict.
+        :type play_item: dict
+        :param succeeded: if ``False``, Kodi won't play anything
+        :type succeeded: bool
+        :return: context dictionary containing necessary parameters
             for Kodi to play the selected media.
-        @rtype: dict
+        :rtype: dict
         """
         return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
 
     @staticmethod
     def create_list_item(item):
         """
-        Create an xbmcgui.ListItem instance from an item dict
+        Create an :class:`xbmcgui.ListItem` instance from an item dict
 
-        @param item: a dict of ListItem properties
-        @type item: dict
-        @return: U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>} instance
-        @rtype: xbmcgui.ListItem
+        :param item: a dict of ListItem properties
+        :type item: dict
+        :return: ListItem instance
+        :rtype: :class:`xbmcgui.ListItem`
         """
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
@@ -638,9 +632,8 @@ class Plugin(Addon):
         """
         Create a virtual folder listing
 
-        @param context: context dictionary
-        @type context: dict
-        @return:
+        :param context: context dictionary
+        :type context: dict
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('content'):
@@ -672,9 +665,8 @@ class Plugin(Addon):
         """
         Resolve a playable URL
 
-        @param context: context dictionary
-        @type context: dict
-        @return:
+        :param context: context dictionary
+        :type context: dict
         """
         self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('play_item') is None:
