@@ -14,6 +14,13 @@
 
 import sys
 import os
+from mock import MagicMock
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'script.module.simpleplugin', 'libs'))
+
+MOCK_MODULES = ('xbmc', 'xbmcaddon', 'xbmcgui', 'xbmcplugin')
+for module in MOCK_MODULES:
+    sys.modules[module] = MagicMock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -32,7 +39,12 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
 ]
+
+autodoc_member_order = 'bysource'
+autodoc_default_flags = ['members', 'show-inheritance']
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -116,7 +128,21 @@ html_theme = 'alabaster'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    'github_button': True,
+    'github_type': 'star&v=2',  ## Use v2 button
+    'github_user': 'romanvm',
+    'github_repo': 'script.module.simpleplugin',
+    'github_banner': True,
+}
+
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'searchbox.html',
+    ]
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -175,7 +201,7 @@ html_static_path = ['_static']
 #html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-#html_show_sphinx = True
+html_show_sphinx = False
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #html_show_copyright = True
@@ -288,4 +314,5 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'https://docs.python.org/2.7': None,
+                       'http://romanvm.github.io/Kodistubs/': None}

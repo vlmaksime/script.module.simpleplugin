@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# Module: simpleplugin
 # Created on: 03.06.2015
 """
 SimplePlugin micro-framework for Kodi content plugins
 
-Author: Roman Miroshnychenko aka Roman V.M.
+**Author**: Roman Miroshnychenko aka Roman V.M.
 
-License: GPL v.3 <https://www.gnu.org/copyleft/gpl.html>
+**License**: GPL v.3 <https://www.gnu.org/copyleft/gpl.html>
 """
 
 import os
@@ -121,7 +120,6 @@ class Addon(object):
 
     Provides access to basic addon parameters
 
-
     :param id_: addon id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
     """
@@ -152,7 +150,7 @@ class Addon(object):
         Kodi Addon instance that represents this Addon
 
         :return: Addon instance
-        :rtype: :class:`xbmcaddon.Addon`
+        :rtype: xbmcaddon.Addon
         """
         return self._addon
 
@@ -269,13 +267,13 @@ class Addon(object):
             value = str(value)
         self._addon.setSetting(id_, value)
 
-    def log(self, message, level=xbmc.LOGDEBUG):
+    def log(self, message, level=0):
         """
         Add message to Kodi log starting with Addon ID
 
         :param message: message to be written into the Kodi log
         :type message: str
-        :param level: log level. xbmc module provides the necessary symbolic constants.
+        :param level: log level. :mod:`xbmc` module provides the necessary symbolic constants.
             Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
@@ -283,7 +281,7 @@ class Addon(object):
 
     def get_storage(self, filename='storage.pcl'):
         """
-        Get a persistent :class`Storage` instance for storing arbitrary values between addon calls.
+        Get a persistent :class:`Storage` instance for storing arbitrary values between addon calls.
 
         A :class:`Storage` instance can be used as a context manager.
 
@@ -293,12 +291,12 @@ class Addon(object):
                 storage['param1'] = value1
                 value2 = storage['param2']
 
-        Note that after exiting 'with' block a Storage instance is invalidated.
+        .. note:: After exiting 'with' block a :class:`Storage` instance is invalidated.
 
         :param filename: the name of a storage file (optional)
         :type filename: str
         :return: Storage object
-        :rtype: :class:`Storage`
+        :rtype: Storage
         """
         return Storage(self.config_dir, filename)
 
@@ -315,7 +313,7 @@ class Addon(object):
                 # Do some stuff
                 return value
 
-        :param duration: cache time in min, negative value - cache indefinitely
+        :param duration: cache time in min, negative value -- cache indefinitely
         :type duration: int
         """
         def outer_wrapper(func):
@@ -359,10 +357,10 @@ class Plugin(Addon):
             return [{'label': 'Foo',
                     'url': plugin.get_url(action='some_action', param='Foo')},
                     {'label': 'Bar',
-                    'url': plugin.get_url(action='some_action', param='Bar'}]
+                    'url': plugin.get_url(action='some_action', param='Bar')}]
 
         def some_action(params):
-            return [{'label': param['param']}]
+            return [{'label': params['param']}]
 
         plugin.actions['root'] = root_action  # Mandatory item!
         plugin.actions['some_action'] = some_action
@@ -375,7 +373,7 @@ class Plugin(Addon):
         plugin.actions['some_action'] = some_action  # Correct :)
         plugin.actions['some_action'] = some_action()  # Wrong! :(
 
-    An action callable receives 1 parameter - params.
+    An action callable receives 1 parameter -- params.
     params is a dict containing plugin call parameters (including action string)
     The action callable can return
     either a list of dictionaries representing Kodi virtual directory items
@@ -417,7 +415,7 @@ class Plugin(Addon):
     - url -- a callback URL for this list item.
     - is_playable -- if ``True``, then this item is playable and must return a playable path or
      be resolved via :meth:`Plugin.resolve_url` (default: ``False``).
-    - is_folder - if ``True`` then the item will open a lower-level sub-listing. if ``False``,
+    - is_folder -- if ``True`` then the item will open a lower-level sub-listing. if ``False``,
       the item either is a playable media or a general-purpose script
       which neither creates a virtual folder nor points to a playable media (default: C{True}).
       if ``'is_playable'`` is set to ``True``, then ``'is_folder'`` value automatically assumed to be ``False``.
@@ -447,7 +445,7 @@ class Plugin(Addon):
                         'mime': 'video/mp4'
                         }]
 
-    Alternatively, an action callable can use :meth:`Plugin.create_listing`` and :meth:`Plugin.resolve_url`
+    Alternatively, an action callable can use :meth:`Plugin.create_listing` and :meth:`Plugin.resolve_url`
     static methods to set additional parameters for Kodi.
 
     Example 3::
@@ -601,7 +599,7 @@ class Plugin(Addon):
         :param item: a dict of ListItem properties
         :type item: dict
         :return: ListItem instance
-        :rtype: :class:`xbmcgui.ListItem`
+        :rtype: xbmcgui.ListItem
         """
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
