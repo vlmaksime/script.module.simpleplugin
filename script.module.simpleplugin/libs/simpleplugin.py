@@ -5,7 +5,7 @@ SimplePlugin micro-framework for Kodi content plugins
 
 **Author**: Roman Miroshnychenko aka Roman V.M.
 
-**License**: GPL v.3 <https://www.gnu.org/copyleft/gpl.html>
+**License**: `GPL v.3 <https://www.gnu.org/copyleft/gpl.html>`_
 """
 
 import os
@@ -40,9 +40,11 @@ class Storage(object):
 
     Usage::
 
-        with Storage('c:\\storage\\') as storage:
-            storage[key1] = value1
-            value2 = storage[key2]
+        with Storage('/foo/bar/storage/') as storage:
+            storage['key1'] = value1
+            value2 = storage['key2']
+
+    .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
@@ -291,7 +293,7 @@ class Addon(object):
                 storage['param1'] = value1
                 value2 = storage['param2']
 
-        .. note:: After exiting 'with' block a :class:`Storage` instance is invalidated.
+        .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
 
         :param filename: the name of a storage file (optional)
         :type filename: str
