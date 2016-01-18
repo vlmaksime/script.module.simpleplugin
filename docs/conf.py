@@ -17,10 +17,8 @@ import os
 from mock import MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'script.module.simpleplugin', 'libs'))
-
-MOCK_MODULES = ('xbmc', 'xbmcaddon', 'xbmcgui', 'xbmcplugin')
-for module in MOCK_MODULES:
-    sys.modules[module] = MagicMock()
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                                'xbmcstubs'))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
