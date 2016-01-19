@@ -14,7 +14,6 @@
 
 import sys
 import os
-from mock import MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'script.module.simpleplugin', 'libs'))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -196,7 +195,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False

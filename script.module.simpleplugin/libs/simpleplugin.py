@@ -65,7 +65,7 @@ class Storage(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.flush()
         return False
 
@@ -142,7 +142,6 @@ class Addon(object):
 
         :param item:
         :type item: str
-        :return:
         """
         return self.get_setting(item)
 
@@ -232,6 +231,9 @@ class Addon(object):
         If ``convert=True``, 'bool' settings are converted to Python :class:`bool` values,
         and numeric strings to Python :class:`long` or :class:`float` depending on their format.
 
+        .. note:: Settings can also be read via :class:`Addon` instance poperties named as the respective settings.
+            I.e. ``addon.foo`` is equal to ``addon.get_setting('foo')``.
+
         :param id_: setting ID
         :type id_: str
         :param convert: try to guess and convert the setting to an appropriate type
@@ -258,10 +260,12 @@ class Addon(object):
         Python :class:`bool` type are converted to ``'true'`` or ``'false'``
         Non-string/non-unicode values are converted to strings.
 
+        .. warning:: Setting values via :class:`Addon` instance properties is not supported!
+            Values can only be set using :meth:`Addon.set_setting` method.
+
         :param id_: setting ID
         :type id_: str
         :param value: setting value
-        :return:
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
@@ -310,7 +314,7 @@ class Addon(object):
 
         Usage::
 
-            @cached(30)
+            @plugin.cached(30)
             def my_func(*args, **kwargs):
                 # Do some stuff
                 return value

@@ -48,4 +48,6 @@ Kodi supports 3 types of actions:
 
 .. toctree::
 
+  _actions/vf
+  _actions/playback
   _actions/misc

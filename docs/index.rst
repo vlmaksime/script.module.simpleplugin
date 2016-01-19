@@ -13,7 +13,7 @@ Other actions are called via "action" call parameter, e.g. the URL :file:`plugin
 will call a function mapped to ``'foo'`` string.
 
 In addition to simplifying creation of content lists in Kodi interface,
-SimplePlugin also provides :doc:`Persistent Storage<./storage>` with dictionary-like interface
+SimplePlugin provides :doc:`Persistent Storage<./storage>` with dictionary-like interface
 to store arbitrary parameters.
 
 SimplePlugin also provides function :doc:`Cached Decorator<./cached>` similar to that of xbmcswift2 which allows
@@ -22,14 +22,20 @@ to cache function return data for a specified amount of time.
 .. _Kodi mediacenter: http://www.kodi.tv
 .. _xbmcswift2 micro-framework: https://github.com/jbeluch/xbmcswift2
 
-Contents:
+**Contents:**
 
 .. toctree::
     :maxdepth: 2
 
     example
     actions
+    get_url
+    storage
+    cached
+    settings
+    using
     api
+    links
 
 Indices and tables
 ==================
