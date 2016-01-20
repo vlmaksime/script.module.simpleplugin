@@ -14,7 +14,7 @@ In addition to simplifying creation of content lists in Kodi interface,
 SimplePlugin provides :doc:`Persistent Storage<./storage>` with dictionary-like interface
 to store arbitrary parameters.
 
-SimplePlugin also has :doc:`Cached Decorator<./cached>` for functions which similar to that of xbmcswift2.
+SimplePlugin also has :doc:`Cached Decorator<./cached>` for functions which is similar to that of xbmcswift2.
 This decorator allows to cache function return data for a specified amount of time.
 
 .. _Kodi mediacenter: http://www.kodi.tv
