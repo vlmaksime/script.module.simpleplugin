@@ -401,11 +401,11 @@ class Plugin(Addon):
 
     Each dict item can contain the following properties:
 
-    - label -- item's label (default: '').
-    - label2 -- item's label2 (default: '').
-    - thumb -- item's thumbnail (default: '').
-    - icon -- item's icon (default: '').
-    - path -- item's path (default: '').
+    - label -- item's label (default: ``''``).
+    - label2 -- item's label2 (default: ``''``).
+    - thumb -- item's thumbnail (default: ``''``).
+    - icon -- item's icon (default: ``''``).
+    - path -- item's path (default: ``''``).
     - fanart -- item's fanart (optional).
     - art -- a dict containing all item's graphic (see :meth:`xbmcgui.ListItem.setArt` for more info) -- optional.
     - stream_info -- a dictionary of ``{stream_type: {param: value}}`` items
@@ -609,11 +609,16 @@ class Plugin(Addon):
         """
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
-                                     thumbnailImage=item.get('thumb', ''),
-                                     iconImage=item.get('icon', ''),
                                      path=item.get('path', ''))
-        if item.get('fanart'):
-            list_item.setProperty('fanart_image', item['fanart'])
+        if int(xbmc.getInfoLabel('System.BuildVersion')[:2]) >= 16:
+            art = item.get('art', {})
+            art['thumb'] = item.get('thumb', '')
+            art['icon'] = item.get('icon', '')
+            art['fanart'] = item.get('fanart', '')
+        else:
+            list_item.setThumbnailImage(item.get('thumb', ''))
+            list_item.setIconImage(iconImage=item.get('icon', ''))
+            list_item.setProperty('fanart_image', item.get('fanart', ''))
         if item.get('art'):
             list_item.setArt(item['art'])
         if item.get('stream_info'):
