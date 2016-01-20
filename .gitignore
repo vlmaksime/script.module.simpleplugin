@@ -109,7 +109,6 @@ target/
 # Custom
 
 _docs/
-epydoc.cfg
-epydoc.cmd
+*.cmd
 *.zip
 publish.py
