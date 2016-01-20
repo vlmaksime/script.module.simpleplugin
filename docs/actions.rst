@@ -40,9 +40,10 @@ The "root" action is mandatory, i.e. a SimplePlugin based plugin **must** have a
 An action callable automatically receives ``params`` parameter which is a Python :class:`dict`
 containing a parsed plugin callback URL paramstring, e.g. for URL
 :file:`plugin://plugin.video.foo/?action=bar&param=baz` ``params`` parameter will be
-``{'action': 'bar', 'param': 'baz'}``. For "root" action ``params`` will be an empty dict ``{}``.
-Note that an action always receives ``params`` parameter even it does not use it.
-If ``params`` is missing from an action signature, a plugin will raise an exception.
+``{'action': 'bar', 'param': 'baz'}``. For "root" action ``params`` will be an empty :class:`dict` ``{}``.
+
+.. note:: An action always receives ``params`` parameter even it does not use it.
+    If ``params`` is missing from an action signature, a plugin will raise an exception.
 
 Kodi supports 3 types of actions:
 

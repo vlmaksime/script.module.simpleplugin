@@ -5,7 +5,7 @@ get_url Method
 for your virtual folder items. It takes a base plugin URL with trailing ``/`` and a set of ``param='value'``
 parameter pairs that are then passed to the child action.
 If a plugin URL is omitted then the current plugin URL is used.
-In this case `action` parameter needs to be provided to define the necessary child action.
+In this case ``action`` parameter needs to be provided to define the necessary child action.
 
 To illustrate the principle let's assume that our plugin's ID is ``plugin.video.foo``. Then the call
 ::

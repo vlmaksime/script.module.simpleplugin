@@ -11,7 +11,7 @@ Then you need to add the module in the `requires`_ section of your plugin's :fil
 
   <requires>
     ...
-    <import addon="script.module.simpleplugin" version="1.5"/>
+    <import addon="script.module.simpleplugin" version="1.6"/>
     ...
   </requires>
 
