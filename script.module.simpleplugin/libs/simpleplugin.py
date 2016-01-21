@@ -615,6 +615,7 @@ class Plugin(Addon):
             art['thumb'] = item.get('thumb', '')
             art['icon'] = item.get('icon', '')
             art['fanart'] = item.get('fanart', '')
+            item['art'] = art
         else:
             list_item.setThumbnailImage(item.get('thumb', ''))
             list_item.setIconImage(iconImage=item.get('icon', ''))
