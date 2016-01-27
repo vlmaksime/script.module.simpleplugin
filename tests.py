@@ -56,7 +56,10 @@ mock_xbmc.log.side_effect = fake_log
 mock_xbmc.translatePath.side_effect = fake_translate_path
 
 mock_xbmcplugin = mock.MagicMock()
+
 mock_xbmcgui = mock.MagicMock()
+mock_ListItem = mock.MagicMock()
+mock_xbmcgui.ListItem.return_value = mock_ListItem
 
 sys.modules['xbmcaddon'] = mock_xbmcaddon
 sys.modules['xbmc'] = mock_xbmc
@@ -204,6 +207,48 @@ class PluginTestCase(unittest.TestCase):
         # Test unregistered action
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=invalid']):
             self.assertRaises(PluginError, plugin.run)
+
+    def test_create_list_item(self):
+        item = {
+            'label': 'Label',
+            'label2': 'Label2',
+            'path': '/path/foo',
+            'thumb': 'thumb.png',
+            'icon': 'icon.png',
+            'fanart': 'fanart.jpg',
+            'art': {'poster': 'poster.jpg', 'banner': 'banner.jpg'},
+            'stream_info': {'video': {'codec': 'h264'}},
+            'info': {'video': {'genre': 'Comedy'}},
+            'context_menu': ['item1', 'item2'],
+            'subtitles': 'subs.srt',
+            'mime': 'video/x-matroska',
+        }
+        mock_xbmc.getInfoLabel.return_value = '15.0'
+        Plugin.create_list_item(item)
+        mock_xbmcgui.ListItem.assert_called_with(label='Label', label2='Label2', path='/path/foo')
+        mock_ListItem.setThumbnailImage.assert_called_with('thumb.png')
+        mock_ListItem.setIconImage.assert_called_with('icon.png')
+        mock_ListItem.setProperty.assert_called_with('fanart_image', 'fanart.jpg')
+        mock_ListItem.setArt.assert_called_with(item['art'])
+        mock_ListItem.addStreamInfo.assert_called_with('video', {'codec': 'h264'})
+        mock_ListItem.setInfo('video', {'genre': 'Comedy'})
+        mock_ListItem.addContextMenuItems.assert_called_with(['item1', 'item2'])
+        mock_ListItem.setSubtitles.assert_called_with('subs.srt')
+        mock_ListItem.setMimeType.assert_called_with('video/x-matroska')
+        item['context_menu'] = (['item1', 'item2'], True)
+        mock_ListItem.addContextMenuItems.reset_mock()
+        Plugin.create_list_item(item)
+        mock_ListItem.addContextMenuItems.assert_called_with(['item1', 'item2'], True)
+        # Test for Kodi Jarvis API
+        mock_xbmc.getInfoLabel.return_value = '16.0'
+        mock_ListItem.setArt.reset_mock()
+        Plugin.create_list_item(item)
+        mock_ListItem.setArt.assert_called_with({'icon': 'icon.png',
+                                                 'thumb': 'thumb.png',
+                                                 'fanart': 'fanart.jpg',
+                                                 'poster': 'poster.jpg',
+                                                 'banner': 'banner.jpg'})
+
 
 if __name__ == '__main__':
     unittest.main()
