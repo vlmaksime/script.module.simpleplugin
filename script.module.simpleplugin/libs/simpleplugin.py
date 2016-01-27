@@ -538,13 +538,13 @@ class Plugin(Addon):
             result = action_callable(params)
             self.log('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)
             if isinstance(result, list):
-                self._create_listing(self.create_listing(result))
+                self._add_directory_items(self.create_listing(result))
             elif isinstance(result, (str, unicode)):
-                self._resolve_url(self.resolve_url(result))
+                self._set_resolved_url(self.resolve_url(result))
             elif isinstance(result, dict) and result.get('listing') is not None:
-                self._create_listing(result)
+                self._add_directory_items(result)
             elif isinstance(result, dict) and result.get('path') is not None:
-                self._resolve_url(result)
+                self._set_resolved_url(result)
             else:
                 self.log('The action "{0}" has not returned any valid data to process.'.format(action), xbmc.LOGWARNING)
 
@@ -639,7 +639,7 @@ class Plugin(Addon):
             list_item.setMimeType(item['mime'])
         return list_item
 
-    def _create_listing(self, context):
+    def _add_directory_items(self, context):
         """
         Create a virtual folder listing
 
@@ -672,7 +672,7 @@ class Plugin(Addon):
         if context['view_mode'] is not None:
             xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
 
-    def _resolve_url(self, context):
+    def _set_resolved_url(self, context):
         """
         Resolve a playable URL
 
