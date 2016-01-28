@@ -264,7 +264,7 @@ class PluginTestCase(unittest.TestCase):
             'cache_to_disk': True,
             'view_mode': 50,
         }
-        plugin = Plugin()
+        plugin = Plugin('test.plugin')
         plugin._handle = 1
         plugin.create_list_item = mock.MagicMock()
         plugin._add_directory_items(context)
@@ -285,6 +285,27 @@ class PluginTestCase(unittest.TestCase):
         plugin._add_directory_items(context)
         list_item2.setProperty.assert_called_with('IsPlayable', 'true')
         mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, False)], 1)
+
+    def test_set_resolved_url(self):
+        context = {
+            'path': 'http://foo.bar',
+            'play_item': None,
+            'succeeded': True,
+        }
+        plugin = Plugin('test.plugin')
+        plugin._handle = 1
+        mock_xbmcgui.ListItem.reset_mock()
+        plugin._set_resolved_url(context)
+        mock_xbmcgui.ListItem.assert_called_with(path='http://foo.bar')
+        mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, mock_ListItem)
+        mock_xbmcplugin.setResolvedUrl.reset_mock()
+        context['play_item'] = {}
+        list_item = object()
+        plugin.create_list_item = mock.MagicMock()
+        plugin.create_list_item.return_value = list_item
+        plugin._set_resolved_url(context)
+        plugin.create_list_item.assert_called_with({})
+        mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, list_item)
 
 
 if __name__ == '__main__':
