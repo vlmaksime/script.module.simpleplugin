@@ -249,6 +249,43 @@ class PluginTestCase(unittest.TestCase):
                                                  'poster': 'poster.jpg',
                                                  'banner': 'banner.jpg'})
 
+    def test_add_directory_items(self):
+        list_item1 = object()
+        context = {
+            'content': 'movies',
+            'listing': [{
+                'url': 'plugin://foo',
+                'list_item': list_item1,
+                'is_folder': True
+            }],
+            'sort_methods': (0,),
+            'succeeded': True,
+            'update_listing': True,
+            'cache_to_disk': True,
+            'view_mode': 50,
+        }
+        plugin = Plugin()
+        plugin._handle = 1
+        plugin.create_list_item = mock.MagicMock()
+        plugin._add_directory_items(context)
+        mock_xbmcplugin.setContent.assert_called_with(1, 'movies')
+        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item1, True)], 1)
+        mock_xbmcplugin.addSortMethod.assert_called_with(1, 0)
+        mock_xbmcplugin.endOfDirectory.assert_called_with(1, True, True, True)
+        mock_xbmc.executebuiltin.assert_called_with('Container.SetViewMode(50)')
+        mock_xbmcplugin.addDirectoryItems.reset_mock()
+        del context['listing'][0]['list_item']
+        list_item2 = mock.MagicMock()
+        plugin.create_list_item.return_value = list_item2
+        plugin._add_directory_items(context)
+        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, True)], 1)
+        mock_xbmcplugin.addDirectoryItems.reset_mock()
+        list_item2.reset_mock()
+        context['listing'][0]['is_playable'] = True
+        plugin._add_directory_items(context)
+        list_item2.setProperty.assert_called_with('IsPlayable', 'true')
+        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, False)], 1)
+
 
 if __name__ == '__main__':
     unittest.main()
