@@ -2,6 +2,7 @@
 # coding: utf-8
 # Author: Roman Miroshnychenko aka Roman V.M.
 # E-mail: romanvm@yandex.ua
+# License: GPL v.3 <http://www.gnu.org/licenses/gpl-3.0.en.html>
 
 from __future__ import print_function
 import re
@@ -30,6 +31,7 @@ parser = argparse.ArgumentParser(
     description='Deploy an addon to my Kodi repo and/or publish docs on GitHub Pages')
 parser.add_argument('-r', '--repo', help='push to my Kodi repo', action='store_true')
 parser.add_argument('-d', '--docs', help='publish docs to GH pages', action='store_true')
+parser.add_argument('-z', '--zip', help='pack addon into a ZIP file', action='store_true')
 args = parser.parse_args()
 
 addon = os.environ['ADDON']
@@ -44,12 +46,13 @@ kodi_repo_url = 'https://{gh_token}@github.com/romanvm/kodi_repo.git'.format(gh_
 os.chdir(root_dir)
 with open(os.path.join(root_dir, addon, 'addon.xml'), 'rb') as addon_xml:
     version = re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
-if args.repo:
+if args.repo or args.zip:
     shutil.make_archive('{0}-{1}'.format(addon, version),
                         'zip',
                         root_dir=root_dir,
                         base_dir=addon)
     print('ZIP created successfully.')
+if args.repo:
     execute(['git', 'clone', kodi_repo_url], silent=True)
     os.chdir(kodi_repo_dir)
     execute(['git', 'checkout', 'gh-pages'])
