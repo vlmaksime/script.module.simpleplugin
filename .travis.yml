@@ -6,9 +6,13 @@ language: python
 python:
   - "2.6"
   - "2.7"
-install: "pip install -r requirements.txt"
-script: python tests.py
-after_success: python2.7 deploy_addon.py -d
+install:
+  - pip install codecov
+  - pip install -r requirements.txt
+script: coverage run tests.py
+after_success:
+  - codecov
+  - python2.7 deploy_addon.py -d
 before_deploy:
   - python2.7 deploy_addon.py -r
   - export RELEASE_ZIP=$(ls *.zip)
