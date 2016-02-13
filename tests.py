@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 import mock
 
-cwd = os.path.dirname(__file__)
+cwd = os.path.dirname(os.path.abspath(__file__))
 configdir = os.path.join(cwd, 'config')
 
 
