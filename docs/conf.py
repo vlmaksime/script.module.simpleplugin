@@ -16,8 +16,8 @@ import sys
 import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'script.module.simpleplugin', 'libs'))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-                                'xbmcstubs'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__))))
+import tests
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
