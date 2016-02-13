@@ -154,8 +154,8 @@ class AddonTestCase(unittest.TestCase):
         self.assertEqual(addon.fanart, '')
         open('icon.png', 'w').close()
         open('fanart.jpg', 'w').close()
-        self.assertIn('icon.png', addon.icon)
-        self.assertIn('fanart.jpg', addon.fanart)
+        self.assertTrue('icon.png' in addon.icon)
+        self.assertTrue('fanart.jpg' in addon.fanart)
 
 
 class PluginTestCase(unittest.TestCase):
