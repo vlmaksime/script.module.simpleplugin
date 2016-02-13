@@ -99,6 +99,11 @@ class AddonTestCase(unittest.TestCase):
     """
     def tearDown(self):
         shutil.rmtree(configdir, True)
+        try:
+            os.remove('icon.png')
+            os.remove('fanart.jpg')
+        except OSError:
+            pass
 
     def test_addon_instance_creation(self):
         addon = Addon('test.addon')
@@ -142,6 +147,15 @@ class AddonTestCase(unittest.TestCase):
         time.sleep(0.5)
         self.assertEqual(tester('arg1'), test1)
         self.assertNotEqual(tester('arg2'), test1)
+
+    def test_icon_fanart_properties(self):
+        addon = Addon()
+        self.assertEqual(addon.icon, '')
+        self.assertEqual(addon.fanart, '')
+        open('icon.png', 'w').close()
+        open('fanart.jpg', 'w').close()
+        self.assertIn('icon.png', addon.icon)
+        self.assertIn('fanart.jpg', addon.fanart)
 
 
 class PluginTestCase(unittest.TestCase):
