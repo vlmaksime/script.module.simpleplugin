@@ -173,9 +173,11 @@ class PluginTestCase(unittest.TestCase):
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '']):
             mock_actions.root.return_value = [{'label': 'root'}]
             plugin.actions['root'] = mock_actions.root
-            plugin.run()
+            plugin.run(category='Foo')
             mock_actions.root.assert_called_with({})
             plugin.create_listing.assert_called_with([{'label': 'root'}])
+            # Test setting plugin category
+            mock_xbmcplugin.setPluginCategory.assert_called_with(1, 'Foo')
         # Test calling a child action returning list
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo&param=bar']):
             plugin.create_listing.reset_mock()
