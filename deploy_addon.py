@@ -47,7 +47,7 @@ os.chdir(root_dir)
 with open(os.path.join(root_dir, addon, 'addon.xml'), 'rb') as addon_xml:
     version = re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
 if args.repo or args.zip:
-    execute(['find', '.', '-name "*.pyc"', '-exec rm -rf {} \;'])
+    execute(['find', '.', '-name "*.pyc"', '-exec rm -rf "{}" ";"'])
     shutil.make_archive('{0}-{1}'.format(addon, version),
                         'zip',
                         root_dir=root_dir,
