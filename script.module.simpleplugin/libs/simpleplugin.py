@@ -325,7 +325,7 @@ class Addon(object):
         """
         def outer_wrapper(func):
             def inner_wrapper(*args, **kwargs):
-                with self.get_storage(filename='cache.pcl') as cache:
+                with self.get_storage(filename='cache.{0}.pcl'.format(func.__name__)) as cache:
                     current_time = datetime.now()
                     key = func.__name__ + str(args) + str(kwargs)
                     try:
