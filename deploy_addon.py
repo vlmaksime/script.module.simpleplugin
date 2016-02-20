@@ -27,6 +27,19 @@ def execute(args, silent=False):
             res=res))
 
 
+def clean_pyc(folder):
+    cwd = os.getcwd()
+    os.chdir(folder)
+    paths = os.listdir(folder)
+    for path in paths:
+        abs_path = os.path.abspath(path)
+        if os.path.isdir(abs_path):
+            clean_pyc(abs_path)
+        elif path[-4:] == '.pyc':
+            os.remove(abs_path)
+    os.chdir(cwd)
+
+
 parser = argparse.ArgumentParser(
     description='Deploy an addon to my Kodi repo and/or publish docs on GitHub Pages')
 parser.add_argument('-r', '--repo', help='push to my Kodi repo', action='store_true')
@@ -47,7 +60,7 @@ os.chdir(root_dir)
 with open(os.path.join(root_dir, addon, 'addon.xml'), 'rb') as addon_xml:
     version = re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
 if args.repo or args.zip:
-    execute(['find', '.', '-name', '"*.pyc"', '-delete'])
+    clean_pyc(os.path.join(root_dir, addon))
     shutil.make_archive('{0}-{1}'.format(addon, version),
                         'zip',
                         root_dir=root_dir,
