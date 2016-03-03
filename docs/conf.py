@@ -131,6 +131,8 @@ html_theme_options = {
     'github_user': 'romanvm',
     'github_repo': 'script.module.simpleplugin',
     'github_banner': True,
+    'travis_button': True,
+    'codecov_button': True,
 }
 
 html_sidebars = {
