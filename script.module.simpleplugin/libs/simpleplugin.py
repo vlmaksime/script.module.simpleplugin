@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from cPickle import dump, load, PickleError
 from urlparse import parse_qs
 from urllib import urlencode
+from functools import wraps
 import xbmcaddon
 import xbmc
 import xbmcplugin
@@ -324,6 +325,7 @@ class Addon(object):
         :type duration: int
         """
         def outer_wrapper(func):
+            @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 with self.get_storage(filename='cache.{0}.pcl'.format(func.__name__)) as cache:
                     current_time = datetime.now()
