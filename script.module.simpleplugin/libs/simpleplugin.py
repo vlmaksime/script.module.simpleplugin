@@ -47,7 +47,7 @@ class Storage(MutableMapping):
             value2 = storage['key2']
 
     .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
-        Storage contents are saved to disk only for a new storage and if the contents have been changed.
+        Storage contents are saved to disk only for a new storage or if the contents have been changed.
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
