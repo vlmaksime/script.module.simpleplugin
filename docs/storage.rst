@@ -11,8 +11,9 @@ and can hold any Python picklable objects. It also can be used as a context mana
       storage['key1'] = value1  # Store data
       value2 = storage['key2']  # Retrieve data
 
-After exiting a :keyword:`with` block storage contents are saved to disk and the Storage object is invalidated.
-To use the storage again you need to create a new Storage instance.
+After exiting a :keyword:`with` block a Storage object is invalidated. To use the storage again you need to create a
+new Storage instance. Storage contents are saved to disk only for a newly created storage and if the storage contents
+have been changed. This reduces the number of write operations in cases when we need only to read stored data.
 
 :meth:`get_storage<simpleplugin.Addon.get_storage>` method takes an optional parameter
 which is the name of a storage file, so you can have several different storages in your plugin.

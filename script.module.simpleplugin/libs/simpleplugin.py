@@ -87,10 +87,11 @@ class Storage(MutableMapping):
 
     def flush(self):
         """
-        Flush storage contents to disk
+        Save storage contents to disk
 
-        This method saves all :class:`Storage` contents to disk
-        and invalidates the Storage instance.
+        This method saves new and changed :class:`Storage` contents to disk
+        and invalidates the Storage instance. Unchanged Storage is not saved
+        but simply invalidated.
         """
         contents = pickle.dumps(self._storage)
         if self._hash is None or hash(contents) != self._hash:
