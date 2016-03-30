@@ -1,5 +1,6 @@
 1.7.0:
-  - Now Storage contents are not saved to disk if the contents haven't been changed.
+  - Storage contents are not saved to disk if the contents haven't been changed.
+  - Storage class inherits from collections.MutableMapping.
 1.6.8:
   - Adds functools.wraps to cached decorator
 1.6.6:
