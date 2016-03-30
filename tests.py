@@ -78,19 +78,29 @@ class StorageTestCase(unittest.TestCase):
     Test Storage class
     """
     def tearDown(self):
-        os.remove(os.path.join(cwd, 'storage.pcl'))
+        try:
+            os.remove(os.path.join(cwd, 'storage.pcl'))
+        except OSError:
+            pass
 
     def test_storage_initialization(self):
-        Storage(cwd)
+        with Storage(cwd) as storage:
+            storage['foo'] = 'bar'
         self.assertTrue(os.path.exists(os.path.join(cwd, 'storage.pcl')))
 
     def test_storing_value_in_storage_(self):
         with Storage(cwd) as storage1:
-            storage1['key'] = 'value'
-        del storage1
+            storage1['foo'] = 'bar'
         with Storage(cwd) as storage2:
-            self.assertEqual(storage2['key'], 'value')
-        del storage2
+            self.assertEqual(storage2['foo'], 'bar')
+
+    def test_reading_storage_without_changes(self):
+        with Storage(cwd) as storage1:
+            storage1['foo'] = 'bar'
+        last_mod = os.path.getmtime('storage.pcl')
+        with Storage(cwd) as storage2:
+            bar = storage2['foo']
+        self.assertEqual(os.path.getmtime('storage.pcl'), last_mod)
 
 
 class AddonTestCase(unittest.TestCase):

@@ -12,7 +12,7 @@ import os
 import sys
 import re
 from datetime import datetime, timedelta
-from cPickle import dump, load, PickleError
+import cPickle as pickle
 from urlparse import parse_qs
 from urllib import urlencode
 from functools import wraps
@@ -52,23 +52,22 @@ class Storage(object):
         Class constructor
         """
         self._storage = {}
-        filename = os.path.join(storage_dir, filename)
-        if os.path.exists(filename):
-            mode = 'r+b'
-        else:
-            mode = 'w+b'
-        self._file = open(filename, mode)
-        try:
-            self._storage = load(self._file)
-        except (PickleError, EOFError):
-            pass
+        self._hash = None
+        self._filename = os.path.join(storage_dir, filename)
+        if os.path.exists(self._filename):
+            try:
+                with open(self._filename, 'rb') as fo:
+                    contents = fo.read()
+                self._storage = pickle.loads(contents)
+                self._hash = hash(contents)
+            except (pickle.PickleError, EOFError):
+                pass
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.flush()
-        return False
 
     def __getitem__(self, key):
         return self._storage[key]
@@ -110,11 +109,10 @@ class Storage(object):
         This method saves all :class:`Storage` contents to disk
         and invalidates the Storage instance.
         """
-        self._file.seek(0)
-        dump(self._storage, self._file)
-        self._file.truncate()
-        self._file.close()
-        del self._file
+        contents = pickle.dumps(self._storage)
+        if self._hash is None or hash(contents) != self._hash:
+            with open(self._filename, 'wb') as fo:
+                fo.write(contents)
         del self._storage
 
 
