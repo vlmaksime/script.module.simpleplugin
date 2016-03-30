@@ -16,6 +16,7 @@ import cPickle as pickle
 from urlparse import parse_qs
 from urllib import urlencode
 from functools import wraps
+from collections import MutableMapping
 import xbmcaddon
 import xbmc
 import xbmcplugin
@@ -27,7 +28,7 @@ class PluginError(Exception):
     pass
 
 
-class Storage(object):
+class Storage(MutableMapping):
     """
     Persistent storage for arbitrary data with a dictionary-like interface
 
@@ -46,6 +47,7 @@ class Storage(object):
             value2 = storage['key2']
 
     .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
+        Storage contents are saved to disk only for a new storage and if the contents have been changed.
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
@@ -54,14 +56,13 @@ class Storage(object):
         self._storage = {}
         self._hash = None
         self._filename = os.path.join(storage_dir, filename)
-        if os.path.exists(self._filename):
-            try:
-                with open(self._filename, 'rb') as fo:
-                    contents = fo.read()
-                self._storage = pickle.loads(contents)
-                self._hash = hash(contents)
-            except (pickle.PickleError, EOFError):
-                pass
+        try:
+            with open(self._filename, 'rb') as fo:
+                contents = fo.read()
+            self._storage = pickle.loads(contents)
+            self._hash = hash(contents)
+        except (IOError, pickle.PickleError, EOFError):
+            pass
 
     def __enter__(self):
         return self
@@ -78,29 +79,11 @@ class Storage(object):
     def __delitem__(self, key):
         del self._storage[key]
 
-    def __contains__(self, item):
-        return item in self._storage
-
     def __iter__(self):
-        return self.iterkeys()
-
-    def get(self, key, default=None):
-        return self._storage.get(key, default)
-
-    def iteritems(self):
-        return self._storage.iteritems()
-
-    def iterkeys(self):
         return self._storage.iterkeys()
 
-    def itervalues(self):
-        return self._storage.itervalues()
-
-    def keys(self):
-        return self._storage.keys()
-
-    def values(self):
-        return self._storage.values()
+    def __len__(self):
+        return len(self._storage)
 
     def flush(self):
         """

@@ -102,6 +102,17 @@ class StorageTestCase(unittest.TestCase):
             bar = storage2['foo']
         self.assertEqual(os.path.getmtime('storage.pcl'), last_mod)
 
+    def test_storage_iteration(self):
+        with Storage(cwd) as storage:
+            storage['foo'] = 'foo'
+            storage['bar'] = 'bar'
+            storage['baz'] = 'baz'
+            i = 0
+            for key, value in storage.iteritems():
+                self.assertEqual(key, value)
+                i += 1
+            self.assertEqual(i, 3)
+
 
 class AddonTestCase(unittest.TestCase):
     """
