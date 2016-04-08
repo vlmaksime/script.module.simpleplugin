@@ -17,13 +17,13 @@ from urlparse import parse_qs
 from urllib import urlencode
 from functools import wraps
 from collections import MutableMapping
+from copy import deepcopy
 import xbmcaddon
 import xbmc
 import xbmcplugin
 import xbmcgui
 
-
-class PluginError(Exception):
+class SimplePluginError(Exception):
     """Custom exception"""
     pass
 
@@ -99,6 +99,17 @@ class Storage(MutableMapping):
                 fo.write(contents)
         del self._storage
 
+    def copy(self):
+        """
+        Make a copy of storage contents
+
+        .. note:: this method performs a *deep* copy operation.
+
+        :return: a copy of storage contents
+        :rtype: dict
+        """
+        return deepcopy(self._storage)
+
 
 class Addon(object):
     """
@@ -115,8 +126,10 @@ class Addon(object):
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
+        self._ui_strings = None
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
+        self._load_ui_string()
 
     def __getattr__(self, item):
         """
@@ -323,6 +336,46 @@ class Addon(object):
             return inner_wrapper
         return outer_wrapper
 
+    def gettext(self, ui_string):
+        if self._ui_strings is not None:
+            try:
+                return self.get_localized_string(self._ui_strings['strings'][ui_string])
+            except KeyError:
+                raise SimplePluginError('UI string "{0}" is not found in English strings.po!'.format(ui_string))
+        else:
+            raise SimplePluginError('The addon does not have English strings.po file!')
+
+    def _load_ui_strings(self):
+        strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
+        gettext_pcl = '__gettext__.pcl'
+        if os.path.exists(strings_po):
+            with open(strings_po, 'rb') as fo:
+                raw_strings = fo.read()
+            raw_strings_hash = hash(raw_strings)
+            with self.get_storage(gettext_pcl) as storage:
+                if raw_strings_hash != self._ui_strings['hash'] or not os.path.exists(os.path.join(self._configdir,
+                                                                                                   gettext_pcl)):
+                    strings = raw_strings.split('\n')
+                    self._ui_strings = {
+                        'hash': raw_strings_hash,
+                        'strings': self._parse_po(strings)
+                    }
+                    storage['hash'] = self._ui_strings['hash']
+                    storage['strings'] = self._ui_strings['strings'].copy()
+                else:
+                    self._ui_strings = storage.copy()
+
+    def _parse_po(self, strings):
+        ui_strings = {}
+        string_id = None
+        for string in strings:
+            if string_id is None and 'msgctxt' in string:
+                string_id = int(re.search(r'"#(\d+)"', string).group(1))
+            elif string_id is not None and 'msgid' in string:
+                ui_strings[re.search(r'"(.+?)"', string).group(1)] = string_id
+                string_id = None
+        return ui_strings
+
 
 class Plugin(Addon):
     """
@@ -517,7 +570,7 @@ class Plugin(Addon):
         try:
             action_callable = self.actions[action]
         except KeyError:
-            raise PluginError('Invalid action: "{0}"!'.format(action))
+            raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
             result = action_callable(params)
             self.log('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)

@@ -68,7 +68,7 @@ sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin', 'libs'))
-from simpleplugin import Storage, Addon, Plugin, PluginError
+from simpleplugin import Storage, Addon, Plugin, SimplePluginError
 
 
 # Begin tests
@@ -243,7 +243,7 @@ class PluginTestCase(unittest.TestCase):
             plugin._set_resolved_url.assert_called_with({'path': 'test'})
         # Test unregistered action
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=invalid']):
-            self.assertRaises(PluginError, plugin.run)
+            self.assertRaises(SimplePluginError, plugin.run)
 
     def test_create_list_item(self):
         item = {
