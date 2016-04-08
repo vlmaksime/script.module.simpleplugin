@@ -126,10 +126,9 @@ class Addon(object):
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
-        self._ui_strings = None
+        self._ui_strings_map = None
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
-        self._load_ui_string()
 
     def __getattr__(self, item):
         """
@@ -337,33 +336,85 @@ class Addon(object):
         return outer_wrapper
 
     def gettext(self, ui_string):
-        if self._ui_strings is not None:
-            try:
-                return self.get_localized_string(self._ui_strings['strings'][ui_string])
-            except KeyError:
-                raise SimplePluginError('UI string "{0}" is not found in English strings.po!'.format(ui_string))
-        else:
-            raise SimplePluginError('The addon does not have English strings.po file!')
+        """
+        Get a translated UI string from addon localization files.
 
-    def _load_ui_strings(self):
+        This function emulates GNU Gettext for more convenient access
+        to localized addon UI strings. To reduce typing this method object
+        can be assigned to a ``_`` (single underscore) variable.
+
+        For using gettext emulation :meth:`Addon.initialize_gettext` method
+        needs to be called first. See documentation for that method for more info
+        about Gettext emulation.
+
+        :param ui_string: a UI string from English strings.po.
+        :type ui_string: str
+        :return: a UI string from addon's localization file :file:`strings.po`.
+        :rtype: unicode
+        :raises: SimplePluginError if :meth:`Addon.initialize_gettext` wasn't called first
+            or if a string is not found in English strings.po.
+        """
+        if xbmc.getLanguage() == 'English':
+            return ui_string
+        elif self._ui_strings is not None:
+            try:
+                return self.get_localized_string(self._ui_strings_map['strings'][ui_string])
+            except KeyError:
+                raise SimplePluginError('UI string "{0}" is not found in strings.po!'.format(ui_string))
+        else:
+            raise SimplePluginError('Addon localization is not initialized!')
+
+    def initialize_gettext(self):
+        """
+        Initialize GNU gettext emulation in addon
+
+        Kodi localization system for addons is not very convenient
+        because you need to operate with numeric string codes instead
+        of UI strings themselves which reduces code readability and
+        may lead to errors. The :class:`Addon` class provides facilities
+        for emulating GNU Gettext localization system.
+
+        This allows to use UI strings from addon's English :file:`strings.po`
+        file instead of numeric codes to return localized strings from
+        respective localized :file:`.po` files.
+
+        This method returns :meth:`Addon.gettext` method object that
+        can be assigned to a short alias to reduce typing. Traditionally,
+        ``_`` (a single underscore) is used for this purpose.
+
+        Example::
+
+            addon = simpleplugin.Addon()
+            _ = addon.initialize_gettext()
+
+            xbmcgui.Dialog().notification(_('Warning!'), _('Something happened'))
+
+        In the preceding example the notification strings will be replaced
+        with localized versions if these strings are translated.
+
+        :return: :meth:`Addon.gettext` method object
+        """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         gettext_pcl = '__gettext__.pcl'
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
             raw_strings_hash = hash(raw_strings)
-            with self.get_storage(gettext_pcl) as storage:
+            with self.get_storage(gettext_pcl) as ui_strings_map:
                 if raw_strings_hash != self._ui_strings['hash'] or not os.path.exists(os.path.join(self._configdir,
                                                                                                    gettext_pcl)):
-                    strings = raw_strings.split('\n')
-                    self._ui_strings = {
+                    ui_strings = self._parse_po(raw_strings.split('\n'))
+                    self._ui_strings_map = {
                         'hash': raw_strings_hash,
-                        'strings': self._parse_po(strings)
+                        'strings': ui_strings
                     }
-                    storage['hash'] = self._ui_strings['hash']
-                    storage['strings'] = self._ui_strings['strings'].copy()
+                    ui_strings_map['hash'] = raw_strings_hash
+                    ui_strings_map['strings'] = ui_strings.copy()
                 else:
-                    self._ui_strings = storage.copy()
+                    self._ui_strings_map = deepcopy(ui_strings_map)
+        else:
+            raise SimplePluginError('Unable to initialize localization because of missing English strings.po!')
+        return self.gettext
 
     def _parse_po(self, strings):
         ui_strings = {}
@@ -372,7 +423,7 @@ class Addon(object):
             if string_id is None and 'msgctxt' in string:
                 string_id = int(re.search(r'"#(\d+)"', string).group(1))
             elif string_id is not None and 'msgid' in string:
-                ui_strings[re.search(r'"(.+?)"', string).group(1)] = string_id
+                ui_strings[re.search(r'"(.*?)"', string, re.U).group(1)] = string_id
                 string_id = None
         return ui_strings
 
@@ -559,6 +610,7 @@ class Plugin(Addon):
         :param category: str - plugin sub-category, e.g. 'Comedy'.
             See :func:`xbmcplugin.setPluginCategory` for more info.
         :type category: str
+        :raises: SimplePluginError if unknown action string is provided.
         """
         self._handle = int(sys.argv[1])
         if category:
