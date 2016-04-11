@@ -395,14 +395,14 @@ class Addon(object):
         :return: :meth:`Addon.gettext` method object
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
-        gettext_pcl = '__gettext__.pcl'
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
             raw_strings_hash = hash(raw_strings)
+            gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
-                if raw_strings_hash != self._ui_strings['hash'] or not os.path.exists(os.path.join(self._configdir,
-                                                                                                   gettext_pcl)):
+                if raw_strings_hash != ui_strings_map['hash'] or not os.path.exists(os.path.join(self._configdir,
+                                                                                                 gettext_pcl)):
                     ui_strings = self._parse_po(raw_strings.split('\n'))
                     self._ui_strings_map = {
                         'hash': raw_strings_hash,
