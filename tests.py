@@ -44,6 +44,9 @@ class FakeAddon(object):
     def setSetting(self, setting_id, value):
         self._settings[setting_id] = value
 
+    def getLocalizedString(self, id_):
+        return {32000: u'Привет, мир!', 32001: u'Я тебя люблю.'}[id_]
+
 # Mock Kodi Python API
 
 mock_xbmcaddon = mock.MagicMock()
@@ -177,6 +180,24 @@ class AddonTestCase(unittest.TestCase):
         open('fanart.jpg', 'w').close()
         self.assertTrue('icon.png' in addon.icon)
         self.assertTrue('fanart.jpg' in addon.fanart)
+
+    def test_gettext_english_language(self):
+        mock_xbmc.getLanguage.return_value = 'English'
+        addon = Addon()
+        self.assertEqual(addon.gettext('Foo'), 'Foo')
+
+    def test_gettext_not_initialized(self):
+        mock_xbmc.getLanguage.return_value = 'Russian'
+        addon = Addon()
+        self.assertRaises(SimplePluginError, addon.gettext, 'Hello World!')
+
+    def test_gettext_initialized(self):
+        mock_xbmc.getLanguage.return_value = 'Russian'
+        addon = Addon()
+        _ = addon.initialize_gettext()
+        self.assertEqual(_('Hello World!'), u'Привет, мир!'.encode('utf-8'))
+        self.assertEqual(_('I love you.'), u'Я тебя люблю.'.encode('utf-8'))
+        self.assertRaises(SimplePluginError, _, 'Foo Bar')
 
 
 class PluginTestCase(unittest.TestCase):

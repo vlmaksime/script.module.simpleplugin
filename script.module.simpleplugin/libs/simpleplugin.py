@@ -356,7 +356,7 @@ class Addon(object):
         """
         if xbmc.getLanguage() == 'English':
             return ui_string
-        elif self._ui_strings is not None:
+        elif self._ui_strings_map is not None:
             try:
                 return self.get_localized_string(self._ui_strings_map['strings'][ui_string])
             except KeyError:
@@ -401,8 +401,8 @@ class Addon(object):
             raw_strings_hash = hash(raw_strings)
             gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
-                if raw_strings_hash != ui_strings_map['hash'] or not os.path.exists(os.path.join(self._configdir,
-                                                                                                 gettext_pcl)):
+                if (not os.path.exists(os.path.join(self._configdir, gettext_pcl)) or
+                        raw_strings_hash != ui_strings_map['hash']):
                     ui_strings = self._parse_po(raw_strings.split('\n'))
                     self._ui_strings_map = {
                         'hash': raw_strings_hash,
