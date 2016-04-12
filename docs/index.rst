@@ -20,20 +20,22 @@ This decorator allows to cache function return data for a specified amount of ti
 .. _Kodi mediacenter: http://www.kodi.tv
 .. _xbmcswift2 micro-framework: https://github.com/jbeluch/xbmcswift2
 
-**Contents:**
+Contents:
+---------
 
 .. toctree::
-    :maxdepth: 2
+  :maxdepth: 2
 
-    example
-    actions
-    get_url
-    storage
-    cached
-    settings
-    using
-    api
-    links
+  example
+  actions
+  get_url
+  storage
+  cached
+  settings
+  gettext
+  using
+  api
+  links
 
 Indices and tables
 ==================
