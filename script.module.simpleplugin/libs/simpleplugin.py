@@ -351,7 +351,7 @@ class Addon(object):
         :type ui_string: str
         :return: a UI string from addon's localization file :file:`strings.po`.
         :rtype: unicode
-        :raises: SimplePluginError if :meth:`Addon.initialize_gettext` wasn't called first
+        :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
             or if a string is not found in English strings.po.
         """
         if xbmc.getLanguage() == 'English':
@@ -393,6 +393,7 @@ class Addon(object):
         with localized versions if these strings are translated.
 
         :return: :meth:`Addon.gettext` method object
+        :raises: :exc:`SimplePluginError` if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):

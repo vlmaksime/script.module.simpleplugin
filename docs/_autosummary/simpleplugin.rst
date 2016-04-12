@@ -25,6 +25,6 @@ simpleplugin
 
    .. autosummary::
    
-      PluginError
+      SimplePluginError
    
    
