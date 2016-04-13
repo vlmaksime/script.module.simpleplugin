@@ -354,9 +354,7 @@ class Addon(object):
         :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
             or if a string is not found in English strings.po.
         """
-        if xbmc.getLanguage() == 'English':
-            return ui_string
-        elif self._ui_strings_map is not None:
+        if self._ui_strings_map is not None:
             try:
                 return self.get_localized_string(self._ui_strings_map['strings'][ui_string])
             except KeyError:

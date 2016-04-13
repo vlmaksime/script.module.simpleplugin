@@ -181,18 +181,11 @@ class AddonTestCase(unittest.TestCase):
         self.assertTrue('icon.png' in addon.icon)
         self.assertTrue('fanart.jpg' in addon.fanart)
 
-    def test_gettext_english_language(self):
-        mock_xbmc.getLanguage.return_value = 'English'
-        addon = Addon()
-        self.assertEqual(addon.gettext('Foo'), 'Foo')
-
     def test_gettext_not_initialized(self):
-        mock_xbmc.getLanguage.return_value = 'Russian'
         addon = Addon()
         self.assertRaises(SimplePluginError, addon.gettext, 'Hello World!')
 
     def test_gettext_initialized(self):
-        mock_xbmc.getLanguage.return_value = 'Russian'
         addon = Addon()
         _ = addon.initialize_gettext()
         self.assertEqual(_('Hello World!'), u'Привет, мир!'.encode('utf-8'))
