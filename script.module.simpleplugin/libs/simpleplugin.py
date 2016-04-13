@@ -352,7 +352,7 @@ class Addon(object):
         :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
         :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
-            or if a string is not found in English :file`strings.po`.
+            or if a string is not found in English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
             try:
