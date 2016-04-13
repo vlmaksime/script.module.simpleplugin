@@ -147,6 +147,8 @@ class AddonTestCase(unittest.TestCase):
         self.assertEqual(addon.get_setting('test'), 10)
         addon.addon.setSetting('test', '1.0')
         self.assertEqual(addon.get_setting('test'), 1.0)
+        addon.addon.setSetting('test', 'foo')
+        self.assertEqual(addon.get_setting('test'), 'foo')
 
     def test_addon_set_setting(self):
         """
