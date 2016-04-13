@@ -347,12 +347,12 @@ class Addon(object):
         needs to be called first. See documentation for that method for more info
         about Gettext emulation.
 
-        :param ui_string: a UI string from English strings.po.
+        :param ui_string: a UI string from English :file:`strings.po`.
         :type ui_string: str
-        :return: a UI string from addon's localization file :file:`strings.po`.
+        :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
         :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
-            or if a string is not found in English strings.po.
+            or if a string is not found in English :file`strings.po`.
         """
         if self._ui_strings_map is not None:
             try:
@@ -416,6 +416,9 @@ class Addon(object):
         return self.gettext
 
     def _parse_po(self, strings):
+        """
+        Parses ``strings.po`` file into a dict of {'string': id} items.
+        """
         ui_strings = {}
         string_id = None
         for string in strings:
