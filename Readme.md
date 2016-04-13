@@ -11,7 +11,7 @@ SimplePlugin micro-framework simplifies creating addons and content plugins for 
 * Simplified creating of content lists: each list item is defined as a dictionary and the properties of the list item
   are set as dictionary `key: value` pairs.
 * Convenience methods for simplified access to addon/plugin parameters and settings.
-* Persistent dictionary-like storage for storing permanent data.
+* Persistent dictionary-like storage for storing addon's data.
 * Caching decorator that allows to cache function return data for a specified amount time,
   for example, to reduce the frequency of polling data from some website.
 * GNU Gettext emulation for simplified addon GUI localization: you can use English source strings in your Python code
