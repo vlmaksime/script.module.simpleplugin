@@ -720,10 +720,8 @@ class Plugin(Addon):
         if item.get('info'):
             for media, info in item['info'].iteritems():
                 list_item.setInfo(media, info)
-        if item.get('context_menu') and isinstance(item['context_menu'], list):
+        if item.get('context_menu') is not None:
             list_item.addContextMenuItems(item['context_menu'])
-        elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
-            list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
         if item.get('subtitles'):
             list_item.setSubtitles(item['subtitles'])
         if item.get('mime'):
