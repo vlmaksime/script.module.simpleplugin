@@ -1,3 +1,5 @@
+1.9.0
+  - Removes support for replacing list_item context menu (removed in Kodi).
 1.8.0:
   - Adds GNU Gettext emulation.
 1.7.0:
