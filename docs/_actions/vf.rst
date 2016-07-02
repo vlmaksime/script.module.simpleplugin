@@ -17,13 +17,9 @@ Each item can have the following properties:
   (see :meth:`xbmcgui.ListItem.addStreamInfo`) -- optional.
 * **info** --  a :class:`dict` of ``{media: {param: value}}`` items
   (see :meth:`xbmcgui.ListItem.setInfo`) -- optional.
-* **context_menu** -- a :class:`list` or a :obj:`tuple`.
-  A :class:`list` must contain 2-item tuples ``('Menu label', '<Built-in function>')`` where "Built-in function"
-  is a `Kodi built-in function`_. If a :class:`list` is provided then the items from the tuples
-  are added to the item's context menu. Alternatively, context_menu can be a 2-item :obj:`tuple`.
-  The 1-st item is a :class:`list` as described above, and the 2-nd is a :class:`bool` value for replacing items.
-  If ``True``, context menu will contain only the provided items.
-  If ``False``, the items are added to the existing context menu. **context_menu** property is optional.
+* **context_menu** -- a :class:`list`.
+  The :class:`list` must contain 2-item tuples ``('Menu label', '<Built-in function>')`` where "Built-in function"
+  is a `Kodi built-in function`_. The items from the tuples are added to the item's context menu.
 * **url** -- a callback URL for this list item. This is a mandatory item.
   A **url** can be provided directly as a :class:`str` or created using
   :meth:`get_url<simpleplugin.Plugin.get_url>` method.
@@ -50,7 +46,7 @@ An example of a listing that contains 1 item::
                   'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
                                   'audio': {'codec': 'ac3', 'language': 'en'}},
                   'info': {'video': {'genre': 'Comedy', 'year': 2005}},
-                  'context_menu': ([('Menu Item', 'Action')], True),
+                  'context_menu': [('Menu Item', 'Action')],
                   'url': 'plugin:/plugin.video.foo/?action=play&video=bar.mp4',
                   'is_playable': True,
                   'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],

@@ -288,10 +288,6 @@ class PluginTestCase(unittest.TestCase):
         mock_ListItem.addContextMenuItems.assert_called_with(['item1', 'item2'])
         mock_ListItem.setSubtitles.assert_called_with('subs.srt')
         mock_ListItem.setMimeType.assert_called_with('video/x-matroska')
-        item['context_menu'] = (['item1', 'item2'], True)
-        mock_ListItem.addContextMenuItems.reset_mock()
-        Plugin.create_list_item(item)
-        mock_ListItem.addContextMenuItems.assert_called_with(['item1', 'item2'], True)
         # Test for Kodi Jarvis API
         mock_xbmc.getInfoLabel.return_value = '16.0'
         mock_ListItem.setArt.reset_mock()

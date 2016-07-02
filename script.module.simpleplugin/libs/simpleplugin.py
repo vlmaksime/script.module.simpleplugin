@@ -503,12 +503,8 @@ class Plugin(Addon):
       (see :meth:`xbmcgui.ListItem.addStreamInfo`) -- optional.
     - info --  a dictionary of ``{media: {param: value}}`` items
       (see :meth:`xbmcgui.ListItem.setInfo`) -- optional
-    - context_menu - a list or a tuple. A list must contain 2-item tuples ``('Menu label', 'Action')``.
-      If a list is provided then the items from the tuples are added to the item's context menu.
-      Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
-      and the 2-nd is a boolean value for replacing items. If ``True``, context menu will contain only
-      the provided items, if ``False`` - the items are added to an existing context menu.
-      context_menu param is optional.
+    - context_menu - a list that contains 2-item tuples ``('Menu label', 'Action')``.
+      The items from the tuples are added to the item's context menu.
     - url -- a callback URL for this list item.
     - is_playable -- if ``True``, then this item is playable and must return a playable path or
      be resolved via :meth:`Plugin.resolve_url` (default: ``False``).
@@ -534,7 +530,7 @@ class Plugin(Addon):
                         'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
                                         'audio': {'codec': 'ac3', 'language': 'en'}},
                         'info': {'video': {'genre': 'Comedy', 'year': 2005}},
-                        'context_menu': ([('Menu Item', 'Action')], True),
+                        'context_menu': [('Menu Item', 'Action')],
                         'url': 'plugin:/plugin.video.test/?action=play',
                         'is_playable': True,
                         'is_folder': False,
@@ -720,10 +716,8 @@ class Plugin(Addon):
         if item.get('info'):
             for media, info in item['info'].iteritems():
                 list_item.setInfo(media, info)
-        if item.get('context_menu') and isinstance(item['context_menu'], list):
+        if item.get('context_menu') is not None:
             list_item.addContextMenuItems(item['context_menu'])
-        elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
-            list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
         if item.get('subtitles'):
             list_item.setSubtitles(item['subtitles'])
         if item.get('mime'):
