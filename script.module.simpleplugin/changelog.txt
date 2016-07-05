@@ -1,13 +1,17 @@
+1.9.1:
+  - Fixes paramstring encoding for lists as parameters.
+1.9.0:
+  - Removes support for replacing context menu because of depreciation of the respective feature in Kodi.
 1.8.0:
   - Adds GNU Gettext emulation.
 1.7.0:
   - Storage contents are not saved to disk if the contents haven't been changed.
   - Storage class inherits from collections.MutableMapping.
 1.6.8:
-  - Adds functools.wraps to cached decorator
+  - Adds functools.wraps to cached decorator.
 1.6.6:
-  - Added GPLv3 license and this changelog
+  - Added GPLv3 license and this changelog.
 1.6.5:
-  - Implemented Travis CI
+  - Implements Travis CI.
 1.6.0:
   - Adds support for list_item graphics processing according to Kodi Jarvis Python API changes.
