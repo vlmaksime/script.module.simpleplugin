@@ -599,7 +599,7 @@ class Plugin(Addon):
         """
         url = plugin_url or self._url
         if kwargs:
-            return '{0}?{1}'.format(url, urlencode(kwargs))
+            return '{0}?{1}'.format(url, urlencode(kwargs, doseq=True))
         return url
 
     def run(self, category=''):
