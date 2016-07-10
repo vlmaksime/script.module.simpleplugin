@@ -18,6 +18,7 @@ from urllib import urlencode
 from functools import wraps
 from collections import MutableMapping
 from copy import deepcopy
+from types import GeneratorType
 import xbmcaddon
 import xbmc
 import xbmcplugin
@@ -624,7 +625,7 @@ class Plugin(Addon):
         else:
             result = action_callable(params)
             self.log('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)
-            if isinstance(result, list):
+            if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
             elif isinstance(result, basestring):
                 self._set_resolved_url(self.resolve_url(result))
@@ -642,7 +643,7 @@ class Plugin(Addon):
         Create and return a context dict for a virtual folder listing
 
         :param listing: the list of the plugin virtual folder items
-        :type listing: list
+        :type listing: :class:`list` or :class:`types.GeneratorType`
         :param succeeded: if ``False`` Kodi won't open a new listing and stays on the current level.
         :type succeeded: bool
         :param update_listing: if ``True``, Kodi won't open a sub-listing but refresh the current one.

@@ -25,6 +25,11 @@ def fake_log(msg, level=0):
     print msg
 
 
+def test_generator():
+    for i in xrange(6):
+        yield {'label': 'item {0}'.format(i)}
+
+
 class FakeAddon(object):
     def __init__(self, id_='test.addon'):
         self._id = id_
@@ -229,7 +234,7 @@ class PluginTestCase(unittest.TestCase):
             plugin.create_listing.assert_called_with([{'label': 'root'}])
             # Test setting plugin category
             mock_xbmcplugin.setPluginCategory.assert_called_with(1, 'Foo')
-        # Test calling a child action returning list
+        # Test calling a child action returning list or generator
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo&param=bar']):
             plugin.create_listing.reset_mock()
             mock_actions.foo.return_value = [{'label': 'foo'}]
@@ -237,6 +242,12 @@ class PluginTestCase(unittest.TestCase):
             plugin.run()
             mock_actions.foo.assert_called_with({'action': 'foo', 'param': 'bar'})
             plugin.create_listing.assert_called_with([{'label': 'foo'}])
+            plugin.create_listing.reset_mock()
+            generator = test_generator()
+            mock_actions.foo.return_value = generator
+            plugin.run()
+            mock_actions.foo.assert_called_with({'action': 'foo', 'param': 'bar'})
+            plugin.create_listing.assert_called_with(generator)
         # Test calling a child action returning a str
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=play_str']):
             mock_actions.play_str.return_value = '/play/path'
