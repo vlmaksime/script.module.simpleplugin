@@ -265,7 +265,7 @@ class Addon(object):
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
-        elif not isinstance(value, (str, unicode)):
+        elif not isinstance(value, basestring):
             value = str(value)
         self._addon.setSetting(id_, value)
 
@@ -626,7 +626,7 @@ class Plugin(Addon):
             self.log('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)
             if isinstance(result, list):
                 self._add_directory_items(self.create_listing(result))
-            elif isinstance(result, (str, unicode)):
+            elif isinstance(result, basestring):
                 self._set_resolved_url(self.resolve_url(result))
             elif isinstance(result, dict) and result.get('listing') is not None:
                 self._add_directory_items(result)
