@@ -23,6 +23,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
+
 class SimplePluginError(Exception):
     """Custom exception"""
     pass
@@ -54,13 +55,11 @@ class Storage(MutableMapping):
         Class constructor
         """
         self._storage = {}
-        self._hash = None
+        self._dirty = False
         self._filename = os.path.join(storage_dir, filename)
         try:
             with open(self._filename, 'rb') as fo:
-                contents = fo.read()
-            self._storage = pickle.loads(contents)
-            self._hash = hash(contents)
+                self._storage = pickle.load(fo)
         except (IOError, pickle.PickleError, EOFError):
             pass
 
@@ -75,9 +74,11 @@ class Storage(MutableMapping):
 
     def __setitem__(self, key, value):
         self._storage[key] = value
+        self._dirty = True
 
     def __delitem__(self, key):
         del self._storage[key]
+        self._dirty = True
 
     def __iter__(self):
         return self._storage.iterkeys()
@@ -93,10 +94,9 @@ class Storage(MutableMapping):
         and invalidates the Storage instance. Unchanged Storage is not saved
         but simply invalidated.
         """
-        contents = pickle.dumps(self._storage)
-        if self._hash is None or hash(contents) != self._hash:
+        if self._dirty:
             with open(self._filename, 'wb') as fo:
-                fo.write(contents)
+                pickle.dump(self._storage, fo)
         del self._storage
 
     def copy(self):
