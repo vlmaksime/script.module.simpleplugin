@@ -3,8 +3,10 @@ Virtual Fodler Actions
 
 A virtual folder action creates in the Kodi UI a listing of items representing various child actions:
 virtual sub-folders, playable items or misc. tasks. The listing is a Python :class:`list` object
-where each item is a Python :class:`dict` which defines item's properties.
-Each item can have the following properties:
+where each item is a Python :class:`dict` which defines item's properties. Alternatively,
+a generator function yielding virtual folder items can be used instead of a :class:`list`.
+
+Each virtual folder item can have the following properties:
 
 * **label** -- item's label (default: ``''``).
 * **label2** -- item's label2 (default: ``''``).
@@ -53,9 +55,9 @@ An example of a listing that contains 1 item::
                   'mime': 'video/mp4'
                   }]
 
-A virtual folder action must return either the :class:`list` described above, or a context :class:`dict`
+A virtual folder action must return either the :class:`list` described above, or a context object
 created with :meth:`create_listing<simpleplugin.Plugin.create_listing>` static method.
-This method is used to pass additional properties to Kodi.
+This method can be used to pass additional properties to Kodi.
 
 :meth:`create_listing<simpleplugin.Plugin.create_listing>` method takes the following parameters:
 

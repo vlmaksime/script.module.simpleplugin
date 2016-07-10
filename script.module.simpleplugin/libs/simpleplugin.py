@@ -474,7 +474,7 @@ class Plugin(Addon):
     An action callable receives 1 parameter -- params.
     params is a dict containing plugin call parameters (including action string)
     The action callable can return
-    either a list of dictionaries representing Kodi virtual directory items
+    either a list/generator of dictionaries representing Kodi virtual directory items
     or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
 
     Example 1::
