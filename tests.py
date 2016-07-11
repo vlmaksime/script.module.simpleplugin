@@ -76,7 +76,7 @@ sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin', 'libs'))
-from simpleplugin import Storage, Addon, Plugin, SimplePluginError
+from simpleplugin import Storage, Addon, Plugin, SimplePluginError, ListContext, PlayContext
 
 
 # Begin tests
@@ -254,20 +254,35 @@ class PluginTestCase(unittest.TestCase):
             plugin.actions['play_str'] = mock_actions.play_str
             plugin.run()
             plugin.resolve_url.assert_called_with('/play/path')
-        # Test calling a child action returning listing dict
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=dict_listing']):
+        # Test calling a child action returning ListContext namedtuple
+        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=tuple_listing']):
             plugin._add_directory_items.reset_mock()
-            mock_actions.dict_listing.return_value = {'listing': 'test'}
-            plugin.actions['dict_listing'] = mock_actions.dict_listing
+            list_context = ListContext(
+                [{
+                    'url': 'plugin://foo',
+                    'label': 'Foo',
+                    'is_folder': True
+                }],
+                True,
+                True,
+                True,
+                (0,),
+                50,
+                'movies'
+            )
+
+            mock_actions.dict_listing.return_value = list_context
+            plugin.actions['tuple_listing'] = mock_actions.dict_listing
             plugin.run()
-            plugin._add_directory_items.assert_called_with({'listing': 'test'})
-        # Test calling a child action returning play dict
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=dict_play']):
+            plugin._add_directory_items.assert_called_with(list_context)
+        # Test calling a child action returning PlayContext namedtuple
+        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=tuple_play']):
             plugin._set_resolved_url.reset_mock()
-            mock_actions.dict_play.return_value = {'path': 'test'}
-            plugin.actions['dict_play'] = mock_actions.dict_play
+            play_context = PlayContext('http://foo.bar', None, True)
+            mock_actions.dict_play.return_value = play_context
+            plugin.actions['tuple_play'] = mock_actions.dict_play
             plugin.run()
-            plugin._set_resolved_url.assert_called_with({'path': 'test'})
+            plugin._set_resolved_url.assert_called_with(play_context)
         # Test unregistered action
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=invalid']):
             self.assertRaises(SimplePluginError, plugin.run)
@@ -310,61 +325,82 @@ class PluginTestCase(unittest.TestCase):
                                                  'banner': 'banner.jpg'})
 
     def test_add_directory_items(self):
-        list_item1 = object()
-        context = {
-            'content': 'movies',
-            'listing': [{
+        list_item1 = mock.MagicMock()
+        context1 = ListContext(
+            [{
                 'url': 'plugin://foo',
                 'list_item': list_item1,
                 'is_folder': True
             }],
-            'sort_methods': (0,),
-            'succeeded': True,
-            'update_listing': True,
-            'cache_to_disk': True,
-            'view_mode': 50,
-        }
+            True,
+            True,
+            True,
+            (0,),
+            50,
+            'movies'
+        )
         plugin = Plugin('test.plugin')
         plugin._handle = 1
         plugin.create_list_item = mock.MagicMock()
-        plugin._add_directory_items(context)
+        plugin._add_directory_items(context1)
         mock_xbmcplugin.setContent.assert_called_with(1, 'movies')
         mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item1, True)], 1)
         mock_xbmcplugin.addSortMethod.assert_called_with(1, 0)
         mock_xbmcplugin.endOfDirectory.assert_called_with(1, True, True, True)
         mock_xbmc.executebuiltin.assert_called_with('Container.SetViewMode(50)')
         mock_xbmcplugin.addDirectoryItems.reset_mock()
-        del context['listing'][0]['list_item']
+        context2 = ListContext(
+            [{
+                'url' : 'plugin://foo',
+                'label': 'Foo',
+                'is_folder': True
+            }],
+            True,
+            True,
+            True,
+            (0,),
+            50,
+            'movies'
+        )
         list_item2 = mock.MagicMock()
         plugin.create_list_item.return_value = list_item2
-        plugin._add_directory_items(context)
+        plugin._add_directory_items(context2)
         mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, True)], 1)
         mock_xbmcplugin.addDirectoryItems.reset_mock()
         list_item2.reset_mock()
-        context['listing'][0]['is_playable'] = True
-        plugin._add_directory_items(context)
+        context3 = ListContext(
+            [{
+                'url' : 'plugin://foo',
+                'label': 'Foo',
+                'is_playable': True
+            }],
+            True,
+            True,
+            True,
+            (0,),
+            50,
+            'movies'
+        )
+        plugin._add_directory_items(context3)
         list_item2.setProperty.assert_called_with('IsPlayable', 'true')
         mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, False)], 1)
 
     def test_set_resolved_url(self):
-        context = {
-            'path': 'http://foo.bar',
-            'play_item': None,
-            'succeeded': True,
-        }
+        context1 = PlayContext('http://foo.bar', None, True)
         plugin = Plugin('test.plugin')
         plugin._handle = 1
         mock_xbmcgui.ListItem.reset_mock()
-        plugin._set_resolved_url(context)
+        plugin._set_resolved_url(context1)
         mock_xbmcgui.ListItem.assert_called_with(path='http://foo.bar')
         mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, mock_ListItem)
         mock_xbmcplugin.setResolvedUrl.reset_mock()
-        context['play_item'] = {}
-        list_item = object()
+        play_item = mock.MagicMock()
+        context2 = PlayContext('http://foo.bar', play_item, True)
+        list_item = mock.MagicMock()
         plugin.create_list_item = mock.MagicMock()
         plugin.create_list_item.return_value = list_item
-        plugin._set_resolved_url(context)
-        plugin.create_list_item.assert_called_with({})
+        plugin._set_resolved_url(context2)
+        plugin.create_list_item.assert_called_with(play_item)
         mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, list_item)
 
 

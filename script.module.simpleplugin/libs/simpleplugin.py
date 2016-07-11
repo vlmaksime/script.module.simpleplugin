@@ -16,13 +16,18 @@ import cPickle as pickle
 from urlparse import parse_qs
 from urllib import urlencode
 from functools import wraps
-from collections import MutableMapping
+from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from types import GeneratorType
 import xbmcaddon
 import xbmc
 import xbmcplugin
 import xbmcgui
+
+
+ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
+                                         'sort_methods', 'view_mode', 'content'])
+PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
 
 
 class SimplePluginError(Exception):
@@ -540,7 +545,7 @@ class Plugin(Addon):
                         }]
 
     Alternatively, an action callable can use :meth:`Plugin.create_listing` and :meth:`Plugin.resolve_url`
-    static methods to set additional parameters for Kodi.
+    static methods to pass additional parameters to Kodi.
 
     Example 3::
 
@@ -629,9 +634,9 @@ class Plugin(Addon):
                 self._add_directory_items(self.create_listing(result))
             elif isinstance(result, basestring):
                 self._set_resolved_url(self.resolve_url(result))
-            elif isinstance(result, dict) and result.get('listing') is not None:
+            elif isinstance(result, tuple) and hasattr(result, 'listing'):
                 self._add_directory_items(result)
-            elif isinstance(result, dict) and result.get('path') is not None:
+            elif isinstance(result, tuple) and hasattr(result, 'path'):
                 self._set_resolved_url(result)
             else:
                 self.log('The action "{0}" has not returned any valid data to process.'.format(action), xbmc.LOGWARNING)
@@ -658,13 +663,11 @@ class Plugin(Addon):
         :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
             See :func:`xbmcplugin.setContent` for more info.
         :type content: str
-        :return: context dictionary containing necessary parameters
+        :return: context object containing necessary parameters
             to create virtual folder listing in Kodi UI.
-        :rtype: dict
+        :rtype: ListContext
         """
-        return {'listing': listing, 'succeeded': succeeded, 'update_listing': update_listing,
-                'cache_to_disk': cache_to_disk, 'sort_methods': sort_methods, 'view_mode': view_mode,
-                'content': content}
+        return ListContext(listing, succeeded, update_listing, cache_to_disk, sort_methods, view_mode, content)
 
     @staticmethod
     def resolve_url(path='', play_item=None, succeeded=True):
@@ -680,11 +683,11 @@ class Plugin(Addon):
         :type play_item: dict
         :param succeeded: if ``False``, Kodi won't play anything
         :type succeeded: bool
-        :return: context dictionary containing necessary parameters
+        :return: context object containing necessary parameters
             for Kodi to play the selected media.
-        :rtype: dict
+        :rtype: PlayContext
         """
-        return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
+        return PlayContext(path, play_item, succeeded)
 
     @staticmethod
     def create_list_item(item):
@@ -729,14 +732,14 @@ class Plugin(Addon):
         """
         Create a virtual folder listing
 
-        :param context: context dictionary
-        :type context: dict
+        :param context: context object
+        :type context: ListContext
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
-        if context.get('content'):
-            xbmcplugin.setContent(self._handle, context['content'])  # This must be at the beginning
+        if context.content is not None:
+            xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         listing = []
-        for item in context['listing']:
+        for item in context.listing:
             if item.get('list_item') is not None:
                 list_item = item['list_item']
                 is_folder = item.get('is_folder', True)
@@ -749,25 +752,25 @@ class Plugin(Addon):
                     is_folder = item.get('is_folder', True)
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
-        if context['sort_methods'] is not None:
-            [xbmcplugin.addSortMethod(self._handle, method) for method in context['sort_methods']]
+        if context.sort_methods is not None:
+            [xbmcplugin.addSortMethod(self._handle, method) for method in context.sort_methods]
         xbmcplugin.endOfDirectory(self._handle,
-                                  context['succeeded'],
-                                  context['update_listing'],
-                                  context['cache_to_disk'])
-        if context['view_mode'] is not None:
-            xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
+                                  context.succeeded,
+                                  context.update_listing,
+                                  context.cache_to_disk)
+        if context.view_mode is not None:
+            xbmc.executebuiltin('Container.SetViewMode({0})'.format(context.view_mode))
 
     def _set_resolved_url(self, context):
         """
         Resolve a playable URL
 
-        :param context: context dictionary
-        :type context: dict
+        :param context: context object
+        :type context: PlayContext
         """
         self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
-        if context.get('play_item') is None:
-            list_item = xbmcgui.ListItem(path=context['path'])
+        if context.play_item is None:
+            list_item = xbmcgui.ListItem(path=context.path)
         else:
-            list_item = self.create_list_item(context['play_item'])
-        xbmcplugin.setResolvedUrl(self._handle, context['succeeded'], list_item)
+            list_item = self.create_list_item(context.play_item)
+        xbmcplugin.setResolvedUrl(self._handle, context.succeeded, list_item)
