@@ -285,7 +285,11 @@ class Addon(object):
             Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
-        xbmc.log('{0}: {1}'.format(self.id, message), level)
+        try:
+            formatted_msg = '{0}: {1}'.format(self.id, message)
+        except UnicodeError:
+            formatted_msg = '{0}: {1}'.format(self.id, message.encode('utf-8'))
+        xbmc.log(formatted_msg, level)
 
     def get_storage(self, filename='storage.pcl'):
         """
