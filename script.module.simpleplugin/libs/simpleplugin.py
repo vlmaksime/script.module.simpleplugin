@@ -492,13 +492,12 @@ class Plugin(Addon):
             listing = get_listing(params)  # Some external function to create listing
             return listing
 
+    The ``listing`` variable is a Python list/generator of dict items.
     Example 2::
 
         def play_action(params):
             path = get_path(params)  # Some external function to get a playable path
             return path
-
-    listing is a Python list of dict items.
 
     Each dict item can contain the following properties:
 
