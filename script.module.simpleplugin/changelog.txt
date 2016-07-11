@@ -1,3 +1,6 @@
+1.10.0:
+  - Adds support for generators as action return values
+  - Various internal changes
 1.9.1:
   - Fixes paramstring encoding for lists as parameters.
 1.9.0:
