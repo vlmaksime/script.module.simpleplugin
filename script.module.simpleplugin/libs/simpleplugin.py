@@ -338,9 +338,11 @@ class Addon(object):
                         data, timestamp = cache[key]
                         if duration > 0 and current_time - timestamp > timedelta(minutes=duration):
                             raise KeyError
+                        self.log('Cache hit: {0}'.format(key))
                     except KeyError:
                         data = func(*args, **kwargs)
                         cache[key] = (data, current_time)
+                        self.log('Cache miss: {0}'.format(key))
                 return data
             return inner_wrapper
         return outer_wrapper
