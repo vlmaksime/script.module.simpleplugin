@@ -92,6 +92,12 @@ class Storage(MutableMapping):
     def __len__(self):
         return len(self._storage)
 
+    def __str__(self):
+        return str(self._storage)
+
+    def __repr__(self):
+        return 'simpleplugin.Storage object {0}'.format(self._storage)
+
     def flush(self):
         """
         Save storage contents to disk
