@@ -24,7 +24,6 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
-
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
 PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
@@ -61,11 +60,13 @@ class Storage(MutableMapping):
         Class constructor
         """
         self._storage = {}
-        self._dirty = False
+        self._hash = None
         self._filename = os.path.join(storage_dir, filename)
         try:
             with open(self._filename, 'rb') as fo:
-                self._storage = pickle.load(fo)
+                contents = fo.read()
+            self._storage = pickle.loads(contents)
+            self._hash = hash(contents)
         except (IOError, pickle.PickleError, EOFError):
             pass
 
@@ -80,11 +81,9 @@ class Storage(MutableMapping):
 
     def __setitem__(self, key, value):
         self._storage[key] = value
-        self._dirty = True
 
     def __delitem__(self, key):
         del self._storage[key]
-        self._dirty = True
 
     def __iter__(self):
         return self._storage.iterkeys()
@@ -100,9 +99,10 @@ class Storage(MutableMapping):
         and invalidates the Storage instance. Unchanged Storage is not saved
         but simply invalidated.
         """
-        if self._dirty:
+        contents = pickle.dumps(self._storage)
+        if self._hash is None or hash(contents) != self._hash:
             with open(self._filename, 'wb') as fo:
-                pickle.dump(self._storage, fo)
+                fo.write(contents)
         del self._storage
 
     def copy(self):
