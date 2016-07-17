@@ -594,10 +594,8 @@ class Plugin(Addon):
         :return: parsed paramstring
         :rtype: dict
         """
-        params = parse_qs(paramstring)
-        for key, value in params.iteritems():
-            params[key] = value[0] if len(value) == 1 else value
-        return params
+        return {key: value[0] if len(value) == 1 else value
+                for key, value in parse_qs(paramstring).iteritems()}
 
     def get_url(self, plugin_url='', **kwargs):
         """
