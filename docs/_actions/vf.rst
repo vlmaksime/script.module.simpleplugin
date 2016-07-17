@@ -4,9 +4,10 @@ Virtual Fodler Actions
 A virtual folder action creates in the Kodi UI a listing of items representing various child actions:
 virtual sub-folders, playable items or misc. tasks. The listing is a Python :class:`list` object
 where each item is a Python :class:`dict` which defines item's properties. Alternatively,
-a generator function yielding virtual folder items can be used instead of a :class:`list`.
+a virtual folder action can be a generator function yielding virtual folder items instead of a
+plain function returning :class:`list`.
 
-Each virtual folder item can have the following properties:
+Each virtual folder item is a :class:`dict` that can have the following properties:
 
 * **label** -- item's label (default: ``''``).
 * **label2** -- item's label2 (default: ``''``).
@@ -55,13 +56,16 @@ An example of a listing that contains 1 item::
                   'mime': 'video/mp4'
                   }]
 
-A virtual folder action must return either the :class:`list` described above, or a context object
-created with :meth:`create_listing<simpleplugin.Plugin.create_listing>` static method.
+A virtual folder action must return either the :class:`list` described above
+or implement a generator that yields virtual folder items one by one.
+Alternatively the virtual folder action can return a context object created with
+:meth:`create_listing<simpleplugin.Plugin.create_listing>` static method.
 This method can be used to pass additional properties to Kodi.
 
 :meth:`create_listing<simpleplugin.Plugin.create_listing>` method takes the following parameters:
 
-* **listing**: :class:`list` -- the list of the plugin virtual folder items.
+* **listing**: :class:`list` or :class:`types.GeneratorType` -- a list or a generator of the plugin
+  virtual folder items.
 * **succeeded**: :class:`bool` -- if ``False`` Kodi won't open a new listing and stays on the current level.
 * **update_listing**: :class:`bool` -- if ``True``, Kodi won't open a sub-listing but refresh the current one.
 * **cache_to_disk**: :class:`bool` -- if ``False``, Kodi won't cache this listing to disk.
@@ -78,7 +82,7 @@ All parameters, except for **listing**, are optional.
 Example::
 
   def virtual_folder_action(params):
-      listing = get_listing(params)  # Some external function to create listing
+      listing = get_listing(params)  # Some external function to create a listing or a generator
       return Plugin.create_listing(listing,
                                    sort_methods=(SORT_METHOD_LABEL_IGNORE_THE,
                                                  SORT_METHOD_TITLE_IGNORE_THE,

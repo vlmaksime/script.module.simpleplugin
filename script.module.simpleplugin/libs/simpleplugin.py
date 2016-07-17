@@ -91,6 +91,12 @@ class Storage(MutableMapping):
     def __len__(self):
         return len(self._storage)
 
+    def __str__(self):
+        return str(self._storage)
+
+    def __repr__(self):
+        return 'simpleplugin.Storage object {0}'.format(self._storage)
+
     def flush(self):
         """
         Save storage contents to disk
@@ -338,7 +344,9 @@ class Addon(object):
                         data, timestamp = cache[key]
                         if duration > 0 and current_time - timestamp > timedelta(minutes=duration):
                             raise KeyError
+                        self.log('Cache hit: {0}'.format(key))
                     except KeyError:
+                        self.log('Cache miss: {0}'.format(key))
                         data = func(*args, **kwargs)
                         cache[key] = (data, current_time)
                 return data
@@ -492,13 +500,12 @@ class Plugin(Addon):
             listing = get_listing(params)  # Some external function to create listing
             return listing
 
+    The ``listing`` variable is a Python list/generator of dict items.
     Example 2::
 
         def play_action(params):
             path = get_path(params)  # Some external function to get a playable path
             return path
-
-    listing is a Python list of dict items.
 
     Each dict item can contain the following properties:
 
