@@ -751,16 +751,14 @@ class Plugin(Addon):
             xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         listing = []
         for item in context.listing:
+            is_folder = item.get('is_folder', True)
             if item.get('list_item') is not None:
                 list_item = item['list_item']
-                is_folder = item.get('is_folder', True)
             else:
                 list_item = self.create_list_item(item)
                 if item.get('is_playable'):
                     list_item.setProperty('IsPlayable', 'true')
                     is_folder = False
-                else:
-                    is_folder = item.get('is_folder', True)
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context.sort_methods is not None:
