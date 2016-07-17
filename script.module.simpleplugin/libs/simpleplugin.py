@@ -88,7 +88,7 @@ class Storage(MutableMapping):
         del self._storage[key]
 
     def __iter__(self):
-        return self._storage.iterkeys()
+        return self._storage.__iter__()
 
     def __len__(self):
         return len(self._storage)
