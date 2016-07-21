@@ -737,6 +737,9 @@ class Plugin(Addon):
             list_item.setSubtitles(item['subtitles'])
         if item.get('mime'):
             list_item.setMimeType(item['mime'])
+        if item.get('properties'):
+            for key, value in item['properties'].iteritems():
+                list_item.setProperty(key, value)
         return list_item
 
     def _add_directory_items(self, context):
