@@ -24,6 +24,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
+__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
@@ -61,11 +62,13 @@ class Storage(MutableMapping):
         Class constructor
         """
         self._storage = {}
-        self._dirty = False
+        self._hash = None
         self._filename = os.path.join(storage_dir, filename)
         try:
             with open(self._filename, 'rb') as fo:
-                self._storage = pickle.load(fo)
+                contents = fo.read()
+            self._storage = pickle.loads(contents)
+            self._hash = hash(contents)
         except (IOError, pickle.PickleError, EOFError):
             pass
 
@@ -80,14 +83,12 @@ class Storage(MutableMapping):
 
     def __setitem__(self, key, value):
         self._storage[key] = value
-        self._dirty = True
 
     def __delitem__(self, key):
         del self._storage[key]
-        self._dirty = True
 
     def __iter__(self):
-        return self._storage.iterkeys()
+        return self._storage.__iter__()
 
     def __len__(self):
         return len(self._storage)
@@ -106,9 +107,10 @@ class Storage(MutableMapping):
         and invalidates the Storage instance. Unchanged Storage is not saved
         but simply invalidated.
         """
-        if self._dirty:
+        contents = pickle.dumps(self._storage)
+        if self._hash is None or hash(contents) != self._hash:
             with open(self._filename, 'wb') as fo:
-                pickle.dump(self._storage, fo)
+                fo.write(contents)
         del self._storage
 
     def copy(self):
@@ -756,16 +758,14 @@ class Plugin(Addon):
             xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         listing = []
         for item in context.listing:
+            is_folder = item.get('is_folder', True)
             if item.get('list_item') is not None:
                 list_item = item['list_item']
-                is_folder = item.get('is_folder', True)
             else:
                 list_item = self.create_list_item(item)
                 if item.get('is_playable'):
                     list_item.setProperty('IsPlayable', 'true')
                     is_folder = False
-                else:
-                    is_folder = item.get('is_folder', True)
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context.sort_methods is not None:
