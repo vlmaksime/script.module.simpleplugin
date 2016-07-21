@@ -1,5 +1,6 @@
 branches:
   only:
+    - develop
     - master
     - /v\.\d+\.\d+\.\d+/
 language: python
