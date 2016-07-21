@@ -535,6 +535,8 @@ class Plugin(Addon):
       It is used when you want to set all list item properties by yourself.
       If ``'list_item'`` property is present, all other properties,
       except for ``'url'`` and ``'is_folder'``, are ignored.
+    - properties -- a dictionary of list item properties
+      (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
 
     Example::
 
