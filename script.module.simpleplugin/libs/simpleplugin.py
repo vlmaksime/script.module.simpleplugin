@@ -19,6 +19,7 @@ from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from types import GeneratorType
+from hashlib import md5
 import xbmcaddon
 import xbmc
 import xbmcplugin
@@ -68,7 +69,7 @@ class Storage(MutableMapping):
             with open(self._filename, 'rb') as fo:
                 contents = fo.read()
             self._storage = pickle.loads(contents)
-            self._hash = hash(contents)
+            self._hash = md5(contents).hexdigest()
         except (IOError, pickle.PickleError, EOFError):
             pass
 
@@ -108,7 +109,7 @@ class Storage(MutableMapping):
         but simply invalidated.
         """
         contents = pickle.dumps(self._storage)
-        if self._hash is None or hash(contents) != self._hash:
+        if self._hash is None or md5(contents).hexdigest() != self._hash:
             with open(self._filename, 'wb') as fo:
                 fo.write(contents)
         del self._storage
@@ -417,7 +418,7 @@ class Addon(object):
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
-            raw_strings_hash = hash(raw_strings)
+            raw_strings_hash = md5(raw_strings).hexdigest()
             gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
                 if (not os.path.exists(os.path.join(self._configdir, gettext_pcl)) or
