@@ -95,7 +95,7 @@ class Storage(MutableMapping):
         return len(self._storage)
 
     def __str__(self):
-        return str(self._storage)
+        return 'Storage{0}'.format(self._storage)
 
     def __repr__(self):
         return 'simpleplugin.Storage object {0}'.format(self._storage)
