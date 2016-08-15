@@ -378,9 +378,9 @@ class Addon(object):
                         data, timestamp = cache[key]
                         if duration > 0 and current_time - timestamp > timedelta(minutes=duration):
                             raise KeyError
-                        self.log('Cache hit: {0}'.format(key))
+                        self.log_debug('Cache hit: {0}'.format(key))
                     except KeyError:
-                        self.log('Cache miss: {0}'.format(key))
+                        self.log_debug('Cache miss: {0}'.format(key))
                         data = func(*args, **kwargs)
                         cache[key] = (data, current_time)
                 return data
@@ -617,6 +617,7 @@ class Plugin(Addon):
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+        self.log_debug('{0} called'.format(self))
 
     def __str__(self):
         return '<Plugin {0}>'.format(sys.argv)
@@ -674,15 +675,15 @@ class Plugin(Addon):
             xbmcplugin.setPluginCategory(self._handle, category)
         params = self.get_params(sys.argv[2][1:])
         action = params.get('action', 'root')
-        self.log('Actions: {0}'.format(str(self.actions.keys())))
-        self.log('Called action "{0}" with params "{1}"'.format(action, str(params)))
+        self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
+        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(params)))
         try:
             action_callable = self.actions[action]
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
             result = action_callable(params)
-            self.log('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)
+            self.log_debug('Action return value: {0}'.format(str(result)))
             if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
             elif isinstance(result, basestring):
@@ -692,7 +693,7 @@ class Plugin(Addon):
             elif isinstance(result, tuple) and hasattr(result, 'path'):
                 self._set_resolved_url(result)
             else:
-                self.log('The action "{0}" has not returned any valid data to process.'.format(action), xbmc.LOGWARNING)
+                self.log_warning('The action "{0}" has not returned any valid data to process.'.format(action))
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
@@ -791,7 +792,7 @@ class Plugin(Addon):
         :param context: context object
         :type context: ListContext
         """
-        self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        self.log_debug('Creating listing from {0}'.format(str(context)))
         if context.content is not None:
             xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         listing = []
@@ -822,7 +823,7 @@ class Plugin(Addon):
         :param context: context object
         :type context: PlayContext
         """
-        self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        self.log_debug('Resolving URL from {0}'.format(str(context)))
         if context.play_item is None:
             list_item = xbmcgui.ListItem(path=context.path)
         else:
