@@ -27,6 +27,7 @@ import xbmcgui
 
 __all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin']
 
+Route = namedtuple('Route', ['pattern', 'func'])
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
 PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
@@ -617,6 +618,7 @@ class Plugin(Addon):
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+        self._routes = {}
         self._params = None
         self.log_debug('{0} called'.format(self))
 
@@ -674,6 +676,17 @@ class Plugin(Addon):
             return '{0}?{1}'.format(url, urlencode(kwargs, doseq=True))
         return url
 
+    def route(self, pattern, name=None):
+        def wrap(func, pattern=pattern, name=name):
+            if name is None:
+                name = func.__name__
+            if not pattern.endswith('/'):
+                pattern += '/'
+            pattern = pattern.replace('int:', 'int__').replace('float:', 'float__')
+            self._routes[name] = Route(pattern, func)
+            return func
+        return wrap
+
     def run(self, category=''):
         """
         Run plugin
@@ -717,7 +730,6 @@ class Plugin(Addon):
             return self.actions[action](self.params)
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
-
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
