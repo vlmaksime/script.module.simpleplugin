@@ -95,10 +95,10 @@ class Storage(MutableMapping):
         return len(self._storage)
 
     def __str__(self):
-        return 'Storage{0}'.format(self._storage)
+        return '<Storage {0}>'.format(self._storage)
 
     def __repr__(self):
-        return 'simpleplugin.Storage object {0}'.format(self._storage)
+        return '<simpleplugin.Storage object {0}>'.format(self._storage)
 
     def flush(self):
         """
@@ -155,6 +155,12 @@ class Addon(object):
         :type item: str
         """
         return self.get_setting(item)
+
+    def __str__(self):
+        return '<Addon [{0}]>'.format(self.id)
+
+    def __repr__(self):
+        return '<simpleplugin.Addon object [{0}]>'.format(self.id)
 
     @property
     def addon(self):
@@ -586,6 +592,12 @@ class Plugin(Addon):
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+
+    def __str__(self):
+        return '<Plugin {0}>'.format(sys.argv)
+
+    def __repr__(self):
+        return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
 
     @staticmethod
     def get_params(paramstring):
