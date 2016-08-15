@@ -617,6 +617,7 @@ class Plugin(Addon):
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+        self._params = None
         self.log_debug('{0} called'.format(self))
 
     def __str__(self):
@@ -624,6 +625,18 @@ class Plugin(Addon):
 
     def __repr__(self):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
+
+    @property
+    def params(self):
+        """
+        Get parsed plugin paramstring as a :class:`dict`
+
+        .. note:: It will return ``None`` if :meth:`Plugin.run` has not been called yet.
+
+        :return: parsed paramstring
+        :rtype: dict
+        """
+        return self._params
 
     @staticmethod
     def get_params(paramstring):
@@ -673,27 +686,38 @@ class Plugin(Addon):
         self._handle = int(sys.argv[1])
         if category:
             xbmcplugin.setPluginCategory(self._handle, category)
-        params = self.get_params(sys.argv[2][1:])
-        action = params.get('action', 'root')
+        self._params = self.get_params(sys.argv[2][1:])
+        if self.actions:
+            result = self._resolve_action()
+        else:
+            raise NotImplementedError
+        self.log_debug('Function return value: {0}'.format(str(result)))
+        if isinstance(result, (list, GeneratorType)):
+            self._add_directory_items(self.create_listing(result))
+        elif isinstance(result, basestring):
+            self._set_resolved_url(self.resolve_url(result))
+        elif isinstance(result, tuple) and hasattr(result, 'listing'):
+            self._add_directory_items(result)
+        elif isinstance(result, tuple) and hasattr(result, 'path'):
+            self._set_resolved_url(result)
+        else:
+            self.log_warning('The function has not returned any valid data to process.')
+
+    def _resolve_action(self):
+        """
+        Resolve action from plugin call params and call the respective callable function
+
+        :return: action callable's return value
+        """
+        self.log_warning('Routing via plugin actions is depreciated. Use plugin.route decorator instead.')
+        action = self._params.get('action', 'root')
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
-        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(params)))
+        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(self._params)))
         try:
-            action_callable = self.actions[action]
+            return self.actions[action](self.params)
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
-        else:
-            result = action_callable(params)
-            self.log_debug('Action return value: {0}'.format(str(result)))
-            if isinstance(result, (list, GeneratorType)):
-                self._add_directory_items(self.create_listing(result))
-            elif isinstance(result, basestring):
-                self._set_resolved_url(self.resolve_url(result))
-            elif isinstance(result, tuple) and hasattr(result, 'listing'):
-                self._add_directory_items(result)
-            elif isinstance(result, tuple) and hasattr(result, 'path'):
-                self._set_resolved_url(result)
-            else:
-                self.log_warning('The action "{0}" has not returned any valid data to process.'.format(action))
+
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
