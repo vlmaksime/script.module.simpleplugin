@@ -13,8 +13,8 @@ import sys
 import re
 from datetime import datetime, timedelta
 import cPickle as pickle
-from urlparse import parse_qs
-from urllib import urlencode
+from urlparse import urlparse, parse_qs
+from urllib import urlencode, quote_plus, unquote_plus
 from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
@@ -676,10 +676,135 @@ class Plugin(Addon):
             return '{0}?{1}'.format(url, urlencode(kwargs, doseq=True))
         return url
 
+    def url_for(self, name_, *args, **kwargs):
+        """
+        Build a URL for a plugin route
+
+        This method reverse-builds an URL for the named route. If a route has no explicit name, then
+        the name of the decorated function is used as route's name.
+
+        The method can optionally take positional args and kwargs.
+        If any positional args are provided their values replace variable placeholders by position.
+
+        .. warning:: The number of positional args must not exceed the number of variable placeholders!
+
+        If any kwargs are provided their values replace variable placeholders by name.
+        If the number of kwargs provided exceeds the number of variable placeholders,
+        then the rest of the kwargs are added to the URL as a query string.
+
+        Example: let's assume that we have a plugin ``plugin.acme`` with the following route::
+
+            @plugin.route('/foo/<bar>/')
+            def foo(bar):
+                pass
+
+        In this case the call ``plugin.url_for('foo', bar='Python', ham='spam')`` will produce the URL:
+        ``'plugin://plugin.acme/foo/Python/?ham=spam'``.
+
+        :param name_: route's name.
+        :type name_: str
+        :return: full plugin callback URL for the route.
+        :rtype: str
+        :raises SimplePluginError: if a route with such name does not exist.
+        """
+        paramstring = ''
+        try:
+            pattern = self._routes[name_].pattern
+        except KeyError:
+            raise SimplePluginError('There is no route with such name: "{0}"!'.format(name_))
+        match = re.search(r'/(<.+?>)/', pattern)
+        if match is not None:
+            i = 0
+            if args:
+                while i < len(match.groups()):
+                    pattern = pattern.replace(match.group(i + 1), quote_plus(str(args[i])))
+                    i += 1
+            if kwargs:
+                for key, value in list(kwargs.items()):
+                    for j in range(i + 1, len(match.groups()) + 1):
+                        if key in match.group(j):
+                            pattern = pattern.replace(match.group(j), quote_plus(str(value)))
+                            del kwargs[key]
+                if kwargs:
+                    paramstring = urlencode(kwargs, doseq=True)
+        url = 'plugin://{0}{1}'.format(self.id, pattern)
+        if paramstring:
+            url += '?' + paramstring
+        return url
+
     def route(self, pattern, name=None):
+        """
+        Route decorator for plugin callback routes
+
+        The route decorator is used to define plugin callback routes
+        similar to a URL routing mechanism in Flask and Bottle Python web-frameworks.
+
+        The plugin routing mechanism calls decorated functions by matching a path
+        in a plugin callback URL (passed as ``sys.argv[0]``) to a route pattern.
+
+        .. note:: A route pattern *must* start with a forward slash ``/``.
+            An end slash is optional. A plugin must include
+            at least the root route with ``'/'`` pattern.
+
+        Example 1::
+
+            @plugin.route('/foo')
+            def foo_function():
+                # Do something
+
+        In the preceding example ``foo_function`` will be called when the plugin is invoked
+        with ``plugin://plugin.acme/foo`` callback URL.
+
+        A route pattern can contain variable placeholders (marked with angular brackets ``<>``)
+        that are used to pass arguments to a route function.
+
+        Example 2::
+
+            @plugin.route('/foo/<param>')
+            def foo_function(param):
+                # Do something
+
+        In the preceding example the part of a callback path marked with ``<param>`` placeholder
+        will be passed to the function as an argument. The name of a placeholder must be the same
+        as the name of the corresponding parameter. By default arguments are passed as strings.
+        The ``int`` and ``float`` prefixes can be used to pass arguments
+        as :class:`int` and :class:`float` numbers, for example ``<int:foo>`` or ``<float:bar>``.
+
+        Example 3::
+
+            @plugin.route('/add/<int:param1>/<int:param2>')
+            def addition(param1, param2):
+                sum = param1 + param2
+
+        A function can have multiple route decorators. In this case additional routes
+        must have explicitly defined names. If a route has less variable placeholders
+        than function parameters, "missing" function parameters must have default values.
+
+        Example 4::
+
+            @plugin.route('/foo/<param>', name='foo_route')
+            @plugin.route('/bar')
+            def some_function(param='spam'):
+                # Do something
+
+        In the preceding example ``some_function`` can be called through 2 possible routes.
+        If the function is called through the 1st route (``'foo_route'``)
+        ``<param>`` value will be passed as an argument. The 2nd route will call the function
+        with the default argument ``'spam'`` because this route has no variable placeholders
+        to pass arguments to the function.
+
+        :param pattern: route matching pattern
+        :type pattern: str
+        :param name: route's name (optional). If no name is provided,
+            the route is named after the decorated function.
+            The name must be unique.
+        :type name: str
+        """
         def wrap(func, pattern=pattern, name=name):
             if name is None:
                 name = func.__name__
+            if name in self._routes:
+                raise SimplePluginError('The route with the name "{0}" already exists!'.format(name))
             if not pattern.endswith('/'):
                 pattern += '/'
             pattern = pattern.replace('int:', 'int__').replace('float:', 'float__')
@@ -694,7 +819,6 @@ class Plugin(Addon):
         :param category: str - plugin sub-category, e.g. 'Comedy'.
             See :func:`xbmcplugin.setPluginCategory` for more info.
         :type category: str
-        :raises: SimplePluginError if unknown action string is provided.
         """
         self._handle = int(sys.argv[1])
         if category:
@@ -703,7 +827,7 @@ class Plugin(Addon):
         if self.actions:
             result = self._resolve_action()
         else:
-            raise NotImplementedError
+            result = self._resolve_route()
         self.log_debug('Function return value: {0}'.format(str(result)))
         if isinstance(result, (list, GeneratorType)):
             self._add_directory_items(self.create_listing(result))
@@ -725,11 +849,40 @@ class Plugin(Addon):
         self.log_warning('Routing via plugin actions is depreciated. Use plugin.route decorator instead.')
         action = self._params.get('action', 'root')
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
-        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(self._params)))
+        self.log_debug('Call action "{0}" with params "{1}"'.format(action, str(self._params)))
         try:
             return self.actions[action](self.params)
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
+
+    def _resolve_route(self):
+        """
+        Resolve route from plugin callback path and call the respective route function
+
+        :return: route function's return value
+        """
+        path = urlparse(sys.argv[0]).path
+        self.log_debug('Routes: {0}'.format(self._routes))
+        for route in self._routes.itervalues():
+            pattern = re.sub(r'/(<.+?>)/', r'/(?P\1.+?)/', route.pattern)
+            match = re.search(pattern, path)
+            if match is not None:
+                kwargs = match.groupdict()
+                for key, value in kwargs.items():
+                    if key.startswith('int__') or key.startswith('float__'):
+                        del kwargs[key]
+                        if key.startswith('int__'):
+                            key = key.lstrip('int__')
+                            value = int(value)
+                        else:
+                            key = key.lstrip('float__')
+                            value = float(value)
+                        kwargs[key] = value
+                    else:
+                        kwargs[key] = unquote_plus(value)
+                self.log_debug('Calling route {0} with kwargs {1}'.format(route, kwargs))
+                return route.func(**kwargs)
+        raise SimplePluginError('No route matches the path {0}!'.format(repr(path)))
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
