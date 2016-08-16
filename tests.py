@@ -20,11 +20,6 @@ configdir = os.path.join(cwd, 'config')
 def fake_translate_path(path):
     return path
 
-
-def fake_log(msg, level=0):
-    print msg
-
-
 def test_generator():
     for i in xrange(6):
         yield {'label': 'item {0}'.format(i)}
@@ -60,7 +55,6 @@ mock_xbmcaddon.Addon.side_effect = FakeAddon
 mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
-mock_xbmc.log.side_effect = fake_log
 mock_xbmc.translatePath.side_effect = fake_translate_path
 
 mock_xbmcplugin = mock.MagicMock()
@@ -403,6 +397,70 @@ class PluginTestCase(unittest.TestCase):
         plugin.create_list_item.assert_called_with(play_item)
         mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, list_item)
 
+
+class PluginRoutingTestCase(unittest.TestCase):
+    def tearDown(self):
+        shutil.rmtree(configdir, True)
+
+    def test_simple_routing(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/foo')
+        def test_func():
+            raise AssertionError('Test passed!')
+
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
+            self.assertRaises(AssertionError, plugin.run)
+
+    def test_passing_arguments(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/foo/<param1>/<param2>')
+        def test_func(param1, param2):
+            assert param1 == 'ham'
+            assert param2 == 'spam'
+            return []
+
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/ham/spam/', '1', '']):
+            plugin.run()
+
+    def test_passing_int_and_float(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/foo/<int:param1>/<float:param2>')
+        def test_func(param1, param2):
+            assert param1 == 28
+            assert param2 == 3.1416
+            return []
+
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416/', '1', '']):
+            plugin.run()
+
+    def test_multiple_routes(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/foo', name='foo_route')
+        @plugin.route('/bar/<param>')
+        def test_func(param='ham'):
+            assert param == 'ham'
+            return []
+
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
+            plugin.run()
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/bar/spam/', '1', '']):
+            self.assertRaises(AssertionError, plugin.run)
+
+    def test_routes_with_same_name(self):
+        plugin = Plugin('test.plugin')
+        try:
+            @plugin.route('/foo')
+            @plugin.route('/bar')
+            def test_func():
+                pass
+        except SimplePluginError:
+            pass
+        else:
+            self.fail('Added 2 routes with the same name!')
 
 if __name__ == '__main__':
     unittest.main()

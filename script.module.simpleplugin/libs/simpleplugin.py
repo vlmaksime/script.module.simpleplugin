@@ -873,7 +873,11 @@ class Plugin(Addon):
         path = urlparse(sys.argv[0]).path
         self.log_debug('Routes: {0}'.format(self._routes))
         for route in self._routes.itervalues():
-            pattern = re.sub(r'/(<.+?>)/', r'/(?P\1.+?)/', route.pattern)
+            pattern = route.pattern
+            while True:
+                pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
+                if not count:
+                    break
             match = re.search(pattern, path)
             if match is not None:
                 kwargs = match.groupdict()
