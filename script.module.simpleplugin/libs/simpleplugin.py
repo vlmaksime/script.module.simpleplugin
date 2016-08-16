@@ -323,6 +323,15 @@ class Addon(object):
         """
         self.log(message, xbmc.LOGWARNING)
 
+    def log_error(self, message):
+        """
+        Add ERROR message to the Kodi log
+
+        :param message: message to write to the Kodi log
+        :type message: str
+        """
+        self.log(message, xbmc.LOGERROR)
+
     def log_debug(self, message):
         """
         Add debug message to the Kodi log
