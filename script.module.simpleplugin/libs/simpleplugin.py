@@ -501,10 +501,9 @@ class Plugin(Addon):
 
     This class provides a simplified API to create virtual directories of playable items
     for Kodi content plugins.
-    :class:`simpleplugin.Plugin` uses a concept of callable plugin actions (functions or methods)
-    that are mapped to 'action' parameters via actions instance property.
-    A Plugin instance must have at least one action for its root section
-    mapped to 'root' string.
+    :class:`simpleplugin.Plugin` uses :meth:`Plugin.route` decorator to dispatch callback functions
+    depending on a plugin callback URL (passed via ``sys.argv[0]`` and ``sys.argv[2]``.
+    A plugin must have at least the root route with ``'/'`` matching pattern.
 
     Minimal example::
 
@@ -512,46 +511,39 @@ class Plugin(Addon):
 
         plugin = Plugin()
 
-        def root_action(params):
+        @plugin.route('/')  # Mandatory item!
+        def root():
             return [{'label': 'Foo',
-                    'url': plugin.get_url(action='some_action', param='Foo')},
+                    'url': plugin.url_for('some_func', label='Foo')},
                     {'label': 'Bar',
-                    'url': plugin.get_url(action='some_action', param='Bar')}]
+                    'url': plugin.url_for('some_func", label='Bar')}]
 
-        def some_action(params):
+        @plugin.route('/foo/<label>')
+        def some_func(label):
             return [{'label': params['param']}]
 
-        plugin.actions['root'] = root_action  # Mandatory item!
-        plugin.actions['some_action'] = some_action
         plugin.run()
 
-    .. warning:: You need to map function or method objects without round brackets!
-
-    E.g.::
-
-        plugin.actions['some_action'] = some_action  # Correct :)
-        plugin.actions['some_action'] = some_action()  # Wrong! :(
-
-    An action callable receives 1 parameter -- params.
-    params is a dict containing plugin call parameters (including action string)
-    The action callable can return
+    A callback function can return
     either a list/generator of dictionaries representing Kodi virtual directory items
     or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
 
     Example 1::
 
-        def list_action(params):
-            listing = get_listing(params)  # Some external function to create listing
+        @plugin.route('/list')
+        def list_func():
+            listing = get_listing()  # Some external function to create listing
             return listing
 
     The ``listing`` variable is a Python list/generator of dict items.
     Example 2::
 
-        def play_action(params):
-            path = get_path(params)  # Some external function to get a playable path
+        @plugin.route('/play')
+        def play_func(params):
+            path = get_path()  # Some external function to get a playable path
             return path
 
-    Each dict item can contain the following properties:
+    Each virtual directory item can contain the following properties:
 
     - label -- item's label (default: ``''``).
     - label2 -- item's label2 (default: ``''``).
@@ -582,7 +574,7 @@ class Plugin(Addon):
     - properties -- a dictionary of list item properties
       (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
 
-    Example::
+    Example 2::
 
         listing = [{    'label': 'Label',
                         'label2': 'Label 2',
@@ -606,17 +598,19 @@ class Plugin(Addon):
 
     Example 3::
 
-        def list_action(params):
+        @plugin.route('/list')
+        def list_func():
             listing = get_listing(params)  # Some external function to create listing
             return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
 
     Example 4::
 
-        def play_action(params):
-            path = get_path(params)  # Some external function to get a playable path
+        @plugin.route('/play')
+        def play_func():
+            path = get_path()  # Some external function to get a playable path
             return Plugin.resolve_url(path, succeeded=True)
 
-    If an action callable performs any actions other than creating a listing or
+    If a callback function performs any actions other than creating a listing or
     resolving a playable URL, it must return ``None``.
     """
     def __init__(self, id_=''):
@@ -638,13 +632,13 @@ class Plugin(Addon):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
 
     @property
-    def params(self):
+    def query(self):
         """
-        Get parsed plugin paramstring as a :class:`dict`
+        Get parsed plugin query string as a :class:`dict`
 
         .. note:: It will return ``None`` if :meth:`Plugin.run` has not been called yet.
 
-        :return: parsed paramstring
+        :return: parsed query string
         :rtype: dict
         """
         return self._params
@@ -674,6 +668,9 @@ class Plugin(Addon):
         if 'action' parameter is missing, then the plugin root action is called
         If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
 
+        .. warning:: Callback routing via plugin actions is depreciated!
+            Use :meth:`Plugin.route` decorator instead.
+
         :param plugin_url: plugin URL with trailing / (optional)
         :type plugin_url: str
         :param kwargs: pairs of key=value items
@@ -689,26 +686,30 @@ class Plugin(Addon):
         """
         Build a URL for a plugin route
 
-        This method reverse-builds an URL for the named route. If a route has no explicit name, then
-        the name of the decorated function is used as route's name.
+        This method performs reverse resolving an URL for the named route.
+        If a route has no explicit name,
+        then the name of the decorated function is used as route's name.
 
         The method can optionally take positional args and kwargs.
-        If any positional args are provided their values replace variable placeholders by position.
+        If any positional args are provided their values replace
+        variable placeholders by position.
 
-        .. warning:: The number of positional args must not exceed the number of variable placeholders!
+        .. warning:: The number of positional args must not exceed
+            the number of variable placeholders!
 
         If any kwargs are provided their values replace variable placeholders by name.
         If the number of kwargs provided exceeds the number of variable placeholders,
         then the rest of the kwargs are added to the URL as a query string.
 
-        Example: let's assume that we have a plugin ``plugin.acme`` with the following route::
+        Example: let's assume that we have a plugin ``plugin.acme``
+        with the following route::
 
             @plugin.route('/foo/<bar>/')
             def foo(bar):
                 pass
 
-        In this case the call ``plugin.url_for('foo', bar='Python', ham='spam')`` will produce the URL:
-        ``'plugin://plugin.acme/foo/Python/?ham=spam'``.
+        In this case the call ``plugin.url_for('foo', bar='Python', ham='spam')``
+        will produce the following URL: ``'plugin://plugin.acme/foo/Python/?ham=spam'``.
 
         :param name_: route's name.
         :type name_: str
@@ -722,8 +723,10 @@ class Plugin(Addon):
         except KeyError:
             raise SimplePluginError('There is no route with such name: "{0}"!'.format(name_))
         matches = re.findall(r'/(<.+?>)', pattern)
-        if len(args) + len(kwargs) < len(matches):
-            raise SimplePluginError('The number of arguments is less than the number of placeholders!')
+        if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
+            raise SimplePluginError(
+                'Arguments for a route {0} does not match placeholders!'.format(name_)
+            )
         if matches:
             for arg, match in zip(args, matches):
                 pattern = pattern.replace(match, quote_plus(str(arg)))
@@ -747,15 +750,19 @@ class Plugin(Addon):
         The plugin routing mechanism calls decorated functions by matching a path
         in a plugin callback URL (passed as ``sys.argv[0]``) to a route pattern.
 
-        .. note:: A route pattern *must* start with a forward slash ``/``.
-            An end slash is optional. A plugin must include
-            at least the root route with ``'/'`` pattern.
+        A route pattern *must* start with a forward slash ``/``. An end slash is optional.
+        A plugin must have at least the root route with ``'/'`` pattern.
+
+        Bu default a route is named by the decorated function, but route's name can
+        be set explicitly by providing the 2nd optional ``name`` argument.
+
+        .. warning:: Route names must be unique!
 
         Example 1::
 
             @plugin.route('/foo')
             def foo_function():
-                # Do something
+                pass
 
         In the preceding example ``foo_function`` will be called when the plugin is invoked
         with ``plugin://plugin.acme/foo`` callback URL.
@@ -767,7 +774,7 @@ class Plugin(Addon):
 
             @plugin.route('/foo/<param>')
             def foo_function(param):
-                # Do something
+                pass
 
         In the preceding example the part of a callback path marked with ``<param>`` placeholder
         will be passed to the function as an argument. The name of a placeholder must be the same
@@ -796,7 +803,8 @@ class Plugin(Addon):
         If the function is called through the 1st route (``'foo_route'``)
         ``<param>`` value will be passed as an argument. The 2nd route will call the function
         with the default argument ``'spam'`` because this route has no variable placeholders
-        to pass arguments to the function.
+        to pass arguments to the function. The order of the ``route`` decorators does not matter
+        but each route must have a unique name.
 
         :param pattern: route matching pattern
         :type pattern: str
@@ -809,7 +817,7 @@ class Plugin(Addon):
             if name is None:
                 name = func.__name__
             if name in self._routes:
-                raise SimplePluginError('The route with the name "{0}" already exists!'.format(name))
+                raise SimplePluginError('The route "{0}" already exists!'.format(name))
             if not pattern.endswith('/'):
                 pattern += '/'
             pattern = pattern.replace('int:', 'int__').replace('float:', 'float__')
@@ -889,7 +897,7 @@ class Plugin(Addon):
                         kwargs[key] = value
                     else:
                         kwargs[key] = unquote_plus(value)
-                self.log_debug('Calling route {0} with kwargs {1}'.format(route, kwargs))
+                self.log_debug('Calling {0} with kwargs {1}'.format(route, kwargs))
                 return route.func(**kwargs)
         raise SimplePluginError('No route matches the path {0}!'.format(repr(path)))
 
