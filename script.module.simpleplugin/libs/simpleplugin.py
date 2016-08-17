@@ -882,7 +882,7 @@ class Plugin(Addon):
                 pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
                 if not count:
                     break
-            match = re.search(pattern, path)
+            match = re.search('^' + pattern + '$', path)
             if match is not None:
                 kwargs = match.groupdict()
                 for key, value in kwargs.items():
