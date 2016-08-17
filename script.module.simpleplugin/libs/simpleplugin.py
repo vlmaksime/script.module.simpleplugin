@@ -413,7 +413,7 @@ class Addon(object):
         :type ui_string: str
         :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
-        :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
+        :raises simpleplugin.SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
             or if a string is not found in English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
@@ -453,7 +453,7 @@ class Addon(object):
         with localized versions if these strings are translated.
 
         :return: :meth:`Addon.gettext` method object
-        :raises: :exc:`SimplePluginError` if the addon's English :file:`strings.po` file is missing
+        :raises simpleplugin.SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):
@@ -714,31 +714,27 @@ class Plugin(Addon):
         :type name_: str
         :return: full plugin callback URL for the route.
         :rtype: str
-        :raises SimplePluginError: if a route with such name does not exist.
+        :raises simpleplugin.SimplePluginError: if a route with such name does not exist
+            or on arguments mismatch.
         """
-        paramstring = ''
         try:
             pattern = self._routes[name_].pattern
         except KeyError:
             raise SimplePluginError('There is no route with such name: "{0}"!'.format(name_))
-        match = re.search(r'/(<.+?>)/', pattern)
-        if match is not None:
-            i = 0
-            if args:
-                while i < len(match.groups()):
-                    pattern = pattern.replace(match.group(i + 1), quote_plus(str(args[i])))
-                    i += 1
-            if kwargs:
-                for key, value in list(kwargs.items()):
-                    for j in range(i + 1, len(match.groups()) + 1):
-                        if key in match.group(j):
-                            pattern = pattern.replace(match.group(j), quote_plus(str(value)))
-                            del kwargs[key]
-                if kwargs:
-                    paramstring = urlencode(kwargs, doseq=True)
+        matches = re.findall(r'/(<.+?>)', pattern)
+        if len(args) + len(kwargs) < len(matches):
+            raise SimplePluginError('The number of arguments is less than the number of placeholders!')
+        if matches:
+            for arg, match in zip(args, matches):
+                pattern = pattern.replace(match, quote_plus(str(arg)))
+            for key, value in kwargs.items():
+                for match in matches[len(args):]:
+                    if key in match:
+                        pattern = pattern.replace(match, quote_plus(str(value)))
+                        del kwargs[key]
         url = 'plugin://{0}{1}'.format(self.id, pattern)
-        if paramstring:
-            url += '?' + paramstring
+        if kwargs:
+            url += '?' + urlencode(kwargs, doseq=True)
         return url
 
     def route(self, pattern, name=None):

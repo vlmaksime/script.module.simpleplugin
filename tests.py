@@ -462,5 +462,60 @@ class PluginRoutingTestCase(unittest.TestCase):
         else:
             self.fail('Added 2 routes with the same name!')
 
+
+class PluginUrlForTestCase(unittest.TestCase):
+    def tearDown(self):
+        shutil.rmtree(configdir, True)
+
+    def test_building_simple_url(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/foo')
+        def test():
+            pass
+
+        self.assertEqual(plugin.url_for('test'), 'plugin://test.plugin/foo/')
+
+    def test_building_url_args(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/<param1>/<param2>')
+        def test():
+            pass
+
+        url = plugin.url_for('test', 'foo', 'bar')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
+
+    def test_building_url_kwargs(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/<param1>/<param2>')
+        def test():
+            pass
+
+        url = plugin.url_for('test', param1='foo', param2='bar')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
+
+    def test_building_url_args_kwargs(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/<param1>/<param2>/<param3>')
+        def test():
+            pass
+
+        url = plugin.url_for('test', 'foo', param2='bar', param3='spam')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/')
+
+    def test_building_url_args_kwargs_query(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.route('/<param1>/<param2>/<param3>')
+        def test():
+            pass
+
+        url = plugin.url_for('test', 'foo', param2='bar', param3='spam', param4='ham')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/?param4=ham')
+
+
 if __name__ == '__main__':
     unittest.main()
