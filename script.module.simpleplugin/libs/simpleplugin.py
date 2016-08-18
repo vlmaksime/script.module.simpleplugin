@@ -539,7 +539,7 @@ class Plugin(Addon):
     Example 2::
 
         @plugin.route('/play')
-        def play_func(params):
+        def play_func():
             path = get_path()  # Some external function to get a playable path
             return path
 
@@ -668,7 +668,7 @@ class Plugin(Addon):
         if 'action' parameter is missing, then the plugin root action is called
         If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
 
-        .. warning:: Callback routing via plugin actions is depreciated!
+        .. warning:: Callback routing via plugin actions is depreciated.
             Use :meth:`Plugin.route` decorator instead.
 
         :param plugin_url: plugin URL with trailing / (optional)
@@ -686,9 +686,9 @@ class Plugin(Addon):
         """
         Build a URL for a plugin route
 
-        This method performs reverse resolving an URL for the named route.
-        If a route has no explicit name,
-        then the name of the decorated function is used as route's name.
+        This method performs reverse resolving a plugin callback URL for the named route.
+        If route's name is not set explicitly, then the name of a decorated function
+        is used as the name of the corresponding route.
 
         The method can optionally take positional args and kwargs.
         If any positional args are provided their values replace
@@ -701,15 +701,35 @@ class Plugin(Addon):
         If the number of kwargs provided exceeds the number of variable placeholders,
         then the rest of the kwargs are added to the URL as a query string.
 
-        Example: let's assume that we have a plugin ``plugin.acme``
-        with the following route::
+        Let's assume that the ID of our plugin is ``plugin.acme``. The following examples
+        will show how to use this method to resolve callback URLs for this plugin.
 
-            @plugin.route('/foo/<bar>/')
-            def foo(bar):
+        Example 1::
+
+            @plugin.route('/foo')
+            def foo():
                 pass
 
-        In this case the call ``plugin.url_for('foo', bar='Python', ham='spam')``
-        will produce the following URL: ``'plugin://plugin.acme/foo/Python/?ham=spam'``.
+            url = plugin.url_for('foo')
+            # url = 'plugin://plugin.acme/foo/'
+
+        Example 2:
+
+            @plugin.route('/foo/<param>')
+            def foo(param):
+                pass
+
+            url = plugin.url_for('foo', param='bar')
+            # url = 'plugin://plugin.acme/foo/bar/'
+
+        Example 3:
+
+            plugin.route('/foo/<param>')
+            def foo(param):
+                pass
+
+            url = plugin.url_for('foo', param='bar', ham='spam')
+            # url = 'plugin://plugin.acme/foo/bar/?ham=spam
 
         :param name_: route's name.
         :type name_: str
