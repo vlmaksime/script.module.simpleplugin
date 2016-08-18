@@ -505,7 +505,9 @@ class Plugin(Addon):
     depending on a plugin callback URL (passed via ``sys.argv[0]`` and ``sys.argv[2]``.
     A plugin must have at least the root route with ``'/'`` matching pattern.
 
-    Minimal example::
+    Minimal example:
+
+    .. code-block:: python
 
         from simpleplugin import Plugin
 
@@ -516,11 +518,11 @@ class Plugin(Addon):
             return [{'label': 'Foo',
                     'url': plugin.url_for('some_func', label='Foo')},
                     {'label': 'Bar',
-                    'url': plugin.url_for('some_func", label='Bar')}]
+                    'url': plugin.url_for('some_func', label='Bar')}]
 
         @plugin.route('/foo/<label>')
         def some_func(label):
-            return [{'label': params['param']}]
+            return [{'label': label]
 
         plugin.run()
 
