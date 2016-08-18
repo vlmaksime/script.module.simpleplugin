@@ -713,7 +713,7 @@ class Plugin(Addon):
             url = plugin.url_for('foo')
             # url = 'plugin://plugin.acme/foo/'
 
-        Example 2:
+        Example 2::
 
             @plugin.route('/foo/<param>')
             def foo(param):
@@ -722,7 +722,7 @@ class Plugin(Addon):
             url = plugin.url_for('foo', param='bar')
             # url = 'plugin://plugin.acme/foo/bar/'
 
-        Example 3:
+        Example 3::
 
             plugin.route('/foo/<param>')
             def foo(param):
@@ -785,7 +785,7 @@ class Plugin(Addon):
                 pass
 
         In the preceding example ``foo_function`` will be called when the plugin is invoked
-        with ``plugin://plugin.acme/foo`` callback URL.
+        with ``plugin://plugin.acme/foo/`` callback URL.
 
         A route pattern can contain variable placeholders (marked with angular brackets ``<>``)
         that are used to pass arguments to a route function.
