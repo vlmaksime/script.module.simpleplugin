@@ -632,7 +632,7 @@ class Plugin(Addon):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
 
     @property
-    def query(self):
+    def params(self):
         """
         Get parsed plugin query string as a :class:`dict`
 
@@ -725,7 +725,7 @@ class Plugin(Addon):
         matches = re.findall(r'/(<.+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
-                'Arguments for a route {0} does not match placeholders!'.format(name_)
+                'Arguments for the route {0} do not match placeholders!'.format(name_)
             )
         if matches:
             for arg, match in zip(args, matches):
@@ -859,12 +859,12 @@ class Plugin(Addon):
 
         :return: action callable's return value
         """
-        self.log_warning('Routing via plugin actions is depreciated. Use plugin.route decorator instead.')
+        self.log_warning('Callback routing via plugin actions is depreciated. Use plugin.route decorator instead.')
         action = self._params.get('action', 'root')
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
         self.log_debug('Call action "{0}" with params "{1}"'.format(action, str(self._params)))
         try:
-            return self.actions[action](self.params)
+            return self.actions[action](self._params)
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
 
