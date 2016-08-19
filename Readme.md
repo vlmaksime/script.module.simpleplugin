@@ -5,11 +5,19 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/0b11ece4ae73463ba3ce0b5836214ee6/badge.svg)](https://www.quantifiedcode.com/app/project/0b11ece4ae73463ba3ce0b5836214ee6)
 
 SimplePlugin micro-framework simplifies creating addons and content plugins for [Kodi](www.kodi.tv) mediacenter.
+It was inspired by [xbmcswift2](https://github.com/jbeluch/xbmcswift2) and has some similar features
+but SimplePlugin has different concept. Its 2 main goals are simplicity and support for
+both content plugins and general purpose addons. SimplePlugin consists of one module
+with no third-party dependencies, so you can simply include it in your plugin/addon.
+Or you can install it in Kodi as a library module addon.
+
 
 ## Main Features
 
 * Simplified creating of content lists: each list item is defined as a dictionary and the properties of the list item
   are set as dictionary `key: value` pairs.
+* Automated plugin callback routing based on actions, that is, functions marked with
+  a special decorator.
 * Convenience methods for simplified access to addon/plugin parameters and settings.
 * Persistent dictionary-like storage for storing addon's data.
 * Caching decorator that allows to cache function return data for a specified amount time,
