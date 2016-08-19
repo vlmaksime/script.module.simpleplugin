@@ -17,7 +17,10 @@ simpleplugin
       Params
       Plugin
       Storage
+   
+   
 
+   
    
    .. rubric:: Exceptions
 

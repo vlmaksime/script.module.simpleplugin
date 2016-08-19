@@ -34,7 +34,7 @@ Example:
 
   plugin.run()
 
-The "root" action is mandatory, that is a SimplePlugin-based plugin **must** have at least a "root" action.
+The "root" action is mandatory, that is, a SimplePlugin-based plugin **must** have at least a "root" action.
 
 .. warning::  Actions must have unique names!
 

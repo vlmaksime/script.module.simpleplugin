@@ -33,6 +33,7 @@ Contents:
   cached
   settings
   gettext
+  log
   using
   api
   links

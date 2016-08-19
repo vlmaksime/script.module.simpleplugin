@@ -25,7 +25,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin']
+__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin', 'Params']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
@@ -39,9 +39,11 @@ class SimplePluginError(Exception):
 
 class Params(dict):
     """
+    Params(**kwargs)
+
     A class that stores parsed plugin call parameters
 
-    Parameters can be accessed both through :class`dict` keys and
+    Parameters can be accessed both through :class:`dict` keys and
     instance properties.
 
     Example:
@@ -50,8 +52,8 @@ class Params(dict):
 
         @plugin.action('foo')
         def action(params):
-            foo = params['foo']
-            bar = params.bar
+            foo = params['foo']  # Access by key
+            bar = params.bar  # Access through property. Both variants are equal
     """
     def __getattr__(self, item):
         if item not in self:
