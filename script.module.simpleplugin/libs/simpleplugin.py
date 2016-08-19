@@ -445,7 +445,7 @@ class Addon(object):
         :type ui_string: str
         :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
-        :raises: :exc:`SimplePluginError` if :meth:`Addon.initialize_gettext` wasn't called first
+        :raises simpleplugin.SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
             or if a string is not found in English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
@@ -485,7 +485,7 @@ class Addon(object):
         with localized versions if these strings are translated.
 
         :return: :meth:`Addon.gettext` method object
-        :raises: :exc:`SimplePluginError` if the addon's English :file:`strings.po` file is missing
+        :raises simpleplugin.SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):
@@ -744,7 +744,7 @@ class Plugin(Addon):
         :param category: str - plugin sub-category, e.g. 'Comedy'.
             See :func:`xbmcplugin.setPluginCategory` for more info.
         :type category: str
-        :raises: SimplePluginError if unknown action string is provided.
+        :raises simpleplugin.SimplePluginError: if unknown action string is provided.
         """
         self._handle = int(sys.argv[1])
         if category:
