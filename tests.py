@@ -20,11 +20,6 @@ configdir = os.path.join(cwd, 'config')
 def fake_translate_path(path):
     return path
 
-
-def fake_log(msg, level=0):
-    print msg
-
-
 def test_generator():
     for i in xrange(6):
         yield {'label': 'item {0}'.format(i)}
@@ -60,7 +55,6 @@ mock_xbmcaddon.Addon.side_effect = FakeAddon
 mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
-mock_xbmc.log.side_effect = fake_log
 mock_xbmc.translatePath.side_effect = fake_translate_path
 
 mock_xbmcplugin = mock.MagicMock()
@@ -402,6 +396,25 @@ class PluginTestCase(unittest.TestCase):
         plugin._set_resolved_url(context2)
         plugin.create_list_item.assert_called_with(play_item)
         mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, list_item)
+
+    def test_action_decorator(self):
+        plugin = Plugin('test.plugin')
+
+        @plugin.action()
+        def foo(params):
+            raise AssertionError('Test passed!')
+
+        try:
+            @plugin.action('foo')
+            def bar(params):
+                pass
+        except SimplePluginError:
+            pass
+        else:
+            self.fail('Duplicate action names test failed!')
+
+        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo']):
+            self.assertRaises(AssertionError, plugin.run)
 
 
 if __name__ == '__main__':

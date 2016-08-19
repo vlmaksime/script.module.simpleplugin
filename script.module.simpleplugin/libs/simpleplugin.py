@@ -57,10 +57,10 @@ class Params(dict):
         return self[item]
 
     def __str__(self):
-        return '<Params {0}>'.format(super(Params, self).__str__())
+        return '<Params {0}>'.format(super(Params, self).__repr__())
 
     def __repr__(self):
-        return '<simpleplugin.Params object {0}>'.format(super(Params, self).__str__())
+        return '<simpleplugin.Params object {0}>'.format(super(Params, self).__repr__())
 
 
 class Storage(MutableMapping):
