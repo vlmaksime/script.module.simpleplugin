@@ -326,11 +326,45 @@ class Addon(object):
             Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
-        try:
-            formatted_msg = '{0}: {1}'.format(self.id, message)
-        except UnicodeError:
-            formatted_msg = '{0}: {1}'.format(self.id, message.encode('utf-8'))
-        xbmc.log(formatted_msg, level)
+        if isinstance(message, unicode):
+            message = message.encode('utf-8')
+        xbmc.log('{0}: {1}'.format(self.id, message), level)
+
+    def log_notice(self, message):
+        """
+        Add NOTICE message to the Kodi log
+
+        :param message: message to write to the Kodi log
+        :type message: str
+        """
+        self.log(message, xbmc.LOGINFO)
+
+    def log_warning(self, message):
+        """
+        Add WARNING message to the Kodi log
+
+        :param message: message to write to the Kodi log
+        :type message: str
+        """
+        self.log(message, xbmc.LOGWARNING)
+
+    def log_error(self, message):
+        """
+        Add ERROR message to the Kodi log
+
+        :param message: message to write to the Kodi log
+        :type message: str
+        """
+        self.log(message, xbmc.LOGERROR)
+
+    def log_debug(self, message):
+        """
+        Add debug message to the Kodi log
+
+        :param message: message to write to the Kodi log
+        :type message: str
+        """
+        self.log(message, xbmc.LOGDEBUG)
 
     def get_storage(self, filename='storage.pcl'):
         """
