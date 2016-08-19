@@ -290,9 +290,9 @@ class Addon(object):
                 return True  # Convert boolean strings to bool
             elif setting == 'false':
                 return False
-            elif re.search(r'^\-?\d+$', setting) is not None:
+            elif re.search(r'^-?\d+$', setting) is not None:
                 return long(setting)  # Convert numeric strings to long
-            elif re.search(r'^\-?\d+\.\d+$', setting) is not None:
+            elif re.search(r'^-?\d+\.\d+$', setting) is not None:
                 return float(setting)  # Convert numeric strings with a dot to float
         return setting
 
@@ -756,7 +756,7 @@ class Plugin(Addon):
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
             result = action_callable(params)
-            self.log_debug('Action return value: {0}'.format(str(result)), xbmc.LOGDEBUG)
+            self.log_debug('Action return value: {0}'.format(str(result)))
             if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
             elif isinstance(result, basestring):
@@ -766,7 +766,7 @@ class Plugin(Addon):
             elif isinstance(result, tuple) and hasattr(result, 'path'):
                 self._set_resolved_url(result)
             else:
-                self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action), xbmc.LOGWARNING)
+                self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
@@ -865,7 +865,7 @@ class Plugin(Addon):
         :param context: context object
         :type context: ListContext
         """
-        self.log_debug('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        self.log_debug('Creating listing from {0}'.format(str(context)))
         if context.content is not None:
             xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         listing = []
@@ -896,7 +896,7 @@ class Plugin(Addon):
         :param context: context object
         :type context: PlayContext
         """
-        self.log_debug('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
+        self.log_debug('Resolving URL from {0}'.format(str(context)))
         if context.play_item is None:
             list_item = xbmcgui.ListItem(path=context.path)
         else:
