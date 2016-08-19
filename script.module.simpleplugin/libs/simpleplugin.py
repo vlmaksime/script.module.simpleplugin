@@ -53,7 +53,7 @@ class Params(dict):
     """
     def __getattr__(self, item):
         if item not in self:
-            raise AttributeError('Invalid parameter: {0}!'.format(item))
+            raise AttributeError('Invalid parameter: "{0}"!'.format(item))
         return self[item]
 
     def __str__(self):
@@ -728,7 +728,7 @@ class Plugin(Addon):
             if name is None:
                 name = func.__name__
             if name in self.actions:
-                raise SimplePluginError('Action "" already defined!'.format(name))
+                raise SimplePluginError('Action "{0}" already defined!'.format(name))
             self.actions[name] = func
             return func
         return wrap
