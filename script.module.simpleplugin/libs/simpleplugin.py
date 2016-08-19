@@ -662,6 +662,42 @@ class Plugin(Addon):
             return '{0}?{1}'.format(url, urlencode(kwargs, doseq=True))
         return url
 
+    def action(self, name=None):
+        """
+        Action decorator
+
+        Defines plugin callback action. If action's name is not defined explicitly,
+        then the action is named after the decorated function.
+
+        .. warning:: Action's name must be unique.
+
+        A plugin must have at least one action named ``'root'`` implicitly or explicitly.
+
+        Example:
+
+        .. code-block:: python
+
+            @plugin.action()  # The action is implicitly named 'root' after the decorated function
+            def root(params):
+                pass
+
+            @plugin.action('foo')  # The action name is set explicitly
+            def foo_action(params):
+                pass
+
+        :param name: action's name (optional).
+        :type name: str
+        :raises simpleplugin.SimplePluginError: if the action with such name is already defined.
+        """
+        def wrap(func, name=name):
+            if name is None:
+                name = func.__name__
+            if name in self.actions:
+                raise SimplePluginError('Action "" already defined!'.format(name))
+            self.actions[name] = func
+            return func
+        return wrap
+
     def run(self, category=''):
         """
         Run plugin
