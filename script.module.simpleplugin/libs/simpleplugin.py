@@ -530,44 +530,39 @@ class Plugin(Addon):
     This class provides a simplified API to create virtual directories of playable items
     for Kodi content plugins.
     :class:`simpleplugin.Plugin` uses a concept of callable plugin actions (functions or methods)
-    that are mapped to 'action' parameters via actions instance property.
-    A Plugin instance must have at least one action for its root section
-    mapped to 'root' string.
+    that are defined using :meth:`Plugin.action` decorator.
+    A Plugin instance must have at least one action that is named ``'root'``.
 
-    Minimal example::
+    Minimal example:
+
+    .. code-block:: python
 
         from simpleplugin import Plugin
 
         plugin = Plugin()
 
-        def root_action(params):
+        @plugin.action()
+        def root(params):  # Mandatory item!
             return [{'label': 'Foo',
                     'url': plugin.get_url(action='some_action', param='Foo')},
                     {'label': 'Bar',
                     'url': plugin.get_url(action='some_action', param='Bar')}]
 
+        @plugin.action()
         def some_action(params):
             return [{'label': params['param']}]
 
-        plugin.actions['root'] = root_action  # Mandatory item!
-        plugin.actions['some_action'] = some_action
         plugin.run()
 
-    .. warning:: You need to map function or method objects without round brackets!
-
-    E.g.::
-
-        plugin.actions['some_action'] = some_action  # Correct :)
-        plugin.actions['some_action'] = some_action()  # Wrong! :(
-
     An action callable receives 1 parameter -- params.
-    params is a dict containing plugin call parameters (including action string)
+    params is a dict-like object containing plugin call parameters (including action string)
     The action callable can return
     either a list/generator of dictionaries representing Kodi virtual directory items
     or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
 
     Example 1::
 
+        @plugin.action()
         def list_action(params):
             listing = get_listing(params)  # Some external function to create listing
             return listing
@@ -575,6 +570,7 @@ class Plugin(Addon):
     The ``listing`` variable is a Python list/generator of dict items.
     Example 2::
 
+        @plugin.action()
         def play_action(params):
             path = get_path(params)  # Some external function to get a playable path
             return path
@@ -634,12 +630,14 @@ class Plugin(Addon):
 
     Example 3::
 
+        @plugin.action()
         def list_action(params):
             listing = get_listing(params)  # Some external function to create listing
             return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
 
     Example 4::
 
+        @plugin.action()
         def play_action(params):
             path = get_path(params)  # Some external function to get a playable path
             return Plugin.resolve_url(path, succeeded=True)

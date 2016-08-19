@@ -14,12 +14,10 @@ simpleplugin
    .. autosummary::
    
       Addon
+      Params
       Plugin
       Storage
-   
-   
 
-   
    
    .. rubric:: Exceptions
 
