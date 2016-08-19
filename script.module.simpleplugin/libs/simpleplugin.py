@@ -25,7 +25,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin', 'Params']
+__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
