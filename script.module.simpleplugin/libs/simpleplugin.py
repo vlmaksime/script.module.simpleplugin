@@ -25,7 +25,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin']
+__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin', 'Params']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
@@ -35,6 +35,32 @@ PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
 class SimplePluginError(Exception):
     """Custom exception"""
     pass
+
+
+class Params(dict):
+    """
+    A class that stores parsed plugin call parameters
+
+    Parameters can be accessed both through :class`dict` keys and
+    instance properties.
+
+    Example::
+
+        @plugin.action('foo')
+        def action(params):
+            foo = params['foo']
+            bar = params.bar
+    """
+    def __getattr__(self, item):
+        if item not in self:
+            raise AttributeError('Invalid parameter: {0}!'.format(item))
+        return self[item]
+
+    def __str__(self):
+        return '<Params {0}>'.format(super(Params, self).__str__())
+
+    def __repr__(self):
+        return '<simpleplugin.Params object {0}>'.format(super(Params, self).__str__())
 
 
 class Storage(MutableMapping):
@@ -607,10 +633,11 @@ class Plugin(Addon):
         :param paramstring: URL-encoded paramstring
         :type paramstring: str
         :return: parsed paramstring
-        :rtype: dict
+        :rtype: Params
         """
-        params = parse_qs(paramstring)
-        for key, value in params.iteritems():
+        raw_params = parse_qs(paramstring)
+        params = Params()
+        for key, value in raw_params.iteritems():
             params[key] = value[0] if len(value) == 1 else value
         return params
 
