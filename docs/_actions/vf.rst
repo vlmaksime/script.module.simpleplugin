@@ -80,8 +80,11 @@ This method can be used to pass additional properties to Kodi.
 
 All parameters, except for **listing**, are optional.
 
-Example::
+Example:
 
+.. code-block:: python
+
+  @plugin.action('foo')
   def virtual_folder_action(params):
       listing = get_listing(params)  # Some external function to create a listing or a generator
       return Plugin.create_listing(listing,

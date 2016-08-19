@@ -5,8 +5,11 @@ A misc action may perform any operations except for creating a virtual folder li
 Such action must not have a :keyword:`return` statement.
 The respective item in the upper level virtual folder must have its ``is_folder`` property set to ``False``.
 
-Example::
+Example:
 
+.. code-block:: python
+
+  @plugin.action('foo')
   def misc_action(params):
       xbcmgui.Dialog().notification('Hello', 'Hello world!')
 

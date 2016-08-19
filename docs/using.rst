@@ -17,5 +17,9 @@ Then you need to add the module in the `requires`_ section of your plugin's :fil
 
 After that you can import SimplePlugin classes in your plugin's Python code and use them as necessary.
 
+Alternatively, you can simply include :file:`simpleplugin.py` module into your addon.
+The module is self-contained and has no external dependencies, except the Python standard library
+and Kodi Python API modules.
+
 .. _Releases: https://github.com/romanvm/script.module.simpleplugin/releases/latest
 .. _requires: http://kodi.wiki/view/Addon.xml#.3Crequires.3E

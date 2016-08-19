@@ -8,7 +8,7 @@ and cache decorator for functions.
 
 But unlike xbmcswift2 which uses decorator-based callback routing mechanism similar to Bottle or Flask
 web-frameworks, SimplePlugin uses :doc:`Actions<./actions>` that are Python callable objects
-mapped to plugin call parameters.
+mapped to plugin call parameters passed though a URL-encoded paramstring.
 
 In addition to simplifying creation of content lists in Kodi interface,
 SimplePlugin provides :doc:`Persistent Storage<./storage>` with dictionary-like interface

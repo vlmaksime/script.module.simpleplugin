@@ -44,7 +44,9 @@ class Params(dict):
     Parameters can be accessed both through :class`dict` keys and
     instance properties.
 
-    Example::
+    Example:
+
+    .. code-block:: python
 
         @plugin.action('foo')
         def action(params):

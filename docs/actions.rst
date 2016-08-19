@@ -4,43 +4,50 @@ Actions
 In SimplePlugin **actions** are Python callable objects -- functions or methods -- that are called
 when a SimplePlugin-based plugin is invoked in Kodi. "root" action is called when a user opens the plugin from Kodi UI,
 e.g. from "Video Addons" or "Music Addons" section. Child actions are called via a plugin callback URL
-containing "action" parameter in its paramstring, e.g. :file:`plugin://plugin.video.foo/?action=bar`
+containing "action" parameter in its paramstring, e.g. the :file:`plugin://plugin.video.foo/?action=bar`
 URL will call the action mapped to "bar" action string.
 
-Actions are mapped to action strings via ``actions`` property of a Plugin class instance, e.g.::
+Actions are defined using :meth:`action <simpleplugin.Plugin.action>` decorator.
+The decorator takes an optional parameter which is the name of the action. If an explicit name
+is not provided the action is named after the decorated function.
+
+Example:
+
+.. code-block:: python
 
   from simpleplugin import Plugin
 
   plugin = Plugin()
 
+  @plugin.action()
   def root(params):
       # Do some things
       ...
       return listing
 
-
+  @plugin.action()
   def foo(params):
-      # Do some other things
+      # Do other things
       ...
       return listing
 
 
-  plugin.actions['root'] = root  # Mandatory!
-  plugin.actions['foo'] = foo
   plugin.run()
 
-The "root" action is mandatory, i.e. a SimplePlugin based plugin **must** have at least a "root" action.
+The "root" action is mandatory, that is a SimplePlugin-based plugin **must** have at least a "root" action.
 
-.. warning::  For mapping you need to use function objects without brackets ``()``!
+.. warning::  Actions must have unique names!
 
-``plugin.actions['foo'] = foo`` -- Correct :-)
+An action callable automatically receives ``params`` parameter which is a :class:`Params <simpleplugin.Params>`
+instance containing parsed plugin callback parameters. Parameters can be accessed either by keys
+as in a :class:`dict` or as instance properties, for example:
 
-``plugin.actions['foo'] = foo()`` -- **Wrong!!!** :-(
+.. code-block:: python
 
-An action callable automatically receives ``params`` parameter which is a Python :class:`dict`
-containing a parsed plugin callback URL paramstring, e.g. for URL
-:file:`plugin://plugin.video.foo/?action=bar&param=baz` ``params`` parameter will be
-``{'action': 'bar', 'param': 'baz'}``. For "root" action ``params`` will be an empty :class:`dict` ``{}``.
+  @plugin.action('foo')
+  def action(params):
+      foo = params['foo']  # Access by key
+      bar = params.bar  # Access though property. Both variants are equal.
 
 .. note:: An action always receives ``params`` parameter even it does not use it.
     If ``params`` is missing from an action signature, a plugin will raise an exception.
