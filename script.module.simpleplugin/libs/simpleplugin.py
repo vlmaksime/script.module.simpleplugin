@@ -610,7 +610,7 @@ class Plugin(Addon):
     - properties -- a dictionary of list item properties
       (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
 
-    Example::
+    Example 3::
 
         listing = [{    'label': 'Label',
                         'label2': 'Label 2',
@@ -632,14 +632,14 @@ class Plugin(Addon):
     Alternatively, an action callable can use :meth:`Plugin.create_listing` and :meth:`Plugin.resolve_url`
     static methods to pass additional parameters to Kodi.
 
-    Example 3::
+    Example 4::
 
         @plugin.action()
         def list_action(params):
             listing = get_listing(params)  # Some external function to create listing
             return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
 
-    Example 4::
+    Example 5::
 
         @plugin.action()
         def play_action(params):
