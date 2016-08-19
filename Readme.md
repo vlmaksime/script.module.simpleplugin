@@ -26,13 +26,19 @@ plugin = Plugin()
 
 # Free video sample is provided by www.vidsplay.com
 
+@plugin.action()
 def root(params):
-    """Root virtual folder"""
+    """
+    Root virtual folder
+    
+    This is mandatory item.
+    """
     # Create 1-item list with a link to subfolder item
     return [{'label': 'Subfolder',
             'url': plugin.get_url(action='subfolder')}]
 
 
+@plugin.action()
 def subfolder(params):
     """Virtual subfolder"""
     # Create 1-item list with a link to a playable video.
@@ -42,15 +48,13 @@ def subfolder(params):
             'is_playable': True}]
 
 
+@plugin.action()
 def play(params):
     """Play video"""
     # Return a string containing a playable video URL
-    return params['url']
+    return params.url
 
-# Note that we map function objects *without* brackets ()!!!
-plugin.actions['root'] = root  # Mandatory item
-plugin.actions['subfolder'] = subfolder  # Subfolder action
-plugin.actions['play'] = play  # Play action
+
 if __name__ == '__main__':
     plugin.run()  # Start plugin
 ```
