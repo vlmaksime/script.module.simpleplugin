@@ -20,6 +20,7 @@ from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from types import GeneratorType
 from hashlib import md5
+from shutil import move
 import xbmcaddon
 import xbmc
 import xbmcplugin
@@ -140,8 +141,14 @@ class Storage(MutableMapping):
         """
         contents = pickle.dumps(self._storage)
         if self._hash is None or md5(contents).hexdigest() != self._hash:
-            with open(self._filename, 'wb') as fo:
-                fo.write(contents)
+            tmp = self._filename + '.tmp'
+            try:
+                with open(tmp, 'wb') as fo:
+                    fo.write(contents)
+            except:
+                os.remove(tmp)
+                raise
+            move(tmp, self._filename)  # Atomic save
         del self._storage
 
     def copy(self):
