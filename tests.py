@@ -338,7 +338,7 @@ class PluginTestCase(unittest.TestCase):
         plugin.create_list_item = mock.MagicMock()
         plugin._add_directory_items(context1)
         mock_xbmcplugin.setContent.assert_called_with(1, 'movies')
-        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item1, True)], 1)
+        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item1, True)
         mock_xbmcplugin.addSortMethod.assert_called_with(1, 0)
         mock_xbmcplugin.endOfDirectory.assert_called_with(1, True, True, True)
         mock_xbmc.executebuiltin.assert_called_with('Container.SetViewMode(50)')
@@ -359,7 +359,7 @@ class PluginTestCase(unittest.TestCase):
         list_item2 = mock.MagicMock()
         plugin.create_list_item.return_value = list_item2
         plugin._add_directory_items(context2)
-        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, True)], 1)
+        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item2, True)
         mock_xbmcplugin.addDirectoryItems.reset_mock()
         list_item2.reset_mock()
         context3 = ListContext(
@@ -377,7 +377,7 @@ class PluginTestCase(unittest.TestCase):
         )
         plugin._add_directory_items(context3)
         list_item2.setProperty.assert_called_with('IsPlayable', 'true')
-        mock_xbmcplugin.addDirectoryItems.assert_called_with(1, [('plugin://foo', list_item2, False)], 1)
+        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item2, False)
 
     def test_set_resolved_url(self):
         context1 = PlayContext('http://foo.bar', None, True)
