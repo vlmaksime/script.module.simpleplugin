@@ -267,6 +267,16 @@ class Addon(object):
         """
         return self._configdir
 
+    @property
+    def version(self):
+        """
+        Addon version
+
+        :return: addon version
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('version')
+
     def get_localized_string(self, id_):
         """
         Get localized UI string
@@ -274,7 +284,7 @@ class Addon(object):
         :param id_: UI string ID
         :type id_: int
         :return: UI string in the current language
-        :rtype: unicode
+        :rtype: str
         """
         return self._addon.getLocalizedString(id_).encode('utf-8')
 
@@ -327,7 +337,7 @@ class Addon(object):
             value = str(value)
         self._addon.setSetting(id_, value)
 
-    def log(self, message, level=0):
+    def log(self, message, level=xbmc.LOGDEBUG):
         """
         Add message to Kodi log starting with Addon ID
 
@@ -339,7 +349,7 @@ class Addon(object):
         """
         if isinstance(message, unicode):
             message = message.encode('utf-8')
-        xbmc.log('{0}: {1}'.format(self.id, message), level)
+        xbmc.log('{0} [v.{1}]: {2}'.format(self.id, self.version, message), level)
 
     def log_notice(self, message):
         """
