@@ -1,6 +1,9 @@
+2.1.0:
+  - Adds "version" property to Addon class.
+
 2.0.0:
-  - Adds action decorator for defining plugin actions
-  - Adds convenience logging methods
+  - Adds action decorator for defining plugin actions.
+  - Adds convenience logging methods.
 1.11.0:
   - Adds support for setting list item properties.
 1.10.0:
