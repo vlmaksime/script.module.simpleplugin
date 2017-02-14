@@ -112,3 +112,4 @@ _docs/
 *.cmd
 *.zip
 publish.py
+venv/
