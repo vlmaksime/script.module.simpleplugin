@@ -26,7 +26,7 @@ import xbmc
 import xbmcplugin
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'Addon', 'Plugin', 'Params']
+__all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin', 'Params']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode', 'content'])
@@ -70,6 +70,8 @@ class Params(dict):
 
 class Storage(MutableMapping):
     """
+    Storage(storage_dir, filename='storage.pcl')
+
     Persistent storage for arbitrary data with a dictionary-like interface
 
     It is designed as a context manager and better be used
@@ -161,6 +163,60 @@ class Storage(MutableMapping):
         :rtype: dict
         """
         return deepcopy(self._storage)
+
+
+class MemStorage(object):
+    """
+    MemStorage(storage_id)
+
+    :param storage_id: ID of this storage instance
+    :type storage_id: str
+
+    In-memory storage with dict-like interface
+
+    The data is stored in the Kodi core so contents of a MemStorage instance
+    with the same ID can be shared between different Python processes.
+
+    .. note:: Keys are case-insensitive
+    """
+    def __init__(self, storage_id):
+        self._id = storage_id
+        self._window = xbmcgui.Window(10000)
+
+    def _check_key(self, key):
+        if not isinstance(key, str):
+            raise TypeError('Storage key must be of str type!')
+
+    def __getitem__(self, key):
+        self._check_key(key)
+        full_key = '{0}__{1}'.format(self._id, key)
+        raw_item = self._window.getProperty(full_key)
+        if raw_item:
+            return pickle.loads(raw_item)
+        else:
+            raise KeyError(key)
+
+    def __setitem__(self, key, value):
+        self._check_key(key)
+        full_key = '{0}__{1}'.format(self._id, key)
+        self._window.setProperty(full_key, pickle.dumps(value))
+
+    def __delitem__(self, key):
+        self._check_key(key)
+        full_key = '{0}__{1}'.format(self._id, key)
+        item = self._window.getProperty(full_key)
+        if item:
+            self._window.setProperty(full_key, '')
+        else:
+            raise KeyError(key)
+
+    def __contains__(self, key):
+        self._check_key(key)
+        full_key = '{0}__{1}'.format(self._id, key)
+        item = self._window.getProperty(full_key)
+        if item:
+            return True
+        return False
 
 
 class Addon(object):

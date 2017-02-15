@@ -9,6 +9,7 @@ import unittest
 import shutil
 import time
 from datetime import datetime
+from collections import defaultdict
 import mock
 
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +20,7 @@ configdir = os.path.join(cwd, 'config')
 
 def fake_translate_path(path):
     return path
+
 
 def test_generator():
     for i in xrange(6):
@@ -47,6 +49,17 @@ class FakeAddon(object):
     def getLocalizedString(self, id_):
         return {32000: u'Привет, мир!', 32001: u'Я тебя люблю.'}[id_]
 
+
+class FakeWindow(object):
+    def __init__(self, id_=-1):
+        self._contents = defaultdict(str)
+
+    def getProperty(self, key):
+        return self._contents[key]
+
+    def setProperty(self, key, value):
+        self._contents[key] = value
+
 # Mock Kodi Python API
 
 mock_xbmcaddon = mock.MagicMock()
@@ -62,6 +75,7 @@ mock_xbmcplugin = mock.MagicMock()
 mock_xbmcgui = mock.MagicMock()
 mock_ListItem = mock.MagicMock()
 mock_xbmcgui.ListItem.return_value = mock_ListItem
+mock_xbmcgui.Window = FakeWindow
 
 sys.modules['xbmcaddon'] = mock_xbmcaddon
 sys.modules['xbmc'] = mock_xbmc
@@ -70,7 +84,7 @@ sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin', 'libs'))
-from simpleplugin import Storage, Addon, Plugin, SimplePluginError, ListContext, PlayContext
+from simpleplugin import Storage, Addon, Plugin, SimplePluginError, ListContext, PlayContext, MemStorage
 
 
 # Begin tests
@@ -114,6 +128,22 @@ class StorageTestCase(unittest.TestCase):
                 self.assertEqual(key, value)
                 i += 1
             self.assertEqual(i, 3)
+
+
+class MemStorageTestCase(unittest.TestCase):
+    def test_mem_storage(self):
+        storage = MemStorage('foo')
+        storage['ham'] = 'spam'
+        self.assertEqual(storage['ham'], 'spam')
+        self.assertTrue('ham' in storage)
+        del storage['ham']
+        self.assertFalse('ham' in storage)
+        self.assertRaises(KeyError, storage.__getitem__, 'bar')
+        self.assertRaises(KeyError, storage.__delitem__, 'bar')
+        self.assertRaises(TypeError, storage.__getitem__, 5)
+        self.assertRaises(TypeError, storage.__setitem__, 5, 5)
+        self.assertRaises(TypeError, storage.__delitem__, 5)
+        self.assertRaises(TypeError, storage.__contains__, 5)
 
 
 class AddonTestCase(unittest.TestCase):
