@@ -171,6 +171,9 @@ class MemStorage(object):
 
     :param storage_id: ID of this storage instance
     :type storage_id: str
+    :param window_id: the ID of a Kodi Window object where storage contents
+        will be stored.
+    :type window_id: int
 
     In-memory storage with dict-like interface
 
@@ -179,9 +182,9 @@ class MemStorage(object):
 
     .. note:: Keys are case-insensitive
     """
-    def __init__(self, storage_id):
+    def __init__(self, storage_id, window_id=10000):
         self._id = storage_id
-        self._window = xbmcgui.Window(10000)
+        self._window = xbmcgui.Window(window_id)
 
     def _check_key(self, key):
         if not isinstance(key, str):
@@ -463,6 +466,36 @@ class Addon(object):
         :rtype: Storage
         """
         return Storage(self.config_dir, filename)
+
+    def get_mem_storage(self, storage_id='', window_id=10000):
+        """
+        Creates an in-memory storage for this addon with :class:`dict`-like
+        interface
+
+        The storage can store picklable Python objects as long as
+        Kodi is running and storage contents can be shared between
+        Python processes. Different addons have separate storages,
+        so storages with the same names created with this method
+        do not conflict.
+
+        Example::
+
+            addon = Addon()
+            storage = addon.get_mem_storage()
+            foo = storage['foo']
+            storage['bar'] = bar
+
+        :param storage_id: optional storage ID (case-insensitive).
+        :type storage_id: str
+        :param window_id: the ID of a Kodi Window object where storage contents
+            will be stored.
+        :type window_id: int
+        :return: in-memory storage for this addon
+        :rtype: MemStorage
+        """
+        if storage_id:
+            storage_id = '{0}_{1}'.format(self.id, storage_id)
+        return MemStorage(storage_id, window_id)
 
     def cached(self, duration=10):
         """
