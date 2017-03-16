@@ -514,6 +514,8 @@ class Addon(object):
         :type duration: int
         :raises ValueError: if duration is zero or negative
         """
+        if duration <= 0:
+            raise ValueError('Caching duration cannot be zero or negative!')
         def outer_wrapper(func):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -522,10 +524,8 @@ class Addon(object):
                     key = func.__name__ + str(args) + str(kwargs)
                     try:
                         data, timestamp = cache[key]
-                        if duration > 0 and current_time - timestamp > timedelta(minutes=duration):
+                        if current_time - timestamp > timedelta(minutes=duration):
                             raise KeyError
-                        elif duration <= 0:
-                            raise ValueError('Caching duration cannot be zero or negative!')
                         self.log_debug('Cache hit: {0}'.format(key))
                     except KeyError:
                         self.log_debug('Cache miss: {0}'.format(key))
