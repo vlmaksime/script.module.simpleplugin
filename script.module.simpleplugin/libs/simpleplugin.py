@@ -497,6 +497,32 @@ class Addon(object):
             storage_id = '{0}_{1}'.format(self.id, storage_id)
         return MemStorage(storage_id, window_id)
 
+    def _get_cached_data(self, cache, func, duration, *args, **kwargs):
+        """
+        Get data from a cache object
+
+        :param cache: cache object
+        :param func: function to cache
+        :param duration: cache duration
+        :param args: function args
+        :param kwargs: function kwargs
+        :return: function return data
+        """
+        if duration <= 0:
+            raise ValueError('Caching duration cannot be zero or negative!')
+        current_time = datetime.now()
+        key = func.__name__ + str(args) + str(kwargs)
+        try:
+            data, timestamp = cache[key]
+            if current_time - timestamp > timedelta(minutes=duration):
+                raise KeyError
+            self.log_debug('Cache hit: {0}'.format(key))
+        except KeyError:
+            self.log_debug('Cache miss: {0}'.format(key))
+            data = func(*args, **kwargs)
+            cache[key] = (data, current_time)
+        return data
+
     def cached(self, duration=10):
         """
         Cached decorator
@@ -514,24 +540,34 @@ class Addon(object):
         :type duration: int
         :raises ValueError: if duration is zero or negative
         """
-        if duration <= 0:
-            raise ValueError('Caching duration cannot be zero or negative!')
         def outer_wrapper(func):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 with self.get_storage('__cache__.pcl') as cache:
-                    current_time = datetime.now()
-                    key = func.__name__ + str(args) + str(kwargs)
-                    try:
-                        data, timestamp = cache[key]
-                        if current_time - timestamp > timedelta(minutes=duration):
-                            raise KeyError
-                        self.log_debug('Cache hit: {0}'.format(key))
-                    except KeyError:
-                        self.log_debug('Cache miss: {0}'.format(key))
-                        data = func(*args, **kwargs)
-                        cache[key] = (data, current_time)
-                return data
+                    return self._get_cached_data(cache, func, duration, *args, **kwargs)
+            return inner_wrapper
+        return outer_wrapper
+
+    def mem_cached(self, duration=10):
+        """
+        In-memory cache decorator
+
+        Usage::
+
+            @plugin.mem_cached(30)
+            def my_func(*args, **kwargs):
+                # Do some stuff
+                return value
+
+        :param duration: caching duration in min (positive values only)
+        :type duration: int
+        :raises ValueError: if duration is zero or negative
+        """
+        def outer_wrapper(func):
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                cache = self.get_mem_storage('***cache***')
+                return self._get_cached_data(cache, func, duration, *args, **kwargs)
             return inner_wrapper
         return outer_wrapper
 

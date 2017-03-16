@@ -3,6 +3,7 @@
 # Created on: 27.01.2016
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
 
+from __future__ import print_function
 import os
 import sys
 import unittest
@@ -202,6 +203,19 @@ class AddonTestCase(unittest.TestCase):
         time.sleep(0.5)
         self.assertEqual(tester('arg1'), test1)
         self.assertNotEqual(tester('arg2'), test1)
+
+    def test_mem_cached_decorator(self):
+        with mock.patch.object(Addon, 'get_mem_storage', return_value={}):
+            addon = Addon()
+
+            @addon.mem_cached()
+            def tester(*args):
+                return str(datetime.now())
+
+            test1 = tester('arg1')
+            time.sleep(0.5)
+            self.assertEqual(tester('arg1'), test1)
+            self.assertNotEqual(tester('arg2'), test1)
 
     def test_icon_fanart_properties(self):
         addon = Addon()
