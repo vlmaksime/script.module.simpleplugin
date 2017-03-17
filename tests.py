@@ -267,11 +267,9 @@ class PluginTestCase(unittest.TestCase):
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '']):
             mock_actions.root.return_value = [{'label': 'root'}]
             plugin.actions['root'] = mock_actions.root
-            plugin.run(category='Foo')
+            plugin.run()
             mock_actions.root.assert_called_with({})
             plugin.create_listing.assert_called_with([{'label': 'root'}])
-            # Test setting plugin category
-            mock_xbmcplugin.setPluginCategory.assert_called_with(1, 'Foo')
         # Test calling a child action returning list or generator
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo&param=bar']):
             plugin.create_listing.reset_mock()
@@ -306,7 +304,8 @@ class PluginTestCase(unittest.TestCase):
                 True,
                 (0,),
                 50,
-                'movies'
+                'movies',
+                'Comedy'
             )
 
             mock_actions.dict_listing.return_value = list_context
@@ -375,7 +374,8 @@ class PluginTestCase(unittest.TestCase):
             True,
             (0,),
             50,
-            'movies'
+            'movies',
+            'Action',
         )
         plugin = Plugin('test.plugin')
         plugin._handle = 1
@@ -398,7 +398,8 @@ class PluginTestCase(unittest.TestCase):
             True,
             (0,),
             50,
-            'movies'
+            'movies',
+            'Action'
         )
         list_item2 = mock.MagicMock()
         plugin.create_list_item.return_value = list_item2
@@ -417,7 +418,8 @@ class PluginTestCase(unittest.TestCase):
             True,
             (0,),
             50,
-            'movies'
+            'movies',
+            'Action'
         )
         plugin._add_directory_items(context3)
         list_item2.setProperty.assert_called_with('IsPlayable', 'true')

@@ -28,8 +28,10 @@ import xbmcgui
 
 __all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin', 'Params']
 
-ListContext = namedtuple('ListContext', ['listing', 'succeeded', 'update_listing', 'cache_to_disk',
-                                         'sort_methods', 'view_mode', 'content'])
+ListContext = namedtuple('ListContext', ['listing', 'succeeded',
+                                         'update_listing', 'cache_to_disk',
+                                         'sort_methods', 'view_mode',
+                                         'content', 'category'])
 PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
 
 
@@ -587,7 +589,7 @@ class Addon(object):
         :type ui_string: str
         :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
-        :raises simpleplugin.SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
+        :raises SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
             or if a string is not found in English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
@@ -627,7 +629,7 @@ class Addon(object):
         with localized versions if these strings are translated.
 
         :return: :meth:`Addon.gettext` method object
-        :raises simpleplugin.SimplePluginError: if the addon's English :file:`strings.po` file is missing
+        :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):
@@ -868,7 +870,7 @@ class Plugin(Addon):
 
         :param name: action's name (optional).
         :type name: str
-        :raises simpleplugin.SimplePluginError: if the action with such name is already defined.
+        :raises SimplePluginError: if the action with such name is already defined.
         """
         def wrap(func, name=name):
             if name is None:
@@ -879,18 +881,13 @@ class Plugin(Addon):
             return func
         return wrap
 
-    def run(self, category=''):
+    def run(self):
         """
         Run plugin
 
-        :param category: str - plugin sub-category, e.g. 'Comedy'.
-            See :func:`xbmcplugin.setPluginCategory` for more info.
-        :type category: str
-        :raises simpleplugin.SimplePluginError: if unknown action string is provided.
+        :raises SimplePluginError: if unknown action string is provided.
         """
         self._handle = int(sys.argv[1])
-        if category:
-            xbmcplugin.setPluginCategory(self._handle, category)
         params = self.get_params(sys.argv[2][1:])
         action = params.get('action', 'root')
         self.log_debug(str(self))
@@ -916,7 +913,7 @@ class Plugin(Addon):
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
-                       view_mode=None, content=None):
+                       view_mode=None, content=None, category=None):
         """
         Create and return a context dict for a virtual folder listing
 
@@ -936,11 +933,15 @@ class Plugin(Addon):
         :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
             See :func:`xbmcplugin.setContent` for more info.
         :type content: str
+        :param category: str - plugin sub-category, e.g. 'Comedy'.
+            See :func:`xbmcplugin.setPluginCategory` for more info.
+        :type category: str
         :return: context object containing necessary parameters
             to create virtual folder listing in Kodi UI.
         :rtype: ListContext
         """
-        return ListContext(listing, succeeded, update_listing, cache_to_disk, sort_methods, view_mode, content)
+        return ListContext(listing, succeeded, update_listing, cache_to_disk,
+                           sort_methods, view_mode, content, category)
 
     @staticmethod
     def resolve_url(path='', play_item=None, succeeded=True):
@@ -1012,6 +1013,8 @@ class Plugin(Addon):
         :type context: ListContext
         """
         self.log_debug('Creating listing from {0}'.format(str(context)))
+        if context.category is not None:
+            xbmcplugin.setPluginCategory(self._handle, context.category)
         if context.content is not None:
             xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
         for item in context.listing:
