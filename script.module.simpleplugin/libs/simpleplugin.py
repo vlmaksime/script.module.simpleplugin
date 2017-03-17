@@ -802,6 +802,7 @@ class Plugin(Addon):
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
+        self._params = None
         self.actions = {}
 
     def __str__(self):
@@ -809,6 +810,18 @@ class Plugin(Addon):
 
     def __repr__(self):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
+
+    @property
+    def params(self):
+        """
+        Get parsed plugin call parameters passed as a query string
+
+        .. note:: Before calling :meth:`Plugin.run` it returns ``None``.
+
+        :return: parsed parameters
+        :rtype: Params
+        """
+        return self._params
 
     @staticmethod
     def get_params(paramstring):
@@ -895,17 +908,19 @@ class Plugin(Addon):
                 'Use "category" parameter of Plugin.create_listing() instead.'
             )
         self._handle = int(sys.argv[1])
-        params = self.get_params(sys.argv[2][1:])
-        action = params.get('action', 'root')
+        self._params = self.get_params(sys.argv[2][1:])
+        action = self.params.get('action', 'root')
         self.log_debug(str(self))
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
-        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(params)))
+        self.log_debug('Called action "{0}" with params "{1}"'.format(
+            action, str(self._params))
+        )
         try:
             action_callable = self.actions[action]
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
-            result = action_callable(params)
+            result = action_callable(self._params)
             self.log_debug('Action return value: {0}'.format(str(result)))
             if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
