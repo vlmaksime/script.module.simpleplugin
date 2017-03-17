@@ -1011,6 +1011,7 @@ class Plugin(Addon):
 
         :param context: context object
         :type context: ListContext
+        :raises SimplePluginError: if sort_methods parameter is not int, tuple or list
         """
         self.log_debug('Creating listing from {0}'.format(str(context)))
         if context.category is not None:
@@ -1028,7 +1029,13 @@ class Plugin(Addon):
                     is_folder = False
             xbmcplugin.addDirectoryItem(self._handle, item['url'], list_item, is_folder)
         if context.sort_methods is not None:
-            [xbmcplugin.addSortMethod(self._handle, method) for method in context.sort_methods]
+            if isinstance(context.sort_methods, int):
+                xbmcplugin.addSortMethod(self._handle, context.sort_methods)
+            elif isinstance(context.sort_methods, (tuple, list)):
+                [xbmcplugin.addSortMethod(self._handle, method) for method in context.sort_methods]
+            else:
+                raise SimplePluginError(
+                    'sort_methods parameter must be of int, tuple or list type!')
         xbmcplugin.endOfDirectory(self._handle,
                                   context.succeeded,
                                   context.update_listing,
