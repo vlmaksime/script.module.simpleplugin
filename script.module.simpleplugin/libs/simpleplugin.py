@@ -883,12 +883,17 @@ class Plugin(Addon):
             return func
         return wrap
 
-    def run(self):
+    def run(self, category=None):
         """
         Run plugin
 
         :raises SimplePluginError: if unknown action string is provided.
         """
+        if category:
+            self.log_warning(
+                'Depreciation warning: Plugin category is no longer set via Plugin.run(). '
+                'Use "category" parameter of Plugin.create_listing() instead.'
+            )
         self._handle = int(sys.argv[1])
         params = self.get_params(sys.argv[2][1:])
         action = params.get('action', 'root')
