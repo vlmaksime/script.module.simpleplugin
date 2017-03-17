@@ -753,6 +753,8 @@ class Plugin(Addon):
       except for ``'url'`` and ``'is_folder'``, are ignored.
     - properties -- a dictionary of list item properties
       (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
+    - cast -- a list of cast info (actors, roles, thumbnails) for the list item
+      (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
 
     Example 3::
 
@@ -976,7 +978,8 @@ class Plugin(Addon):
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
                                      path=item.get('path', ''))
-        if int(xbmc.getInfoLabel('System.BuildVersion')[:2]) >= 16:
+        major_version = xbmc.getInfoLabel('System.BuildVersion')[:2]
+        if major_version >= '16':
             art = item.get('art', {})
             art['thumb'] = item.get('thumb', '')
             art['icon'] = item.get('icon', '')
@@ -986,6 +989,10 @@ class Plugin(Addon):
             list_item.setThumbnailImage(item.get('thumb', ''))
             list_item.setIconImage(item.get('icon', ''))
             list_item.setProperty('fanart_image', item.get('fanart', ''))
+        if major_version >= '17':
+            cast = item.get('cast')
+            if cast is not None:
+                list_item.setCast(cast)
         if item.get('art'):
             list_item.setArt(item['art'])
         if item.get('stream_info'):
