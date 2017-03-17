@@ -11,6 +11,7 @@ SimplePlugin micro-framework for Kodi content plugins
 import os
 import sys
 import re
+import inspect
 from datetime import datetime, timedelta
 import cPickle as pickle
 from urlparse import parse_qs
@@ -920,7 +921,11 @@ class Plugin(Addon):
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
-            result = action_callable(self._params)
+            # inspect.isfunction is needed for tests
+            if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
+                result = action_callable()
+            else:
+                result = action_callable(self._params)
             self.log_debug('Action return value: {0}'.format(str(result)))
             if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
