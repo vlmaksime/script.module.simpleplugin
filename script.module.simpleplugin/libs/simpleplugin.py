@@ -907,9 +907,9 @@ class Plugin(Addon):
                 self._add_directory_items(self.create_listing(result))
             elif isinstance(result, basestring):
                 self._set_resolved_url(self.resolve_url(result))
-            elif isinstance(result, tuple) and hasattr(result, 'listing'):
+            elif isinstance(result, ListContext):
                 self._add_directory_items(result)
-            elif isinstance(result, tuple) and hasattr(result, 'path'):
+            elif isinstance(result, PlayContext):
                 self._set_resolved_url(result)
             else:
                 self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
