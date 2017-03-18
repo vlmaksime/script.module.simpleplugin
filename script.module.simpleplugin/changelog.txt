@@ -1,28 +1,31 @@
+2.2.0:
+  - Added "debug_exception" diagnostic function.
+  - Action parameters are now optional.
+  - Plugin category is now set via Plugin.create_listing method.
 2.1.0:
-  - Adds "version" property to Addon class.
-
+  - Added "version" property to Addon class.
 2.0.0:
-  - Adds action decorator for defining plugin actions.
-  - Adds convenience logging methods.
+  - Added action decorator for defining plugin actions.
+  - Added convenience logging methods.
 1.11.0:
-  - Adds support for setting list item properties.
+  - Added support for setting list item properties.
 1.10.0:
-  - Adds support for generators as action return values.
+  - Added support for generators as action return values.
   - Various internal changes.
 1.9.1:
-  - Fixes paramstring encoding for lists as parameters.
+  - Fixed paramstring encoding for lists as parameters.
 1.9.0:
-  - Removes support for replacing context menu because of depreciation of the respective feature in Kodi.
+  - Removed support for replacing context menu because of depreciation of the respective feature in Kodi.
 1.8.0:
-  - Adds GNU Gettext emulation.
+  - Added GNU Gettext emulation.
 1.7.0:
   - Storage contents are not saved to disk if the contents haven't been changed.
   - Storage class inherits from collections.MutableMapping.
 1.6.8:
-  - Adds functools.wraps to cached decorator.
+  - Added functools.wraps to cached decorator.
 1.6.6:
   - Added GPLv3 license and this changelog.
 1.6.5:
-  - Implements Travis CI.
+  - Implemented Travis CI.
 1.6.0:
-  - Adds support for list_item graphics processing according to Kodi Jarvis Python API changes.
+  - Added support for list_item graphics processing according to Kodi Jarvis Python API changes.
