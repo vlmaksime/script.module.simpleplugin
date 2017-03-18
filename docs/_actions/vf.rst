@@ -38,6 +38,8 @@ Each virtual folder item is a :class:`dict` that can have the following properti
   properties by yourself. If **list_item** property is present, all other properties,
   except for **url** and **is_folder**, are ignored.
 * **properties** -- a :class:`dict` of list item properties (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
+* **cast** -- a list of cast info (actors, roles, thumbnails) for the list item
+  (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
 
 An example of a listing that contains 1 item::
 
