@@ -22,12 +22,15 @@ from copy import deepcopy
 from types import GeneratorType
 from hashlib import md5
 from shutil import move
+from contextlib import contextmanager
+from pprint import pformat
 import xbmcaddon
 import xbmc
 import xbmcplugin
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin', 'Params']
+__all__ = ['SimplePluginError', 'Storage', 'MemStorage',
+           'Addon', 'Plugin', 'Params', 'debug_exception']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded',
                                          'update_listing', 'cache_to_disk',
@@ -39,6 +42,71 @@ PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
 class SimplePluginError(Exception):
     """Custom exception"""
     pass
+
+
+def _format_vars(variables):
+    """
+    Format variables dictionary
+
+    :param variables: variables dict
+    :type variables: dict
+    :return: formatted string with sorted ``var = val`` pairs
+    :rtype: str
+    """
+    var_list = [(var, val) for var, val in variables.iteritems()]
+    lines = []
+    for var, val in sorted(var_list, key=lambda i: i[0]):
+        if not (var.startswith('__') or var.endswith('__')):
+            lines.append('{0} = {1}'.format(var, pformat(val)))
+    return '\n'.join(lines)
+
+
+@contextmanager
+def debug_exception(logger=None):
+    """
+    Diagnostic helper context manager
+
+    It controls execution within its context and writes extended
+    diagnostic info to the Kodi log if an unhandled exception
+    happens within the context. The info includes the following items:
+
+    - Module path.
+    - Code context.
+    - Global variables.
+    - Local variables.
+
+    After logging the diagnostic info the exception is re-raised.
+
+    Example::
+
+        with debug_exception():
+            # Some risky code
+            raise RuntimeError('Fatal error!')
+
+    :param logger: logger function which must accept a single argument
+        which is a log message. By default it is :func:`xbmc.log`
+        with ``ERROR`` level.
+    """
+    try:
+        yield
+    except:
+        if logger is None:
+            logger = lambda msg: xbmc.log(msg, xbmc.LOGERROR)
+        logger('Unhandled exception detected!')
+        logger('*** Start diagnostic info ***')
+        frame_info = inspect.trace(5)[-1]
+        logger('File: {0}'.format(frame_info[1]))
+        context = ''
+        for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
+            if i == frame_info[2]:
+                context += '{0}:>{1}'.format(str(i).rjust(5), line)
+            else:
+                context += '{0}: {1}'.format(str(i).rjust(5), line)
+        logger('Code context:\n' + context)
+        logger('Global variables:\n' + _format_vars(frame_info[0].f_globals))
+        logger('Local variables:\n' + _format_vars(frame_info[0].f_locals))
+        logger('**** End diagnostic info ****')
+        raise
 
 
 class Params(dict):
@@ -908,22 +976,23 @@ class Plugin(Addon):
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
-            # inspect.isfunction is needed for tests
-            if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
-                result = action_callable()
-            else:
-                result = action_callable(params)
-            self.log_debug('Action return value: {0}'.format(str(result)))
-            if isinstance(result, (list, GeneratorType)):
-                self._add_directory_items(self.create_listing(result))
-            elif isinstance(result, basestring):
-                self._set_resolved_url(self.resolve_url(result))
-            elif isinstance(result, ListContext):
-                self._add_directory_items(result)
-            elif isinstance(result, PlayContext):
-                self._set_resolved_url(result)
-            else:
-                self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
+            with debug_exception(self.log_error):
+                # inspect.isfunction is needed for tests
+                if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
+                    result = action_callable()
+                else:
+                    result = action_callable(params)
+                self.log_debug('Action return value: {0}'.format(str(result)))
+                if isinstance(result, (list, GeneratorType)):
+                    self._add_directory_items(self.create_listing(result))
+                elif isinstance(result, basestring):
+                    self._set_resolved_url(self.resolve_url(result))
+                elif isinstance(result, ListContext):
+                    self._add_directory_items(result)
+                elif isinstance(result, PlayContext):
+                    self._set_resolved_url(result)
+                else:
+                    self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
