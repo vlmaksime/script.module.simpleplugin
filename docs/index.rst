@@ -34,6 +34,7 @@ Contents:
   settings
   gettext
   log
+  debug
   using
   api
   links

@@ -20,7 +20,7 @@ Example:
   plugin = Plugin()
 
   @plugin.action()
-  def root(params):
+  def root():
       # Do some things
       ...
       return listing
@@ -38,7 +38,7 @@ The "root" action is mandatory, that is, a SimplePlugin-based plugin **must** ha
 
 .. warning::  Actions must have unique names!
 
-An action callable automatically receives ``params`` parameter which is a :class:`Params <simpleplugin.Params>`
+An action callable may take an optional ``params`` parameter which is a :class:`Params <simpleplugin.Params>`
 instance containing parsed plugin callback parameters. Parameters can be accessed either by keys
 as in a :class:`dict` or as instance properties, for example:
 
@@ -49,8 +49,7 @@ as in a :class:`dict` or as instance properties, for example:
       foo = params['foo']  # Access by key
       bar = params.bar  # Access though property. Both variants are equal.
 
-.. note:: An action always receives ``params`` parameter even it does not use it.
-    If ``params`` is missing from an action signature, a plugin will raise an exception.
+If an action does not use ``params`` parameter it can be omitted.
 
 Kodi supports 3 types of actions:
 
