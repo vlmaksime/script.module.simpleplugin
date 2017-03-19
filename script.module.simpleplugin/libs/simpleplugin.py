@@ -976,23 +976,22 @@ class Plugin(Addon):
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
-            with debug_exception(self.log_error):
-                # inspect.isfunction is needed for tests
-                if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
-                    result = action_callable()
-                else:
-                    result = action_callable(params)
-                self.log_debug('Action return value: {0}'.format(str(result)))
-                if isinstance(result, (list, GeneratorType)):
-                    self._add_directory_items(self.create_listing(result))
-                elif isinstance(result, basestring):
-                    self._set_resolved_url(self.resolve_url(result))
-                elif isinstance(result, ListContext):
-                    self._add_directory_items(result)
-                elif isinstance(result, PlayContext):
-                    self._set_resolved_url(result)
-                else:
-                    self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
+            # inspect.isfunction is needed for tests
+            if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
+                result = action_callable()
+            else:
+                result = action_callable(params)
+            self.log_debug('Action return value: {0}'.format(str(result)))
+            if isinstance(result, (list, GeneratorType)):
+                self._add_directory_items(self.create_listing(result))
+            elif isinstance(result, basestring):
+                self._set_resolved_url(self.resolve_url(result))
+            elif isinstance(result, ListContext):
+                self._add_directory_items(result)
+            elif isinstance(result, PlayContext):
+                self._set_resolved_url(result)
+            else:
+                self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
