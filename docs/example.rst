@@ -12,7 +12,7 @@ This is a minimal example of a SimplePlugin-based plugin:
   # Free video sample is provided by www.vidsplay.com
 
   @plugin.action()
-  def root(params):
+  def root():
       """
       Root virtual folder
 
@@ -24,7 +24,7 @@ This is a minimal example of a SimplePlugin-based plugin:
 
 
   @plugin.action()
-  def subfolder(params):
+  def subfolder():
       """Virtual subfolder"""
       # Create 1-item list with a link to a playable video.
       return [{'label': 'Ocean Birds',

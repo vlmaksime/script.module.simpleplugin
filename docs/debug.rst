@@ -22,6 +22,21 @@ Usage example:
             # Some error-prone code
             raise RuntimeError('Fatal error!')
 
+The :func:`debug_exception <simplelugin.debug_exception>` context manager takes
+an optional parameter that is a logger function which allows to customize log messages.
+For example:
+
+.. code-block:: python
+
+  from simpleplugin import Plugin, debug_exception
+
+  plugin = Plugin()
+
+  ...
+
+  with debug_exception(plugin.log_error):
+      plugin.run()
+
 Output example::
 
   19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: Unhandled exception detected!
@@ -90,5 +105,3 @@ Output example::
                                               RuntimeError: Fatal error!
                                               -->End of Python script error report<--
 
-The :class:`Plugin <simpleplugin.Plugin>` class uses this context manager
-internally to log diagnostic info about exceptions that happen within actions.
