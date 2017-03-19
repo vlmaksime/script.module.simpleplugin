@@ -759,20 +759,20 @@ class Plugin(Addon):
         plugin = Plugin()
 
         @plugin.action()
-        def root(params):  # Mandatory item!
+        def root():  # Mandatory item!
             return [{'label': 'Foo',
-                    'url': plugin.get_url(action='some_action', param='Foo')},
+                    'url': plugin.get_url(action='some_action', label='Foo')},
                     {'label': 'Bar',
-                    'url': plugin.get_url(action='some_action', param='Bar')}]
+                    'url': plugin.get_url(action='some_action', label='Bar')}]
 
         @plugin.action()
         def some_action(params):
-            return [{'label': params['param']}]
+            return [{'label': params.label]}]
 
         plugin.run()
 
-    An action callable receives 1 parameter -- params.
-    params is a dict-like object containing plugin call parameters (including action string)
+    An action callable may receive 1 optional parameter which is
+    a dict-like object containing plugin call parameters (including action string)
     The action callable can return
     either a list/generator of dictionaries representing Kodi virtual directory items
     or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
