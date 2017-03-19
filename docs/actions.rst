@@ -39,7 +39,7 @@ The "root" action is mandatory, that is, a SimplePlugin-based plugin **must** ha
 .. warning::  Actions must have unique names!
 
 An action callable may take an optional ``params`` parameter which is a :class:`Params <simpleplugin.Params>`
-instance containing parsed plugin callback parameters. Parameters can be accessed either by keys
+instance containing parsed plugin call parameters. Parameters can be accessed either by keys
 as in a :class:`dict` or as instance properties, for example:
 
 .. code-block:: python
@@ -49,7 +49,7 @@ as in a :class:`dict` or as instance properties, for example:
       foo = params['foo']  # Access by key
       bar = params.bar  # Access though property. Both variants are equal.
 
-If an action does not use ``params`` parameter it can be omitted.
+If an action does not use ``params`` parameter, it can be omitted.
 
 Kodi supports 3 types of actions:
 

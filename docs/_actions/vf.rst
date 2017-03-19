@@ -72,7 +72,8 @@ This method can be used to pass additional properties to Kodi.
 * **succeeded**: :class:`bool` -- if ``False`` Kodi won't open a new listing and stays on the current level.
 * **update_listing**: :class:`bool` -- if ``True``, Kodi won't open a sub-listing but refresh the current one.
 * **cache_to_disk**: :class:`bool` -- if ``False``, Kodi won't cache this listing to disk.
-* **sort_methods**: -- a :obj:`tuple` of integer constants representing virtual folder sort methods.
+* **sort_methods**: -- a single :class:`int` constant or a :obj:`tuple` of integer constants
+  representing virtual folder sort methods.
   See :func:`xbmcplugin.addSortMethod` documentation for more info.
 * **view_mode**: :class:`int` -- a numeric code for a skin view mode.
   View mode codes are different in different skins except for ``50`` (basic listing),
