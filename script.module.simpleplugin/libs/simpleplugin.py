@@ -236,7 +236,7 @@ class Storage(MutableMapping):
         return deepcopy(self._storage)
 
 
-class MemStorage(object):
+class MemStorage(MutableMapping):
     """
     MemStorage(storage_id)
 
@@ -252,14 +252,42 @@ class MemStorage(object):
     with the same ID can be shared between different Python processes.
 
     .. note:: Keys are case-insensitive
+
+    .. warning:: :class:`MemStorage` does not allow to modify mutable objects
+        in place! You need to assign them to variables first.
+
+    Example:
+
+    .. code-block:: python
+
+        storage = MemStorage('foo')
+        some_list = storage['bar']
+        some_list.append('spam')
+        storage['bar'] = some_list
     """
     def __init__(self, storage_id, window_id=10000):
         self._id = storage_id
         self._window = xbmcgui.Window(window_id)
+        try:
+            self['__keys__']
+        except KeyError:
+            self['__keys__'] = []
 
     def _check_key(self, key):
         if not isinstance(key, str):
             raise TypeError('Storage key must be of str type!')
+
+    def _format_contents(self):
+        lines = []
+        for key, val in self.iteritems():
+            lines.append('{0}: {1}'.format(repr(key), repr(val)))
+        return ', '.join(lines)
+
+    def __str__(self):
+        return '<MemStorage {{{0}}}>'.format(self._format_contents())
+
+    def __repr__(self):
+        return '<simpleplugin.MemStorage object {{{0}}}'.format(self._format_contents())
 
     def __getitem__(self, key):
         self._check_key(key)
@@ -274,6 +302,10 @@ class MemStorage(object):
         self._check_key(key)
         full_key = '{0}__{1}'.format(self._id, key)
         self._window.setProperty(full_key, pickle.dumps(value))
+        if key != '__keys__':
+            keys = self['__keys__']
+            keys.append(key)
+            self['__keys__'] = keys
 
     def __delitem__(self, key):
         self._check_key(key)
@@ -281,6 +313,10 @@ class MemStorage(object):
         item = self._window.getProperty(full_key)
         if item:
             self._window.setProperty(full_key, '')
+            if key != '__keys__':
+                keys = self['__keys__']
+                keys.remove(key)
+                self['__keys__'] = keys
         else:
             raise KeyError(key)
 
@@ -291,6 +327,12 @@ class MemStorage(object):
         if item:
             return True
         return False
+
+    def __iter__(self):
+        return iter(self['__keys__'])
+
+    def __len__(self):
+        return len(self['__keys__'])
 
 
 class Addon(object):
