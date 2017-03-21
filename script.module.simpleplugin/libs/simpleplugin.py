@@ -1163,7 +1163,7 @@ class Plugin(Addon):
             elif isinstance(context.sort_methods, (tuple, list)):
                 [xbmcplugin.addSortMethod(self._handle, method) for method in context.sort_methods]
             else:
-                raise SimplePluginError(
+                raise TypeError(
                     'sort_methods parameter must be of int, tuple or list type!')
         xbmcplugin.endOfDirectory(self._handle,
                                   context.succeeded,
