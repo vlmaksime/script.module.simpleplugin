@@ -61,6 +61,7 @@ html_theme_options = {
     'travis_button': True,
     'codecov_button': True,
     'description': 'A plugin micro-framework for Kodi mediacenter',
+    'font_family': 'Georgia',
 }
 
 html_sidebars = {
