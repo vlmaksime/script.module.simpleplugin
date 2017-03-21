@@ -4,6 +4,7 @@
   - Plugin category is now set via Plugin.create_listing() method.
   - Added MemStorage class to be used as a temporary in-memory storage
   - Added mem_cached decorator to cache function return data in memory.
+  - Now Params instance attributes return None for missing parameters.
 2.1.0:
   - Added "version" property to Addon class.
 2.0.0:
