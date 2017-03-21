@@ -35,7 +35,7 @@ plugin = Plugin()
 # Free video sample is provided by www.vidsplay.com
 
 @plugin.action()
-def root(params):
+def root():
     """
     Root virtual folder
     
@@ -47,7 +47,7 @@ def root(params):
 
 
 @plugin.action()
-def subfolder(params):
+def subfolder():
     """Virtual subfolder"""
     # Create 1-item list with a link to a playable video.
     return [{'label': 'Ocean Birds',
@@ -56,6 +56,9 @@ def subfolder(params):
             'is_playable': True}]
 
 
+# An action can take an optional argument that contain
+# plugin call parameters parsed into a dict-like object.
+# The params object allows to access parameters by key or by attribute
 @plugin.action()
 def play(params):
     """Play video"""
