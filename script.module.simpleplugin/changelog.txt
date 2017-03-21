@@ -1,7 +1,7 @@
 2.2.0:
-  - Added "debug_exception" diagnostic function.
-  - Action parameters are now optional.
-  - Plugin category is now set via Plugin.create_listing method.
+  - Added "debug_exception" diagnostic context manager.
+  - Action parameters are now optional and can be omitted if an action does not use them.
+  - Plugin category is now set via Plugin.create_listing() method.
   - Added MemStorage class to be used as a temporary in-memory storage
   - Added mem_cached decorator to cache function return data in memory.
 2.1.0:
