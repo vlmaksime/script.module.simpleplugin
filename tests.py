@@ -270,6 +270,11 @@ class PluginTestCase(unittest.TestCase):
             plugin.run()
             mock_actions.root.assert_called_with({})
             plugin.create_listing.assert_called_with([{'label': 'root'}])
+        # Test calling 'root' action with no params
+        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '']):
+            plugin.actions['root'] = lambda: [{'label': 'root'}]
+            plugin.run()
+            plugin.create_listing.assert_called_with([{'label': 'root'}])
         # Test calling a child action returning list or generator
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo&param=bar']):
             plugin.create_listing.reset_mock()
