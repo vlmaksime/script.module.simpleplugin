@@ -240,12 +240,6 @@ class MemStorage(MutableMapping):
     """
     MemStorage(storage_id)
 
-    :param storage_id: ID of this storage instance
-    :type storage_id: str
-    :param window_id: the ID of a Kodi Window object where storage contents
-        will be stored.
-    :type window_id: int
-
     In-memory storage with dict-like interface
 
     The data is stored in the Kodi core so contents of a MemStorage instance
@@ -254,7 +248,8 @@ class MemStorage(MutableMapping):
     .. note:: Keys are case-insensitive
 
     .. warning:: :class:`MemStorage` does not allow to modify mutable objects
-        in place! You need to assign them to variables first.
+        in place! You need to assign them to variables first, modify and
+        store them back to a MemStorage instance.
 
     Example:
 
@@ -264,6 +259,12 @@ class MemStorage(MutableMapping):
         some_list = storage['bar']
         some_list.append('spam')
         storage['bar'] = some_list
+
+    :param storage_id: ID of this storage instance
+    :type storage_id: str
+    :param window_id: the ID of a Kodi Window object where storage contents
+        will be stored.
+    :type window_id: int
     """
     def __init__(self, storage_id, window_id=10000):
         self._id = storage_id

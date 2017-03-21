@@ -2,11 +2,6 @@ simpleplugin
 ============
 
 .. automodule:: simpleplugin
-
-   
-   
-   
-
    
    
    .. rubric:: Classes
@@ -17,9 +12,7 @@ simpleplugin
       Params
       Plugin
       Storage
-   
-   
-
+      MemStorage
    
    
    .. rubric:: Exceptions
@@ -27,5 +20,3 @@ simpleplugin
    .. autosummary::
    
       SimplePluginError
-   
-   
