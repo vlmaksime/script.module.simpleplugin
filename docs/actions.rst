@@ -49,6 +49,9 @@ as in a :class:`dict` or as instance properties, for example:
       foo = params['foo']  # Access by key
       bar = params.bar  # Access though property. Both variants are equal.
 
+.. note:: Accessing a missing parameter by key will raise :exc:`KeyError`,
+  but a property will return ``None`` if a parameter with such name is missing.
+
 If an action does not use ``params`` parameter, it can be omitted.
 
 Kodi supports 3 types of actions:
