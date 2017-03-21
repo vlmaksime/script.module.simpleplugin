@@ -127,10 +127,10 @@ class Params(dict):
             foo = params['foo']  # Access by key
             bar = params.bar  # Access through property. Both variants are equal
     """
-    def __getattr__(self, item):
-        if item not in self:
-            raise AttributeError('Invalid parameter: "{0}"!'.format(item))
-        return self[item]
+    def __getattr__(self, key):
+        if key not in self:
+            raise AttributeError('Invalid parameter: "{0}"!'.format(key))
+        return self[key]
 
     def __str__(self):
         return '<Params {0}>'.format(super(Params, self).__repr__())
@@ -180,7 +180,7 @@ class Storage(MutableMapping):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, t, v, tb):
         self.flush()
 
     def __getitem__(self, key):
@@ -193,7 +193,7 @@ class Storage(MutableMapping):
         del self._storage[key]
 
     def __iter__(self):
-        return self._storage.__iter__()
+        return iter(self._storage)
 
     def __len__(self):
         return len(self._storage)
