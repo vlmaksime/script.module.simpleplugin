@@ -118,6 +118,8 @@ class Params(dict):
     Parameters can be accessed both through :class:`dict` keys and
     instance properties.
 
+    .. note:: For a missing parameter an instance property returns ``None``.
+
     Example:
 
     .. code-block:: python
@@ -128,9 +130,7 @@ class Params(dict):
             bar = params.bar  # Access through property. Both variants are equal
     """
     def __getattr__(self, key):
-        if key not in self:
-            raise AttributeError('Invalid parameter: "{0}"!'.format(key))
-        return self[key]
+        return self.get(key)
 
     def __str__(self):
         return '<Params {0}>'.format(super(Params, self).__repr__())
