@@ -34,7 +34,7 @@ deploy:
   # Publish docs to GH Pages
   - provider: script
     skip_cleanup: true
-    script: python deploy_addon.py -d
+    script: python deploy_addon.py -d --debug
     on:
       branch: master
       python: "2.7"
