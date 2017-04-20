@@ -313,7 +313,7 @@ class MemStorage(MutableMapping):
         full_key = '{0}__{1}'.format(self._id, key)
         item = self._window.getProperty(full_key)
         if item:
-            self._window.setProperty(full_key, '')
+            self._window.clearProperty(full_key)
             if key != '__keys__':
                 keys = self['__keys__']
                 keys.remove(key)

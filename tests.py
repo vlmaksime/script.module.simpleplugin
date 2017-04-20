@@ -61,6 +61,9 @@ class FakeWindow(object):
     def setProperty(self, key, value):
         self._contents[key] = value
 
+    def clearProperty(self, key):
+        del self._contents[key]
+
 # Mock Kodi Python API
 
 mock_xbmcaddon = mock.MagicMock()
