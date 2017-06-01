@@ -744,6 +744,8 @@ class Addon(object):
         :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
+        if not os.path.exists(strings_po):
+            strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
@@ -762,7 +764,9 @@ class Addon(object):
                 else:
                     self._ui_strings_map = deepcopy(ui_strings_map)
         else:
-            raise SimplePluginError('Unable to initialize localization because of missing English strings.po!')
+            raise SimplePluginError(
+                'Unable to initialize localization because of missing English localization file: {0}'.format(strings_po)
+            )
         return self.gettext
 
     def _parse_po(self, strings):
