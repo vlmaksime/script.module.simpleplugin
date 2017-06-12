@@ -867,6 +867,8 @@ class Plugin(Addon):
       (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
     - cast -- a list of cast info (actors, roles, thumbnails) for the list item
       (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
+    - offscreen -- if ``True`` do not lock GUI (used for Python scrapers and subtitle plugins) --
+      optional.
 
     Example 3::
 
@@ -1098,10 +1100,16 @@ class Plugin(Addon):
         :return: ListItem instance
         :rtype: xbmcgui.ListItem
         """
-        list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                     label2=item.get('label2', ''),
-                                     path=item.get('path', ''))
         major_version = xbmc.getInfoLabel('System.BuildVersion')[:2]
+        if major_version >= '18':
+            list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                         label2=item.get('label2', ''),
+                                         path=item.get('path', ''),
+                                         offscreen=item.get('offscreen', False))
+        else:
+            list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                         label2=item.get('label2', ''),
+                                         path=item.get('path', ''))
         if major_version >= '16':
             art = item.get('art', {})
             art['thumb'] = item.get('thumb', '')
