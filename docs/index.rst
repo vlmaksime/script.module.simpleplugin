@@ -36,6 +36,7 @@ Contents:
   log
   debug
   using
+  scrapers
   api
   links
 
