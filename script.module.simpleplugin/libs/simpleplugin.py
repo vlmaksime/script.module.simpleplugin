@@ -743,7 +743,9 @@ class Addon(object):
         :return: :meth:`Addon.gettext` method object
         :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
-        strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
+        strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
+        if not os.path.exists(strings_po):
+            strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
