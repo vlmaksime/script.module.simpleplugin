@@ -21,5 +21,11 @@ Alternatively, you can simply include :file:`simpleplugin.py` module into your a
 The module is self-contained and has no external dependencies, except the Python standard library
 and Kodi Python API modules.
 
+If you are developing an addon based on SimplePlugin, you can install ``simpleplugin``
+module into your development virtual environment using pip::
+
+  $ pip install git+https://github.com/romanvm/script.module.simpleplugin.git#egg=SimplePlugin
+
+
 .. _Releases: https://github.com/romanvm/script.module.simpleplugin/releases/latest
 .. _requires: http://kodi.wiki/view/Addon.xml#.3Crequires.3E
