@@ -313,7 +313,7 @@ class MemStorage(MutableMapping):
         full_key = '{0}__{1}'.format(self._id, key)
         item = self._window.getProperty(full_key)
         if item:
-            self._window.setProperty(full_key, '')
+            self._window.clearProperty(full_key)
             if key != '__keys__':
                 keys = self['__keys__']
                 keys.remove(key)
@@ -743,9 +743,9 @@ class Addon(object):
         :return: :meth:`Addon.gettext` method object
         :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
-        strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
+        strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
         if not os.path.exists(strings_po):
-            strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
+            strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
@@ -764,9 +764,7 @@ class Addon(object):
                 else:
                     self._ui_strings_map = deepcopy(ui_strings_map)
         else:
-            raise SimplePluginError(
-                'Unable to initialize localization because of missing English localization file: {0}'.format(strings_po)
-            )
+            raise SimplePluginError('Unable to initialize localization because of missing English strings.po!')
         return self.gettext
 
     def _parse_po(self, strings):
@@ -871,6 +869,8 @@ class Plugin(Addon):
       (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
     - cast -- a list of cast info (actors, roles, thumbnails) for the list item
       (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
+    - offscreen -- if ``True`` do not lock GUI (used for Python scrapers and subtitle plugins) --
+      optional.
 
     Example 3::
 
@@ -1007,7 +1007,7 @@ class Plugin(Addon):
         """
         if category:
             self.log_warning(
-                'Deprecation warning: Plugin category is no longer set via Plugin.run(). '
+                'Depreciation warning: Plugin category is no longer set via Plugin.run(). '
                 'Use "category" parameter of Plugin.create_listing() instead.'
             )
         self._handle = int(sys.argv[1])
@@ -1102,10 +1102,16 @@ class Plugin(Addon):
         :return: ListItem instance
         :rtype: xbmcgui.ListItem
         """
-        list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                     label2=item.get('label2', ''),
-                                     path=item.get('path', ''))
         major_version = xbmc.getInfoLabel('System.BuildVersion')[:2]
+        if major_version >= '18':
+            list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                         label2=item.get('label2', ''),
+                                         path=item.get('path', ''),
+                                         offscreen=item.get('offscreen', False))
+        else:
+            list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                         label2=item.get('label2', ''),
+                                         path=item.get('path', ''))
         if major_version >= '16':
             art = item.get('art', {})
             art['thumb'] = item.get('thumb', '')
@@ -1166,8 +1172,7 @@ class Plugin(Addon):
             if isinstance(context.sort_methods, int):
                 xbmcplugin.addSortMethod(self._handle, context.sort_methods)
             elif isinstance(context.sort_methods, (tuple, list)):
-                for method in context.sort_methods:
-                    xbmcplugin.addSortMethod(self._handle, method)
+                [xbmcplugin.addSortMethod(self._handle, method) for method in context.sort_methods]
             else:
                 raise TypeError(
                     'sort_methods parameter must be of int, tuple or list type!')
