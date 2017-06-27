@@ -871,6 +871,17 @@ class Plugin(Addon):
       (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
     - offscreen -- if ``True`` do not lock GUI (used for Python scrapers and subtitle plugins) --
       optional.
+    - content_lookup -- if ``False``, do not HEAD requests to get mime type. Optional.
+    - online_db_ids -- a :class:`dict` of ``{'label': 'value'}`` pairs representing
+      the item's IDs in popular online databases. Possible labels: 'imdb', 'tvdb',
+      'tmdb', 'anidb', see :meth:`xbmcgui.ListItem.setUniqueIDs`. Optional.
+    - ratings -- a :class:`list` of :class:`dict`s with the following keys:
+      'type' (:class:`str`), 'rating' (:class:`float`),
+      'votes' (:class:`int`, optional), 'defaultt' (:class:`bool`, optional).
+      This list sets item's ratings in popular online databases.
+      Possible types: 'imdb', 'tvdb', tmdb', 'anidb'.
+      See :meth:`xbmcgui.ListItem.setRating`. Optional.
+
 
     Example 3::
 
@@ -1118,6 +1129,9 @@ class Plugin(Addon):
             art['icon'] = item.get('icon', '')
             art['fanart'] = item.get('fanart', '')
             item['art'] = art
+            cont_look = item.get('content_lookup')
+            if cont_look is not None:
+                list_item.setContentLookup(cont_look)
         else:
             list_item.setThumbnailImage(item.get('thumb', ''))
             list_item.setIconImage(item.get('icon', ''))
@@ -1126,6 +1140,13 @@ class Plugin(Addon):
             cast = item.get('cast')
             if cast is not None:
                 list_item.setCast(cast)
+            db_ids = item.get('online_db_ids')
+            if db_ids is not None:
+                list_item.setUniqueIDs(db_ids)
+            ratings = item.get('ratings')
+            if ratings is not None:
+                for item in ratings:
+                    list_item.setRating(**item)
         if item.get('art'):
             list_item.setArt(item['art'])
         if item.get('stream_info'):

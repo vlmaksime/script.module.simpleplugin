@@ -40,6 +40,19 @@ Each virtual folder item is a :class:`dict` that can have the following properti
 * **properties** -- a :class:`dict` of list item properties (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
 * **cast** -- a list of cast info (actors, roles, thumbnails) for the list item
   (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
+* **offscreen** -- if ``True`` do not lock GUI (used for Python scrapers and subtitle plugins) --
+  optional.
+* **content_lookup** -- if ``False``, do not HEAD requests to get mime type. Optional.
+* **online_db_ids** -- a :class:`dict` of ``{'label': 'value'}`` pairs representing
+  the item's IDs in popular online databases. Possible labels: 'imdb', 'tvdb',
+  'tmdb', 'anidb', see :meth:`xbmcgui.ListItem.setUniqueIDs`. Optional.
+* **ratings** -- a :class:`list` of :class:`dict`s with the following keys:
+  'type' (:class:`str`), 'rating' (:class:`float`),
+  'votes' (:class:`int`, optional), 'defaultt' (:class:`bool`, optional).
+  This list sets item's ratings in popular online databases.
+  Possible types: 'imdb', 'tvdb', tmdb', 'anidb'.
+  See :meth:`xbmcgui.ListItem.setRating`. Optional.
+
 
 An example of a listing that contains 1 item::
 
