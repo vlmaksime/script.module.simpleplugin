@@ -1018,7 +1018,7 @@ class Plugin(Addon):
         """
         if category:
             self.log_warning(
-                'Depreciation warning: Plugin category is no longer set via Plugin.run(). '
+                'Deprecation warning: Plugin category is no longer set via Plugin.run(). '
                 'Use "category" parameter of Plugin.create_listing() instead.'
             )
         self._handle = int(sys.argv[1])
