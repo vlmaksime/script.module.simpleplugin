@@ -346,6 +346,17 @@ class PluginTestCase(unittest.TestCase):
             'context_menu': ['item1', 'item2'],
             'subtitles': 'subs.srt',
             'mime': 'video/x-matroska',
+            'content_lookup': True,
+            'cast': [{
+                'name': 'Michael C. Hall',
+                'role': 'Dexter',
+                'thumbnail': '/foo/dexter.jpg'
+            }],
+            'online_db_ids': {'imdb': 'tt12345', 'tvdb': '12345'},
+            'ratings': [
+                {'type': 'imdb', 'rating': 8.8},
+                {'type': 'tvdb', 'rating': 9.9}
+            ]
         }
         mock_xbmc.getInfoLabel.return_value = '15.0'
         Plugin.create_list_item(item)
@@ -360,7 +371,7 @@ class PluginTestCase(unittest.TestCase):
         mock_ListItem.setSubtitles.assert_called_with('subs.srt')
         mock_ListItem.setMimeType.assert_called_with('video/x-matroska')
         # Test for Kodi Jarvis API
-        mock_xbmc.getInfoLabel.return_value = '16.0'
+        mock_xbmc.getInfoLabel.return_value = '18.0'
         mock_ListItem.setArt.reset_mock()
         Plugin.create_list_item(item)
         mock_ListItem.setArt.assert_called_with({'icon': 'icon.png',
