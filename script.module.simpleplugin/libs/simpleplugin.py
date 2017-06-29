@@ -1145,8 +1145,8 @@ class Plugin(Addon):
                 list_item.setUniqueIDs(db_ids)
             ratings = item.get('ratings')
             if ratings is not None:
-                for item in ratings:
-                    list_item.setRating(**item)
+                for rating in ratings:
+                    list_item.setRating(**rating)
         if item.get('art'):
             list_item.setArt(item['art'])
         if item.get('stream_info'):
