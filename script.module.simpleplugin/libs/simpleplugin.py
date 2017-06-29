@@ -71,7 +71,7 @@ def debug_exception(logger=None):
     happens within the context. The info includes the following items:
 
     - Module path.
-    - Code context.
+    - Code fragment where the exception has happened.
     - Global variables.
     - Local variables.
 

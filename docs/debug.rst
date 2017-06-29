@@ -8,7 +8,7 @@ by providing data about execution context at the moment when an exception happen
 The diagnostic info includes the following items:
 
 - Module path.
-- Code context.
+- Code fragment where the exception has happened.
 - Global variables.
 - Local variables.
 
