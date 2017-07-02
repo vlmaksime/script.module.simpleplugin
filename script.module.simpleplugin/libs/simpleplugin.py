@@ -1058,7 +1058,7 @@ class Plugin(Addon):
         Create and return a context dict for a virtual folder listing
 
         :param listing: the list of the plugin virtual folder items
-        :type listing: :class:`list` or :class:`types.GeneratorType`
+        :type listing: list or types.GeneratorType
         :param succeeded: if ``False`` Kodi won't open a new listing and stays on the current level.
         :type succeeded: bool
         :param update_listing: if ``True``, Kodi won't open a sub-listing but refresh the current one.
