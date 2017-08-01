@@ -1136,17 +1136,6 @@ class Plugin(Addon):
             list_item.setThumbnailImage(item.get('thumb', ''))
             list_item.setIconImage(item.get('icon', ''))
             list_item.setProperty('fanart_image', item.get('fanart', ''))
-        if major_version >= '17':
-            cast = item.get('cast')
-            if cast is not None:
-                list_item.setCast(cast)
-            db_ids = item.get('online_db_ids')
-            if db_ids is not None:
-                list_item.setUniqueIDs(db_ids)
-            ratings = item.get('ratings')
-            if ratings is not None:
-                for rating in ratings:
-                    list_item.setRating(**rating)
         if item.get('art'):
             list_item.setArt(item['art'])
         if item.get('stream_info'):
@@ -1164,6 +1153,17 @@ class Plugin(Addon):
         if item.get('properties'):
             for key, value in item['properties'].iteritems():
                 list_item.setProperty(key, value)
+        if major_version >= '17':
+            cast = item.get('cast')
+            if cast is not None:
+                list_item.setCast(cast)
+            db_ids = item.get('online_db_ids')
+            if db_ids is not None:
+                list_item.setUniqueIDs(db_ids)
+            ratings = item.get('ratings')
+            if ratings is not None:
+                for rating in ratings:
+                    list_item.setRating(**rating)
         return list_item
 
     def _add_directory_items(self, context):
