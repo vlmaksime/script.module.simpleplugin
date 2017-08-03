@@ -531,7 +531,7 @@ class Addon(object):
         :param message: message to write to the Kodi log
         :type message: str
         """
-        self.log(message, xbmc.LOGINFO)
+        self.log(message, xbmc.LOGNOTICE)
 
     def log_warning(self, message):
         """
