@@ -165,6 +165,9 @@ class Storage(MutableMapping):
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
         Class constructor
+
+        :type storage_dir: str
+        :type filename: str
         """
         self._storage = {}
         self._hash = None
@@ -267,6 +270,10 @@ class MemStorage(MutableMapping):
     :type window_id: int
     """
     def __init__(self, storage_id, window_id=10000):
+        """
+        :type storage_id: str
+        :type window_id: int
+        """
         self._id = storage_id
         self._window = xbmcgui.Window(window_id)
         try:
@@ -275,10 +282,16 @@ class MemStorage(MutableMapping):
             self['__keys__'] = []
 
     def _check_key(self, key):
+        """
+        :type key: str
+        """
         if not isinstance(key, str):
             raise TypeError('Storage key must be of str type!')
 
     def _format_contents(self):
+        """
+        :rtype: str
+        """
         lines = []
         for key, val in self.iteritems():
             lines.append('{0}: {1}'.format(repr(key), repr(val)))
@@ -348,6 +361,8 @@ class Addon(object):
     def __init__(self, id_=''):
         """
         Class constructor
+
+        :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
@@ -925,17 +940,30 @@ class Plugin(Addon):
     def __init__(self, id_=''):
         """
         Class constructor
+
+        :type id_: str
         """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+        self._params = None
 
     def __str__(self):
         return '<Plugin {0}>'.format(sys.argv)
 
     def __repr__(self):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
+
+    @property
+    def params(self):
+        """
+        Get plugin call parameters
+
+        :return: plugin call parameters
+        :rtype: Params
+        """
+        return self._params
 
     @staticmethod
     def get_params(paramstring):
@@ -1022,12 +1050,12 @@ class Plugin(Addon):
                 'Use "category" parameter of Plugin.create_listing() instead.'
             )
         self._handle = int(sys.argv[1])
-        params = self.get_params(sys.argv[2][1:])
-        action = params.get('action', 'root')
+        self._params = self.get_params(sys.argv[2][1:])
+        action = self._params.get('action', 'root')
         self.log_debug(str(self))
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
         self.log_debug('Called action "{0}" with params "{1}"'.format(
-            action, str(params))
+            action, str(self._params))
         )
         try:
             action_callable = self.actions[action]
@@ -1038,7 +1066,7 @@ class Plugin(Addon):
             if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
                 result = action_callable()
             else:
-                result = action_callable(params)
+                result = action_callable(self._params)
             self.log_debug('Action return value: {0}'.format(str(result)))
             if isinstance(result, (list, GeneratorType)):
                 self._add_directory_items(self.create_listing(result))
