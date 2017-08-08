@@ -11,6 +11,7 @@ import shutil
 import time
 from datetime import datetime
 from collections import defaultdict
+from urllib import quote_plus
 import mock
 
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -614,6 +615,16 @@ class PluginUrlForTestCase(unittest.TestCase):
 
         url = plugin.url_for('test', 'foo', param2='bar', param3='spam', param4='ham')
         self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/?param4=ham')
+
+    def test_building_url_int_float_unicode(self):
+        plugin = RoutedPlugin('test.plugin')
+
+        @plugin.route('/<int:param1>/<float:param2>/<unicode:param3>')
+        def test():
+            pass
+
+        url = plugin.url_for('test', param1=1, param2=3.14, param3=u'Тест')
+        self.assertEqual(url, 'plugin://test.plugin/1/3.14/{0}/'.format(quote_plus(u'Тест'.encode('utf-8'))))
 
 
 if __name__ == '__main__':
