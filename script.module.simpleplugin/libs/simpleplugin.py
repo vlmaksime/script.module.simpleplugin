@@ -67,6 +67,10 @@ def debug_exception(logger=None):
     """
     Diagnostic helper context manager
 
+    :param logger: logger function which must accept a single argument
+        which is a log message. By default it is :func:`xbmc.log`
+        with ``ERROR`` level.
+
     It controls execution within its context and writes extended
     diagnostic info to the Kodi log if an unhandled exception
     happens within the context. The info includes the following items:
@@ -83,10 +87,6 @@ def debug_exception(logger=None):
         with debug_exception():
             # Some risky code
             raise RuntimeError('Fatal error!')
-
-    :param logger: logger function which must accept a single argument
-        which is a log message. By default it is :func:`xbmc.log`
-        with ``ERROR`` level.
     """
     try:
         yield
@@ -246,6 +246,12 @@ class MemStorage(MutableMapping):
 
     In-memory storage with dict-like interface
 
+    :param storage_id: ID of this storage instance
+    :type storage_id: str
+    :param window_id: the ID of a Kodi Window object where storage contents
+        will be stored.
+    :type window_id: int
+
     The data is stored in the Kodi core so contents of a MemStorage instance
     with the same ID can be shared between different Python processes.
 
@@ -263,12 +269,6 @@ class MemStorage(MutableMapping):
         some_list = storage['bar']
         some_list.append('spam')
         storage['bar'] = some_list
-
-    :param storage_id: ID of this storage instance
-    :type storage_id: str
-    :param window_id: the ID of a Kodi Window object where storage contents
-        will be stored.
-    :type window_id: int
     """
     def __init__(self, storage_id, window_id=10000):
         """
@@ -602,6 +602,14 @@ class Addon(object):
         Creates an in-memory storage for this addon with :class:`dict`-like
         interface
 
+        :param storage_id: optional storage ID (case-insensitive).
+        :type storage_id: str
+        :param window_id: the ID of a Kodi Window object where storage contents
+            will be stored.
+        :type window_id: int
+        :return: in-memory storage for this addon
+        :rtype: MemStorage
+
         The storage can store picklable Python objects as long as
         Kodi is running and storage contents can be shared between
         Python processes. Different addons have separate storages,
@@ -614,14 +622,6 @@ class Addon(object):
             storage = addon.get_mem_storage()
             foo = storage['foo']
             storage['bar'] = bar
-
-        :param storage_id: optional storage ID (case-insensitive).
-        :type storage_id: str
-        :param window_id: the ID of a Kodi Window object where storage contents
-            will be stored.
-        :type window_id: int
-        :return: in-memory storage for this addon
-        :rtype: MemStorage
         """
         if storage_id:
             storage_id = '{0}_{1}'.format(self.id, storage_id)
@@ -659,16 +659,16 @@ class Addon(object):
 
         Used to cache function return data
 
+        :param duration: caching duration in min (positive values only)
+        :type duration: int
+        :raises ValueError: if duration is zero or negative
+
         Usage::
 
             @plugin.cached(30)
             def my_func(*args, **kwargs):
                 # Do some stuff
                 return value
-
-        :param duration: caching duration in min (positive values only)
-        :type duration: int
-        :raises ValueError: if duration is zero or negative
         """
         def outer_wrapper(func):
             @wraps(func)
@@ -705,6 +705,13 @@ class Addon(object):
         """
         Get a translated UI string from addon localization files.
 
+        :param ui_string: a UI string from English :file:`strings.po`.
+        :type ui_string: str
+        :return: a UI string from translated :file:`strings.po`.
+        :rtype: unicode
+        :raises SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
+            or if a string is not found in English :file:`strings.po`.
+
         This function emulates GNU Gettext for more convenient access
         to localized addon UI strings. To reduce typing this method object
         can be assigned to a ``_`` (single underscore) variable.
@@ -712,13 +719,6 @@ class Addon(object):
         For using gettext emulation :meth:`Addon.initialize_gettext` method
         needs to be called first. See documentation for that method for more info
         about Gettext emulation.
-
-        :param ui_string: a UI string from English :file:`strings.po`.
-        :type ui_string: str
-        :return: a UI string from translated :file:`strings.po`.
-        :rtype: unicode
-        :raises SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
-            or if a string is not found in English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
             try:
@@ -731,6 +731,9 @@ class Addon(object):
     def initialize_gettext(self):
         """
         Initialize GNU gettext emulation in addon
+
+        :return: :meth:`Addon.gettext` method object
+        :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
 
         Kodi localization system for addons is not very convenient
         because you need to operate with numeric string codes instead
@@ -755,9 +758,6 @@ class Addon(object):
 
         In the preceding example the notification strings will be replaced
         with localized versions if these strings are translated.
-
-        :return: :meth:`Addon.gettext` method object
-        :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
         """
         strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
         if not os.path.exists(strings_po):
@@ -986,17 +986,17 @@ class Plugin(Addon):
         """
         Construct a callable URL for a virtual directory item
 
-        If plugin_url is empty, a current plugin URL is used.
-        kwargs are converted to a URL-encoded string of plugin call parameters
-        To call a plugin action, 'action' parameter must be used,
-        if 'action' parameter is missing, then the plugin root action is called
-        If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
-
         :param plugin_url: plugin URL with trailing / (optional)
         :type plugin_url: str
         :param kwargs: pairs of key=value items
         :return: a full plugin callback URL
         :rtype: str
+
+        If plugin_url is empty, a current plugin URL is used.
+        kwargs are converted to a URL-encoded string of plugin call parameters
+        To call a plugin action, 'action' parameter must be used,
+        if 'action' parameter is missing, then the plugin root action is called
+        If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
         """
         url = plugin_url or self._url
         if kwargs:
@@ -1014,6 +1014,10 @@ class Plugin(Addon):
 
         A plugin must have at least one action named ``'root'`` implicitly or explicitly.
 
+        :param name: action's name (optional).
+        :type name: str
+        :raises SimplePluginError: if the action with such name is already defined.
+
         Example:
 
         .. code-block:: python
@@ -1025,10 +1029,6 @@ class Plugin(Addon):
             @plugin.action('foo')  # The action name is set explicitly
             def foo_action(params):
                 pass
-
-        :param name: action's name (optional).
-        :type name: str
-        :raises SimplePluginError: if the action with such name is already defined.
         """
         def wrap(func, name=name):
             if name is None:
@@ -1324,6 +1324,13 @@ class RoutedPlugin(Plugin):
         """
         Build a URL for a plugin route
 
+        :param name_: route's name.
+        :type name_: str
+        :return: full plugin callback URL for the route.
+        :rtype: str
+        :raises simpleplugin.SimplePluginError: if a route with such name does not exist
+            or on arguments mismatch.
+
         This method performs reverse resolving a plugin callback URL for the named route.
         If route's name is not set explicitly, then the name of a decorated function
         is used as the name of the corresponding route.
@@ -1366,13 +1373,6 @@ class RoutedPlugin(Plugin):
                 pass
             url = plugin.url_for('foo', param='bar', ham='spam')
             # url = 'plugin://plugin.acme/foo/bar/?ham=spam
-
-        :param name_: route's name.
-        :type name_: str
-        :return: full plugin callback URL for the route.
-        :rtype: str
-        :raises simpleplugin.SimplePluginError: if a route with such name does not exist
-            or on arguments mismatch.
         """
         try:
             pattern = self._routes[name_].pattern
@@ -1406,6 +1406,13 @@ class RoutedPlugin(Plugin):
     def route(self, pattern, name=None):
         """
         Route decorator for plugin callback routes
+
+        :param pattern: route matching pattern
+        :type pattern: str
+        :param name: route's name (optional). If no name is provided,
+            the route is named after the decorated function.
+            The name must be unique.
+        :type name: str
 
         The route decorator is used to define plugin callback routes
         similar to a URL routing mechanism in Flask and Bottle Python web-frameworks.
@@ -1468,13 +1475,6 @@ class RoutedPlugin(Plugin):
         but each route must have a unique name.
 
         .. note:: A forward slash ``/`` at the end of a route pattern is optional.
-
-        :param pattern: route matching pattern
-        :type pattern: str
-        :param name: route's name (optional). If no name is provided,
-            the route is named after the decorated function.
-            The name must be unique.
-        :type name: str
         """
         def wrap(func, pattern=pattern, name=name):
             if name is None:
