@@ -1190,14 +1190,22 @@ class Plugin(Addon):
                     is_folder = False
             xbmcplugin.addDirectoryItem(self._handle, item['url'], list_item, is_folder)
         if context.sort_methods is not None:
-            if isinstance(context.sort_methods, int):
-                xbmcplugin.addSortMethod(self._handle, context.sort_methods)
+            if isinstance(context.sort_methods, (int, dict)):
+                sort_methods = [context.sort_methods]
             elif isinstance(context.sort_methods, (tuple, list)):
-                for method in context.sort_methods:
-                    xbmcplugin.addSortMethod(self._handle, method)
+                sort_methods = context.sort_methods
             else:
                 raise TypeError(
-                    'sort_methods parameter must be of int, tuple or list type!')
+                    'sort_methods parameter must be of int, dict, tuple or list type!')
+            for method in sort_methods:
+                if isinstance(method, int):
+                    xbmcplugin.addSortMethod(self._handle, method)
+                elif isinstance(method, dict):
+                    xbmcplugin.addSortMethod(self._handle, **method)
+                else:
+                    raise TypeError(
+                        'method parameter must be of int or dict type!')
+                    
         xbmcplugin.endOfDirectory(self._handle,
                                   context.succeeded,
                                   context.update_listing,
