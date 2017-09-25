@@ -14,8 +14,8 @@ import re
 import inspect
 from datetime import datetime, timedelta
 import cPickle as pickle
-from urlparse import parse_qs
-from urllib import urlencode
+from urlparse import parse_qs, urlparse
+from urllib import urlencode, quote_plus, unquote_plus
 from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
@@ -30,13 +30,14 @@ import xbmcplugin
 import xbmcgui
 
 __all__ = ['SimplePluginError', 'Storage', 'MemStorage',
-           'Addon', 'Plugin', 'Params', 'debug_exception']
+           'Addon', 'Plugin', 'RoutedPlugin', 'Params', 'debug_exception']
 
 ListContext = namedtuple('ListContext', ['listing', 'succeeded',
                                          'update_listing', 'cache_to_disk',
                                          'sort_methods', 'view_mode',
                                          'content', 'category'])
 PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
+Route = namedtuple('Route', ['pattern', 'func'])
 
 
 class SimplePluginError(Exception):
@@ -165,6 +166,9 @@ class Storage(MutableMapping):
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
         Class constructor
+
+        :type storage_dir: str
+        :type filename: str
         """
         self._storage = {}
         self._hash = None
@@ -267,6 +271,10 @@ class MemStorage(MutableMapping):
     :type window_id: int
     """
     def __init__(self, storage_id, window_id=10000):
+        """
+        :type storage_id: str
+        :type window_id: int
+        """
         self._id = storage_id
         self._window = xbmcgui.Window(window_id)
         try:
@@ -275,10 +283,16 @@ class MemStorage(MutableMapping):
             self['__keys__'] = []
 
     def _check_key(self, key):
+        """
+        :type key: str
+        """
         if not isinstance(key, str):
             raise TypeError('Storage key must be of str type!')
 
     def _format_contents(self):
+        """
+        :rtype: str
+        """
         lines = []
         for key, val in self.iteritems():
             lines.append('{0}: {1}'.format(repr(key), repr(val)))
@@ -348,6 +362,8 @@ class Addon(object):
     def __init__(self, id_=''):
         """
         Class constructor
+
+        :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
@@ -925,17 +941,30 @@ class Plugin(Addon):
     def __init__(self, id_=''):
         """
         Class constructor
+
+        :type id_: str
         """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
         self.actions = {}
+        self._params = None
 
     def __str__(self):
         return '<Plugin {0}>'.format(sys.argv)
 
     def __repr__(self):
         return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
+
+    @property
+    def params(self):
+        """
+        Get plugin call parameters
+
+        :return: plugin call parameters
+        :rtype: Params
+        """
+        return self._params
 
     @staticmethod
     def get_params(paramstring):
@@ -1022,13 +1051,30 @@ class Plugin(Addon):
                 'Use "category" parameter of Plugin.create_listing() instead.'
             )
         self._handle = int(sys.argv[1])
-        params = self.get_params(sys.argv[2][1:])
-        action = params.get('action', 'root')
+        self._params = self.get_params(sys.argv[2][1:])
         self.log_debug(str(self))
+        result = self._resolve_function()
+        self.log_debug('Action return value: {0}'.format(str(result)))
+        if isinstance(result, (list, GeneratorType)):
+            self._add_directory_items(self.create_listing(result))
+        elif isinstance(result, basestring):
+            self._set_resolved_url(self.resolve_url(result))
+        elif isinstance(result, ListContext):
+            self._add_directory_items(result)
+        elif isinstance(result, PlayContext):
+            self._set_resolved_url(result)
+        else:
+            self.log_debug('The action/route has not returned any valid data to process.')
+
+    def _resolve_function(self):
+        """
+        Resolve action from plugin call params and call the respective callable function
+
+        :return: action callable's return value
+        """
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
-        self.log_debug('Called action "{0}" with params "{1}"'.format(
-            action, str(params))
-        )
+        action = self._params.get('action', 'root')
+        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(self._params)))
         try:
             action_callable = self.actions[action]
         except KeyError:
@@ -1036,20 +1082,9 @@ class Plugin(Addon):
         else:
             # inspect.isfunction is needed for tests
             if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
-                result = action_callable()
+                return action_callable()
             else:
-                result = action_callable(params)
-            self.log_debug('Action return value: {0}'.format(str(result)))
-            if isinstance(result, (list, GeneratorType)):
-                self._add_directory_items(self.create_listing(result))
-            elif isinstance(result, basestring):
-                self._set_resolved_url(self.resolve_url(result))
-            elif isinstance(result, ListContext):
-                self._add_directory_items(result)
-            elif isinstance(result, PlayContext):
-                self._set_resolved_url(result)
-            else:
-                self.log_debug('The action "{0}" has not returned any valid data to process.'.format(action))
+                return action_callable(self._params)
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
@@ -1058,7 +1093,7 @@ class Plugin(Addon):
         Create and return a context dict for a virtual folder listing
 
         :param listing: the list of the plugin virtual folder items
-        :type listing: list or types.GeneratorType
+        :type listing: list or GeneratorType
         :param succeeded: if ``False`` Kodi won't open a new listing and stays on the current level.
         :type succeeded: bool
         :param update_listing: if ``True``, Kodi won't open a sub-listing but refresh the current one.
@@ -1226,3 +1261,278 @@ class Plugin(Addon):
         else:
             list_item = self.create_list_item(context.play_item)
         xbmcplugin.setResolvedUrl(self._handle, context.succeeded, list_item)
+
+
+class RoutedPlugin(Plugin):
+    """
+    Plugin class that implements "pretty URL" routing
+
+    :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+    :type id_: str
+
+    This class provides a simplified API to create virtual directories of playable items
+    for Kodi content plugins.
+    :class:`simpleplugin.RoutedPlugin` uses :meth:`RoutedPlugin.route` decorator to dispatch callback functions
+    depending on a plugin callback URL (passed via ``sys.argv[0]`` and ``sys.argv[2]``.
+    A plugin must have at least one root route with ``'/'`` matching pattern.
+
+    Minimal example:
+
+    .. code-block:: python
+
+        from simpleplugin import RoutedPlugin
+
+        plugin = RoutedPlugin()
+
+        @plugin.route('/')  # Mandatory item!
+        def root():
+            return [{'label': 'Foo',
+                    'url': plugin.url_for('some_func', label='Foo')},
+                    {'label': 'Bar',
+                    'url': plugin.url_for('some_func', label='Bar')}]
+
+        @plugin.route('/foo/<label>')
+        def some_func(label):
+            return [{'label': label]
+
+        plugin.run()
+
+    A callback function can return
+    either a list/generator of dictionaries representing Kodi virtual directory items
+    or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
+
+    Example 1::
+
+        @plugin.route('/list')
+        def list_func():
+            listing = get_listing()  # Some external function to create listing
+            return listing
+
+    The ``listing`` variable is a Python list/generator of dict items.
+
+    Example 2::
+
+        @plugin.route('/play')
+        def play_func():
+            path = get_path()  # Some external function to get a playable path
+            return path
+
+    Media items and function return values are defined the same way as in
+    :class:`Plugin <simpleplugin.Plugin>` class.
+    """
+    def __init__(self, id_=''):
+        """
+        :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+        :type id_: str
+        """
+        super(RoutedPlugin, self).__init__(id_)
+        self._routes = {}
+
+    def url_for(self, name_, *args, **kwargs):
+        """
+        Build a URL for a plugin route
+
+        This method performs reverse resolving a plugin callback URL for the named route.
+        If route's name is not set explicitly, then the name of a decorated function
+        is used as the name of the corresponding route.
+        The method can optionally take positional args and kwargs.
+        If any positional args are provided their values replace
+        variable placeholders by position.
+
+        .. warning:: The number of positional args must not exceed
+            the number of variable placeholders!
+
+        If any kwargs are provided their values replace variable placeholders by name.
+        If the number of kwargs provided exceeds the number of variable placeholders,
+        then the rest of the kwargs are added to the URL as a query string.
+
+        .. note:: All :class:`unicode` arguments are encoded with UTF-8 encoding.
+
+        Let's assume that the ID of our plugin is ``plugin.acme``. The following examples
+        will show how to use this method to resolve callback URLs for this plugin.
+
+        Example 1::
+
+            @plugin.route('/foo')
+            def foo():
+                pass
+            url = plugin.url_for('foo')
+            # url = 'plugin://plugin.acme/foo/'
+
+        Example 2::
+
+            @plugin.route('/foo/<param>')
+            def foo(param):
+                pass
+            url = plugin.url_for('foo', param='bar')
+            # url = 'plugin://plugin.acme/foo/bar/'
+
+        Example 3::
+
+            plugin.route('/foo/<param>')
+            def foo(param):
+                pass
+            url = plugin.url_for('foo', param='bar', ham='spam')
+            # url = 'plugin://plugin.acme/foo/bar/?ham=spam
+
+        :param name_: route's name.
+        :type name_: str
+        :return: full plugin callback URL for the route.
+        :rtype: str
+        :raises simpleplugin.SimplePluginError: if a route with such name does not exist
+            or on arguments mismatch.
+        """
+        try:
+            pattern = self._routes[name_].pattern
+        except KeyError:
+            raise SimplePluginError('Route "{0}" does not exist!'.format(name_))
+        matches = re.findall(r'/(<.+?>)', pattern)
+        if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
+            raise SimplePluginError(
+                'Arguments for the route {0} do not match placeholders!'.format(name_)
+            )
+        if matches:
+            for arg, match in zip(args, matches):
+                if isinstance(arg, unicode):
+                    arg = arg.encode('utf-8')
+                pattern = pattern.replace(match, quote_plus(str(arg)))
+            # items() allows to manipulate the dict during iteration
+            for key, value in kwargs.items():
+                for match in matches[len(args):]:
+                    if key in match:
+                        if isinstance(value, unicode):
+                            value = value.encode('utf-8')
+                        pattern = pattern.replace(match, quote_plus(str(value)))
+                        del kwargs[key]
+        url = 'plugin://{0}{1}'.format(self.id, pattern)
+        if kwargs:
+            url += '?' + urlencode(kwargs, doseq=True)
+        return url
+
+    get_url = url_for
+
+    def route(self, pattern, name=None):
+        """
+        Route decorator for plugin callback routes
+
+        The route decorator is used to define plugin callback routes
+        similar to a URL routing mechanism in Flask and Bottle Python web-frameworks.
+        The plugin routing mechanism calls decorated functions by matching a path
+        in a plugin callback URL (passed as ``sys.argv[0]``) to a route pattern.
+        A route pattern *must* start with a forward slash ``/``. An end slash is optional.
+        A plugin must have at least the root route with ``'/'`` pattern.
+        Bu default a route is named by the decorated function, but route's name can
+        be set explicitly by providing the 2nd optional ``name`` argument.
+
+        .. warning:: Route names must be unique!
+
+        Example 1::
+
+            @plugin.route('/foo')
+            def foo_function():
+                pass
+
+        In the preceding example ``foo_function`` will be called when the plugin is invoked
+        with ``plugin://plugin.acme/foo/`` callback URL.
+        A route pattern can contain variable placeholders (marked with angular brackets ``<>``)
+        that are used to pass arguments to a route function.
+
+        Example 2::
+
+            @plugin.route('/foo/<param>')
+            def foo_function(param):
+                pass
+
+        In the preceding example the part of a callback path marked with ``<param>`` placeholder
+        will be passed to the function as an argument. The name of a placeholder must be the same
+        as the name of the corresponding parameter. By default arguments are passed as strings.
+        The ``int`` and ``float`` prefixes can be used to pass arguments
+        as :class:`int` and :class:`float` numbers, for example ``<int:foo>`` or ``<float:bar>``.
+        The ``unicode`` prefix allows to pass Unicode strings correctly, for example
+        ``<unicode:foo>``.
+
+        Example 3::
+
+            @plugin.route('/add/<int:param1>/<int:param2>')
+            def addition(param1, param2):
+                sum = param1 + param2
+
+        A function can have multiple route decorators. In this case additional routes
+        must have explicitly defined names. If a route has less variable placeholders
+        than function parameters, "missing" function parameters must have default values.
+
+        Example 4::
+
+            @plugin.route('/foo/<param>', name='foo_route')
+            @plugin.route('/bar')
+            def some_function(param='spam'):
+                # Do something
+
+        In the preceding example ``some_function`` can be called through 2 possible routes.
+        If the function is called through the 1st route (``'foo_route'``)
+        ``<param>`` value will be passed as an argument. The 2nd route will call the function
+        with the default argument ``'spam'`` because this route has no variable placeholders
+        to pass arguments to the function. The order of the ``route`` decorators does not matter
+        but each route must have a unique name.
+
+        .. note:: A forward slash ``/`` at the end of a route pattern is optional.
+
+        :param pattern: route matching pattern
+        :type pattern: str
+        :param name: route's name (optional). If no name is provided,
+            the route is named after the decorated function.
+            The name must be unique.
+        :type name: str
+        """
+        def wrap(func, pattern=pattern, name=name):
+            if name is None:
+                name = func.__name__
+            if name in self._routes:
+                raise SimplePluginError('The route "{0}" already exists!'.format(name))
+            if not pattern.endswith('/'):
+                pattern += '/'
+            pattern = pattern.replace('int:', 'int__').replace('float:', 'float__').replace('unicode:', 'unicode__')
+            self._routes[name] = Route(pattern, func)
+            return func
+        return wrap
+
+    def _resolve_function(self):
+        """
+        Resolve route from plugin callback path and call the respective route function
+
+        :return: route function's return value
+        """
+        path = urlparse(sys.argv[0]).path
+        self.log_debug('Routes: {0}'.format(self._routes))
+        for route in self._routes.itervalues():
+            pattern = route.pattern
+            while True:
+                pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
+                if not count:
+                    break
+            match = re.search(r'^' + pattern + r'$', path)
+            if match is not None:
+                kwargs = match.groupdict()
+                # items() allows to manipulate the dict during iteration
+                for key, value in kwargs.items():
+                    if key.startswith('int__') or key.startswith('float__') or key.startswith('unicode__'):
+                        del kwargs[key]
+                        if key.startswith('int__'):
+                            key = key.lstrip('int__')
+                            value = int(value)
+                        elif key.startswith('float__'):
+                            key = key.lstrip('float__')
+                            value = float(value)
+                        else:
+                            key = key.lstrip('unicode__')
+                            value = unquote_plus(value).decode('utf-8')
+                        kwargs[key] = value
+                    else:
+                        kwargs[key] = unquote_plus(value)
+                self.log_debug('Calling {0} with kwargs {1}'.format(route, kwargs))
+                return route.func(**kwargs)
+        raise SimplePluginError('No route matches the path {0}!'.format(repr(path)))
+
+    def action(self, name=None):
+        raise NotImplementedError('RoutedPlugin does not support action decorator. '
+                                  'Use route decorator instead.')
