@@ -12,7 +12,7 @@ import os
 import sys
 import re
 import inspect
-from datetime import datetime, timedelta
+import time
 import cPickle as pickle
 from urlparse import parse_qs, urlparse
 from urllib import urlencode, quote_plus, unquote_plus
@@ -178,7 +178,7 @@ class Storage(MutableMapping):
                 contents = fo.read()
             self._storage = pickle.loads(contents)
             self._hash = md5(contents).hexdigest()
-        except (IOError, pickle.PickleError, EOFError):
+        except (IOError, pickle.PickleError, EOFError, AttributeError):
             pass
 
     def __enter__(self):
@@ -640,11 +640,12 @@ class Addon(object):
         """
         if duration <= 0:
             raise ValueError('Caching duration cannot be zero or negative!')
-        current_time = datetime.now()
+        current_time = time.time()
         key = func.__name__ + str(args) + str(kwargs)
         try:
             data, timestamp = cache[key]
-            if current_time - timestamp > timedelta(minutes=duration):
+            # Invalidate old cached object with datetime timestamp
+            if not isinstance(timestamp, float) or current_time - timestamp > duration * 60:
                 raise KeyError
             self.log_debug('Cache hit: {0}'.format(key))
         except KeyError:
