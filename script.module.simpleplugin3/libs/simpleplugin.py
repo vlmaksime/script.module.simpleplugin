@@ -137,7 +137,9 @@ class Params(dict):
         return '<Params {0}>'.format(super(Params, self).__repr__())
 
     def __repr__(self):
-        return '<simpleplugin.Params object {0}>'.format(super(Params, self).__repr__())
+        return '<simpleplugin.Params object {0}>'.format(
+            super(Params, self).__repr__()
+        )
 
 
 class Storage(MutableMapping):
@@ -160,8 +162,9 @@ class Storage(MutableMapping):
             storage['key1'] = value1
             value2 = storage['key2']
 
-    .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
-        Storage contents are saved to disk only for a new storage or if the contents have been changed.
+    .. note:: After exiting :keyword:`with` block a :class:`Storage` instance
+        is invalidated. Storage contents are saved to disk only for
+        a new storage or if the contents have been changed.
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
@@ -302,7 +305,9 @@ class MemStorage(MutableMapping):
         return '<MemStorage {{{0}}}>'.format(self._format_contents())
 
     def __repr__(self):
-        return '<simpleplugin.MemStorage object {{{0}}}'.format(self._format_contents())
+        return '<simpleplugin.MemStorage object {{{0}}}'.format(
+            self._format_contents()
+        )
 
     def __getitem__(self, key):
         self._check_key(key)
@@ -366,7 +371,9 @@ class Addon(object):
         :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
-        self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
+        self._configdir = xbmc.translatePath(
+            self._addon.getAddonInfo('profile')
+        ).decode('utf-8')
         self._ui_strings_map = None
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
@@ -481,16 +488,19 @@ class Addon(object):
         """
         Get addon setting
 
-        If ``convert=True``, 'bool' settings are converted to Python :class:`bool` values,
-        and numeric strings to Python :class:`long` or :class:`float` depending on their format.
+        If ``convert=True``, 'bool' settings are converted to Python
+        :class:`bool` values, and numeric strings to Python :class:`long` or
+        :class:`float` depending on their format.
 
-        .. note:: Settings can also be read via :class:`Addon` instance poperties named as the respective settings.
-            I.e. ``addon.foo`` is equal to ``addon.get_setting('foo')``.
+        .. note:: Settings can also be read via :class:`Addon` instance
+            poperties named as the respective settings. I.e. ``addon.foo``
+            is equal to ``addon.get_setting('foo')``.
 
         :param id_: setting ID
         :type id_: str
         :param convert: try to guess and convert the setting to an appropriate type
-            E.g. ``'1.0'`` will be converted to float ``1.0`` number, ``'true'`` to ``True`` and so on.
+            E.g. ``'1.0'`` will be converted to float ``1.0`` number,
+            ``'true'`` to ``True`` and so on.
         :type convert: bool
         :return: setting value
         """
@@ -513,8 +523,9 @@ class Addon(object):
         Python :class:`bool` type are converted to ``'true'`` or ``'false'``
         Non-string/non-unicode values are converted to strings.
 
-        .. warning:: Setting values via :class:`Addon` instance properties is not supported!
-            Values can only be set using :meth:`Addon.set_setting` method.
+        .. warning:: Setting values via :class:`Addon` instance properties
+            is not supported! Values can only be set using
+            :meth:`Addon.set_setting` method.
 
         :param id_: setting ID
         :type id_: str
@@ -532,13 +543,16 @@ class Addon(object):
 
         :param message: message to be written into the Kodi log
         :type message: str
-        :param level: log level. :mod:`xbmc` module provides the necessary symbolic constants.
-            Default: ``xbmc.LOGDEBUG``
+        :param level: log level. :mod:`xbmc` module provides the necessary
+            symbolic constants. Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
         if isinstance(message, unicode):
             message = message.encode('utf-8')
-        xbmc.log('{0} [v.{1}]: {2}'.format(self.id, self.version, message), level)
+        xbmc.log(
+            '{0} [v.{1}]: {2}'.format(self.id, self.version, message),
+            level
+        )
 
     def log_notice(self, message):
         """
@@ -578,7 +592,8 @@ class Addon(object):
 
     def get_storage(self, filename='storage.pcl'):
         """
-        Get a persistent :class:`Storage` instance for storing arbitrary values between addon calls.
+        Get a persistent :class:`Storage` instance for storing arbitrary values
+        between addon calls.
 
         A :class:`Storage` instance can be used as a context manager.
 
@@ -588,7 +603,8 @@ class Addon(object):
                 storage['param1'] = value1
                 value2 = storage['param2']
 
-        .. note:: After exiting :keyword:`with` block a :class:`Storage` instance is invalidated.
+        .. note:: After exiting :keyword:`with` block a :class:`Storage`
+            instance is invalidated.
 
         :param filename: the name of a storage file (optional)
         :type filename: str
@@ -645,7 +661,8 @@ class Addon(object):
         try:
             data, timestamp = cache[key]
             # Invalidate old cached object with datetime timestamp
-            if not isinstance(timestamp, float) or current_time - timestamp > duration * 60:
+            if (not isinstance(timestamp, float) or
+                    current_time - timestamp > duration * 60):
                 raise KeyError
             self.log_debug('Cache hit: {0}'.format(key))
         except KeyError:
@@ -675,7 +692,8 @@ class Addon(object):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 with self.get_storage('__cache__.pcl') as cache:
-                    return self._get_cached_data(cache, func, duration, *args, **kwargs)
+                    return self._get_cached_data(cache, func, duration,
+                                                 *args, **kwargs)
             return inner_wrapper
         return outer_wrapper
 
@@ -698,7 +716,8 @@ class Addon(object):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 cache = self.get_mem_storage('***cache***')
-                return self._get_cached_data(cache, func, duration, *args, **kwargs)
+                return self._get_cached_data(cache, func, duration,
+                                             *args, **kwargs)
             return inner_wrapper
         return outer_wrapper
 
@@ -718,14 +737,21 @@ class Addon(object):
         :type ui_string: str
         :return: a UI string from translated :file:`strings.po`.
         :rtype: unicode
-        :raises SimplePluginError: if :meth:`Addon.initialize_gettext` wasn't called first
-            or if a string is not found in English :file:`strings.po`.
+        :raises SimplePluginError: if :meth:`Addon.initialize_gettext`
+            wasn't called first or if a string is not found in
+            English :file:`strings.po`.
         """
         if self._ui_strings_map is not None:
             try:
-                return self.get_localized_string(self._ui_strings_map['strings'][ui_string])
+                return self.get_localized_string(
+                    self._ui_strings_map['strings'][ui_string]
+                )
             except KeyError:
-                raise SimplePluginError('UI string "{0}" is not found in strings.po!'.format(ui_string))
+                raise SimplePluginError(
+                    'UI string "{0}" is not found in strings.po!'.format(
+                        ui_string
+                    )
+                )
         else:
             raise SimplePluginError('Addon localization is not initialized!')
 
@@ -758,11 +784,14 @@ class Addon(object):
         with localized versions if these strings are translated.
 
         :return: :meth:`Addon.gettext` method object
-        :raises SimplePluginError: if the addon's English :file:`strings.po` file is missing
+        :raises SimplePluginError: if the addon's English :file:`strings.po`
+            file is missing
         """
-        strings_po = os.path.join(self.path, 'resources', 'language', 'resource.language.en_gb', 'strings.po')
+        strings_po = os.path.join(self.path, 'resources', 'language',
+                                  'resource.language.en_gb', 'strings.po')
         if not os.path.exists(strings_po):
-            strings_po = os.path.join(self.path, 'resources', 'language', 'English', 'strings.po')
+            strings_po = os.path.join(self.path, 'resources', 'language',
+                                      'English', 'strings.po')
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
@@ -781,7 +810,8 @@ class Addon(object):
                 else:
                     self._ui_strings_map = deepcopy(ui_strings_map)
         else:
-            raise SimplePluginError('Unable to initialize localization because of missing English strings.po!')
+            raise SimplePluginError('Unable to initialize localization because '
+                                    'of missing English strings.po!')
         return self.gettext
 
     def _parse_po(self, strings):
@@ -806,10 +836,10 @@ class Plugin(Addon):
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
 
-    This class provides a simplified API to create virtual directories of playable items
-    for Kodi content plugins.
-    :class:`simpleplugin.Plugin` uses a concept of callable plugin actions (functions or methods)
-    that are defined using :meth:`Plugin.action` decorator.
+    This class provides a simplified API to create virtual directories
+    of playable items for Kodi content plugins.
+    :class:`simpleplugin.Plugin` uses a concept of callable plugin actions
+    (functions or methods) that are defined using :meth:`Plugin.action` decorator.
     A Plugin instance must have at least one action that is named ``'root'``.
 
     Minimal example:
@@ -862,7 +892,8 @@ class Plugin(Addon):
     - icon -- item's icon (default: ``''``).
     - path -- item's path (default: ``''``).
     - fanart -- item's fanart (optional).
-    - art -- a dict containing all item's graphic (see :meth:`xbmcgui.ListItem.setArt` for more info) -- optional.
+    - art -- a dict containing all item's graphic
+      (see :meth:`xbmcgui.ListItem.setArt` for more info) -- optional.
     - stream_info -- a dictionary of ``{stream_type: {param: value}}`` items
       (see :meth:`xbmcgui.ListItem.addStreamInfo`) -- optional.
     - info --  a dictionary of ``{media: {param: value}}`` items
@@ -870,8 +901,9 @@ class Plugin(Addon):
     - context_menu - a list that contains 2-item tuples ``('Menu label', 'Action')``.
       The items from the tuples are added to the item's context menu.
     - url -- a callback URL for this list item.
-    - is_playable -- if ``True``, then this item is playable and must return a playable path or
-     be resolved via :meth:`Plugin.resolve_url` (default: ``False``).
+    - is_playable -- if ``True``, then this item is playable and must return
+      a playable path or be resolved via :meth:`Plugin.resolve_url`
+      (default: ``False``).
     - is_folder -- if ``True`` then the item will open a lower-level sub-listing. if ``False``,
       the item either is a playable media or a general-purpose script
       which neither creates a virtual folder nor points to a playable media (default: C{True}).
@@ -991,7 +1023,8 @@ class Plugin(Addon):
         kwargs are converted to a URL-encoded string of plugin call parameters
         To call a plugin action, 'action' parameter must be used,
         if 'action' parameter is missing, then the plugin root action is called
-        If the action is not added to :class:`Plugin` actions, :class:`PluginError` will be raised.
+        If the action is not added to :class:`Plugin` actions,
+        :class:`PluginError` will be raised.
 
         :param plugin_url: plugin URL with trailing / (optional)
         :type plugin_url: str
@@ -1013,7 +1046,8 @@ class Plugin(Addon):
 
         .. warning:: Action's name must be unique.
 
-        A plugin must have at least one action named ``'root'`` implicitly or explicitly.
+        A plugin must have at least one action named ``'root'``
+        implicitly or explicitly.
 
         Example:
 
@@ -1035,7 +1069,9 @@ class Plugin(Addon):
             if name is None:
                 name = func.__name__
             if name in self.actions:
-                raise SimplePluginError('Action "{0}" already defined!'.format(name))
+                raise SimplePluginError(
+                    'Action "{0}" already defined!'.format(name)
+                )
             self.actions[name] = func
             return func
         return wrap
@@ -1065,7 +1101,9 @@ class Plugin(Addon):
         elif isinstance(result, PlayContext):
             self._set_resolved_url(result)
         else:
-            self.log_debug('The action/route has not returned any valid data to process.')
+            self.log_debug(
+                'The action/route has not returned any valid data to process.'
+            )
 
     def _resolve_function(self):
         """
@@ -1075,7 +1113,9 @@ class Plugin(Addon):
         """
         self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
         action = self._params.get('action', 'root')
-        self.log_debug('Called action "{0}" with params "{1}"'.format(action, str(self._params)))
+        self.log_debug('Called action "{0}" with params "{1}"'.format(
+            action, str(self._params))
+        )
         try:
             action_callable = self.actions[action]
         except KeyError:
@@ -1271,8 +1311,8 @@ class RoutedPlugin(Plugin):
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
 
-    This class provides a simplified API to create virtual directories of playable items
-    for Kodi content plugins.
+    This class provides a simplified API to create virtual directories
+    of playable items for Kodi content plugins.
     :class:`simpleplugin.RoutedPlugin` uses :meth:`RoutedPlugin.route` decorator to dispatch callback functions
     depending on a plugin callback URL (passed via ``sys.argv[0]`` and ``sys.argv[2]``.
     A plugin must have at least one root route with ``'/'`` matching pattern.
@@ -1390,7 +1430,8 @@ class RoutedPlugin(Plugin):
         matches = re.findall(r'/(<.+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
-                'Arguments for the route {0} do not match placeholders!'.format(name_)
+                'Arguments for the route {0} do not match placeholders!'.format(
+                    name_)
             )
         if matches:
             for arg, match in zip(args, matches):
@@ -1489,10 +1530,15 @@ class RoutedPlugin(Plugin):
             if name is None:
                 name = func.__name__
             if name in self._routes:
-                raise SimplePluginError('The route "{0}" already exists!'.format(name))
+                raise SimplePluginError(
+                    'The route "{0}" already exists!'.format(name)
+                )
             if not pattern.endswith('/'):
                 pattern += '/'
-            pattern = pattern.replace('int:', 'int__').replace('float:', 'float__').replace('unicode:', 'unicode__')
+            pattern = pattern.replace('int:', 'int__'
+                                      ).replace('float:', 'float__'
+                                                ).replace('unicode:',
+                                                          'unicode__')
             self._routes[name] = Route(pattern, func)
             return func
         return wrap
@@ -1516,7 +1562,8 @@ class RoutedPlugin(Plugin):
                 kwargs = match.groupdict()
                 # items() allows to manipulate the dict during iteration
                 for key, value in kwargs.items():
-                    if key.startswith('int__') or key.startswith('float__') or key.startswith('unicode__'):
+                    if (key.startswith('int__') or key.startswith('float__') or
+                            key.startswith('unicode__')):
                         del kwargs[key]
                         if key.startswith('int__'):
                             key = key.lstrip('int__')
@@ -1530,9 +1577,13 @@ class RoutedPlugin(Plugin):
                         kwargs[key] = value
                     else:
                         kwargs[key] = unquote_plus(value)
-                self.log_debug('Calling {0} with kwargs {1}'.format(route, kwargs))
+                self.log_debug(
+                    'Calling {0} with kwargs {1}'.format(route, kwargs))
                 return route.func(**kwargs)
-        raise SimplePluginError('No route matches the path {0}!'.format(repr(path)))
+
+        raise SimplePluginError(
+            'No route matches the path {0}!'.format(repr(path))
+        )
 
     def action(self, name=None):
         raise NotImplementedError('RoutedPlugin does not support action decorator. '
