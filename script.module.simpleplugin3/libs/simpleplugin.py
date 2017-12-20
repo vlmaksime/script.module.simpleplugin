@@ -19,24 +19,17 @@ from urllib import urlencode, quote_plus, unquote_plus
 from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
-from types import GeneratorType
 from hashlib import md5
 from shutil import move
 from contextlib import contextmanager
 from pprint import pformat
 import xbmcaddon
 import xbmc
-import xbmcplugin
 import xbmcgui
 
 __all__ = ['SimplePluginError', 'Storage', 'MemStorage',
            'Addon', 'Plugin', 'RoutedPlugin', 'Params', 'debug_exception']
 
-ListContext = namedtuple('ListContext', ['listing', 'succeeded',
-                                         'update_listing', 'cache_to_disk',
-                                         'sort_methods', 'view_mode',
-                                         'content', 'category'])
-PlayContext = namedtuple('PlayContext', ['path', 'play_item', 'succeeded'])
 Route = namedtuple('Route', ['pattern', 'func'])
 
 
@@ -730,8 +723,8 @@ class Addon(object):
         can be assigned to a ``_`` (single underscore) variable.
 
         For using gettext emulation :meth:`Addon.initialize_gettext` method
-        needs to be called first. See documentation for that method for more info
-        about Gettext emulation.
+        needs to be called first. See documentation for that method for more
+        info about Gettext emulation.
 
         :param ui_string: a UI string from English :file:`strings.po`.
         :type ui_string: str
@@ -835,141 +828,6 @@ class Plugin(Addon):
 
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
-
-    This class provides a simplified API to create virtual directories
-    of playable items for Kodi content plugins.
-    :class:`simpleplugin.Plugin` uses a concept of callable plugin actions
-    (functions or methods) that are defined using :meth:`Plugin.action` decorator.
-    A Plugin instance must have at least one action that is named ``'root'``.
-
-    Minimal example:
-
-    .. code-block:: python
-
-        from simpleplugin import Plugin
-
-        plugin = Plugin()
-
-        @plugin.action()
-        def root():  # Mandatory item!
-            return [{'label': 'Foo',
-                    'url': plugin.get_url(action='some_action', label='Foo')},
-                    {'label': 'Bar',
-                    'url': plugin.get_url(action='some_action', label='Bar')}]
-
-        @plugin.action()
-        def some_action(params):
-            return [{'label': params.label]}]
-
-        plugin.run()
-
-    An action callable may receive 1 optional parameter which is
-    a dict-like object containing plugin call parameters (including action string)
-    The action callable can return
-    either a list/generator of dictionaries representing Kodi virtual directory items
-    or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
-
-    Example 1::
-
-        @plugin.action()
-        def list_action(params):
-            listing = get_listing(params)  # Some external function to create listing
-            return listing
-
-    The ``listing`` variable is a Python list/generator of dict items.
-    Example 2::
-
-        @plugin.action()
-        def play_action(params):
-            path = get_path(params)  # Some external function to get a playable path
-            return path
-
-    Each dict item can contain the following properties:
-
-    - label -- item's label (default: ``''``).
-    - label2 -- item's label2 (default: ``''``).
-    - thumb -- item's thumbnail (default: ``''``).
-    - icon -- item's icon (default: ``''``).
-    - path -- item's path (default: ``''``).
-    - fanart -- item's fanart (optional).
-    - art -- a dict containing all item's graphic
-      (see :meth:`xbmcgui.ListItem.setArt` for more info) -- optional.
-    - stream_info -- a dictionary of ``{stream_type: {param: value}}`` items
-      (see :meth:`xbmcgui.ListItem.addStreamInfo`) -- optional.
-    - info --  a dictionary of ``{media: {param: value}}`` items
-      (see :meth:`xbmcgui.ListItem.setInfo`) -- optional
-    - context_menu - a list that contains 2-item tuples ``('Menu label', 'Action')``.
-      The items from the tuples are added to the item's context menu.
-    - url -- a callback URL for this list item.
-    - is_playable -- if ``True``, then this item is playable and must return
-      a playable path or be resolved via :meth:`Plugin.resolve_url`
-      (default: ``False``).
-    - is_folder -- if ``True`` then the item will open a lower-level sub-listing. if ``False``,
-      the item either is a playable media or a general-purpose script
-      which neither creates a virtual folder nor points to a playable media (default: C{True}).
-      if ``'is_playable'`` is set to ``True``, then ``'is_folder'`` value automatically assumed to be ``False``.
-    - subtitles -- the list of paths to subtitle files (optional).
-    - mime -- item's mime type (optional).
-    - list_item -- an 'class:`xbmcgui.ListItem` instance (optional).
-      It is used when you want to set all list item properties by yourself.
-      If ``'list_item'`` property is present, all other properties,
-      except for ``'url'`` and ``'is_folder'``, are ignored.
-    - properties -- a dictionary of list item properties
-      (see :meth:`xbmcgui.ListItem.setProperty`) -- optional.
-    - cast -- a list of cast info (actors, roles, thumbnails) for the list item
-      (see :meth:`xbmcgui.ListItem.setCast`) -- optional.
-    - offscreen -- if ``True`` do not lock GUI (used for Python scrapers and subtitle plugins) --
-      optional.
-    - content_lookup -- if ``False``, do not HEAD requests to get mime type. Optional.
-    - online_db_ids -- a :class:`dict` of ``{'label': 'value'}`` pairs representing
-      the item's IDs in popular online databases. Possible labels: 'imdb', 'tvdb',
-      'tmdb', 'anidb', see :meth:`xbmcgui.ListItem.setUniqueIDs`. Optional.
-    - ratings -- a :class:`list` of :class:`dict`s with the following keys:
-      'type' (:class:`str`), 'rating' (:class:`float`),
-      'votes' (:class:`int`, optional), 'defaultt' (:class:`bool`, optional).
-      This list sets item's ratings in popular online databases.
-      Possible types: 'imdb', 'tvdb', tmdb', 'anidb'.
-      See :meth:`xbmcgui.ListItem.setRating`. Optional.
-
-
-    Example 3::
-
-        listing = [{    'label': 'Label',
-                        'label2': 'Label 2',
-                        'thumb': 'thumb.png',
-                        'icon': 'icon.png',
-                        'fanart': 'fanart.jpg',
-                        'art': {'clearart': 'clearart.png'},
-                        'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
-                                        'audio': {'codec': 'ac3', 'language': 'en'}},
-                        'info': {'video': {'genre': 'Comedy', 'year': 2005}},
-                        'context_menu': [('Menu Item', 'Action')],
-                        'url': 'plugin:/plugin.video.test/?action=play',
-                        'is_playable': True,
-                        'is_folder': False,
-                        'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],
-                        'mime': 'video/mp4'
-                        }]
-
-    Alternatively, an action callable can use :meth:`Plugin.create_listing` and :meth:`Plugin.resolve_url`
-    static methods to pass additional parameters to Kodi.
-
-    Example 4::
-
-        @plugin.action()
-        def list_action(params):
-            listing = get_listing(params)  # Some external function to create listing
-            return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
-
-    Example 5::
-
-        @plugin.action()
-        def play_action(params):
-            path = get_path(params)  # Some external function to get a playable path
-            return Plugin.resolve_url(path, succeeded=True)
-
-    If an action callable performs any actions other than creating a listing or
-    resolving a playable URL, it must return ``None``.
     """
     def __init__(self, id_=''):
         """
@@ -998,6 +856,16 @@ class Plugin(Addon):
         :rtype: Params
         """
         return self._params
+
+    @property
+    def handle(self):
+        """
+        Get plugin handle
+
+        :return: plugin handle
+        :rtype: int
+        """
+        return self._handle
 
     @staticmethod
     def get_params(paramstring):
@@ -1041,8 +909,8 @@ class Plugin(Addon):
         """
         Action decorator
 
-        Defines plugin callback action. If action's name is not defined explicitly,
-        then the action is named after the decorated function.
+        Defines plugin callback action. If action's name is not defined
+        explicitly, then the action is named after the decorated function.
 
         .. warning:: Action's name must be unique.
 
@@ -1053,7 +921,8 @@ class Plugin(Addon):
 
         .. code-block:: python
 
-            @plugin.action()  # The action is implicitly named 'root' after the decorated function
+            # The action is implicitly named 'root' after the decorated function
+            @plugin.action()
             def root(params):
                 pass
 
@@ -1076,38 +945,23 @@ class Plugin(Addon):
             return func
         return wrap
 
-    def run(self, category=None):
+    def run(self):
         """
         Run plugin
 
         :raises SimplePluginError: if unknown action string is provided.
         """
-        if category:
-            self.log_warning(
-                'Deprecation warning: Plugin category is no longer set via Plugin.run(). '
-                'Use "category" parameter of Plugin.create_listing() instead.'
-            )
         self._handle = int(sys.argv[1])
         self._params = self.get_params(sys.argv[2][1:])
         self.log_debug(str(self))
         result = self._resolve_function()
-        self.log_debug('Action return value: {0}'.format(str(result)))
-        if isinstance(result, (list, GeneratorType)):
-            self._add_directory_items(self.create_listing(result))
-        elif isinstance(result, basestring):
-            self._set_resolved_url(self.resolve_url(result))
-        elif isinstance(result, ListContext):
-            self._add_directory_items(result)
-        elif isinstance(result, PlayContext):
-            self._set_resolved_url(result)
-        else:
-            self.log_debug(
-                'The action/route has not returned any valid data to process.'
-            )
+        if result is not None:
+            self.log_warning('Decorated function must not return any value!')
 
     def _resolve_function(self):
         """
-        Resolve action from plugin call params and call the respective callable function
+        Resolve action from plugin call params and call the respective callable
+        function
 
         :return: action callable's return value
         """
@@ -1122,186 +976,11 @@ class Plugin(Addon):
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
             # inspect.isfunction is needed for tests
-            if inspect.isfunction(action_callable) and not inspect.getargspec(action_callable).args:
+            if (inspect.isfunction(action_callable) and
+                    not inspect.getargspec(action_callable).args):
                 return action_callable()
             else:
                 return action_callable(self._params)
-
-    @staticmethod
-    def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
-                       view_mode=None, content=None, category=None):
-        """
-        Create and return a context dict for a virtual folder listing
-
-        :param listing: the list of the plugin virtual folder items
-        :type listing: list or GeneratorType
-        :param succeeded: if ``False`` Kodi won't open a new listing and stays on the current level.
-        :type succeeded: bool
-        :param update_listing: if ``True``, Kodi won't open a sub-listing but refresh the current one.
-        :type update_listing: bool
-        :param cache_to_disk: cache this view to disk.
-        :type cache_to_disk: bool
-        :param sort_methods: the list of integer constants representing virtual folder sort methods.
-        :type sort_methods: tuple
-        :param view_mode: a numeric code for a skin view mode.
-            View mode codes are different in different skins except for ``50`` (basic listing).
-        :type view_mode: int
-        :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
-            See :func:`xbmcplugin.setContent` for more info.
-        :type content: str
-        :param category: str - plugin sub-category, e.g. 'Comedy'.
-            See :func:`xbmcplugin.setPluginCategory` for more info.
-        :type category: str
-        :return: context object containing necessary parameters
-            to create virtual folder listing in Kodi UI.
-        :rtype: ListContext
-        """
-        return ListContext(listing, succeeded, update_listing, cache_to_disk,
-                           sort_methods, view_mode, content, category)
-
-    @staticmethod
-    def resolve_url(path='', play_item=None, succeeded=True):
-        """
-        Create and return a context dict to resolve a playable URL
-
-        :param path: the path to a playable media.
-        :type path: str or unicode
-        :param play_item: a dict of item properties as described in the class docstring.
-            It allows to set additional properties for the item being played, like graphics, metadata etc.
-            if ``play_item`` parameter is present, then ``path`` value is ignored, and the path must be set via
-            ``'path'`` property of a ``play_item`` dict.
-        :type play_item: dict
-        :param succeeded: if ``False``, Kodi won't play anything
-        :type succeeded: bool
-        :return: context object containing necessary parameters
-            for Kodi to play the selected media.
-        :rtype: PlayContext
-        """
-        return PlayContext(path, play_item, succeeded)
-
-    @staticmethod
-    def create_list_item(item):
-        """
-        Create an :class:`xbmcgui.ListItem` instance from an item dict
-
-        :param item: a dict of ListItem properties
-        :type item: dict
-        :return: ListItem instance
-        :rtype: xbmcgui.ListItem
-        """
-        major_version = xbmc.getInfoLabel('System.BuildVersion')[:2]
-        if major_version >= '18':
-            list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                         label2=item.get('label2', ''),
-                                         path=item.get('path', ''),
-                                         offscreen=item.get('offscreen', False))
-        else:
-            list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                         label2=item.get('label2', ''),
-                                         path=item.get('path', ''))
-        if major_version >= '16':
-            art = item.get('art', {})
-            art['thumb'] = item.get('thumb', '')
-            art['icon'] = item.get('icon', '')
-            art['fanart'] = item.get('fanart', '')
-            item['art'] = art
-            cont_look = item.get('content_lookup')
-            if cont_look is not None:
-                list_item.setContentLookup(cont_look)
-        else:
-            list_item.setThumbnailImage(item.get('thumb', ''))
-            list_item.setIconImage(item.get('icon', ''))
-            list_item.setProperty('fanart_image', item.get('fanart', ''))
-        if item.get('art'):
-            list_item.setArt(item['art'])
-        if item.get('stream_info'):
-            for stream, stream_info in item['stream_info'].iteritems():
-                list_item.addStreamInfo(stream, stream_info)
-        if item.get('info'):
-            for media, info in item['info'].iteritems():
-                list_item.setInfo(media, info)
-        if item.get('context_menu') is not None:
-            list_item.addContextMenuItems(item['context_menu'])
-        if item.get('subtitles'):
-            list_item.setSubtitles(item['subtitles'])
-        if item.get('mime'):
-            list_item.setMimeType(item['mime'])
-        if item.get('properties'):
-            for key, value in item['properties'].iteritems():
-                list_item.setProperty(key, value)
-        if major_version >= '17':
-            cast = item.get('cast')
-            if cast is not None:
-                list_item.setCast(cast)
-            db_ids = item.get('online_db_ids')
-            if db_ids is not None:
-                list_item.setUniqueIDs(db_ids)
-            ratings = item.get('ratings')
-            if ratings is not None:
-                for rating in ratings:
-                    list_item.setRating(**rating)
-        return list_item
-
-    def _add_directory_items(self, context):
-        """
-        Create a virtual folder listing
-
-        :param context: context object
-        :type context: ListContext
-        :raises SimplePluginError: if sort_methods parameter is not int, tuple or list
-        """
-        self.log_debug('Creating listing from {0}'.format(str(context)))
-        if context.category is not None:
-            xbmcplugin.setPluginCategory(self._handle, context.category)
-        if context.content is not None:
-            xbmcplugin.setContent(self._handle, context.content)  # This must be at the beginning
-        for item in context.listing:
-            is_folder = item.get('is_folder', True)
-            if item.get('list_item') is not None:
-                list_item = item['list_item']
-            else:
-                list_item = self.create_list_item(item)
-                if item.get('is_playable'):
-                    list_item.setProperty('IsPlayable', 'true')
-                    is_folder = False
-            xbmcplugin.addDirectoryItem(self._handle, item['url'], list_item, is_folder)
-        if context.sort_methods is not None:
-            if isinstance(context.sort_methods, (int, dict)):
-                sort_methods = [context.sort_methods]
-            elif isinstance(context.sort_methods, (tuple, list)):
-                sort_methods = context.sort_methods
-            else:
-                raise TypeError(
-                    'sort_methods parameter must be of int, dict, tuple or list type!')
-            for method in sort_methods:
-                if isinstance(method, int):
-                    xbmcplugin.addSortMethod(self._handle, method)
-                elif isinstance(method, dict):
-                    xbmcplugin.addSortMethod(self._handle, **method)
-                else:
-                    raise TypeError(
-                        'method parameter must be of int or dict type!')
-                    
-        xbmcplugin.endOfDirectory(self._handle,
-                                  context.succeeded,
-                                  context.update_listing,
-                                  context.cache_to_disk)
-        if context.view_mode is not None:
-            xbmc.executebuiltin('Container.SetViewMode({0})'.format(context.view_mode))
-
-    def _set_resolved_url(self, context):
-        """
-        Resolve a playable URL
-
-        :param context: context object
-        :type context: PlayContext
-        """
-        self.log_debug('Resolving URL from {0}'.format(str(context)))
-        if context.play_item is None:
-            list_item = xbmcgui.ListItem(path=context.path)
-        else:
-            list_item = self.create_list_item(context.play_item)
-        xbmcplugin.setResolvedUrl(self._handle, context.succeeded, list_item)
 
 
 class RoutedPlugin(Plugin):
@@ -1310,56 +989,6 @@ class RoutedPlugin(Plugin):
 
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
-
-    This class provides a simplified API to create virtual directories
-    of playable items for Kodi content plugins.
-    :class:`simpleplugin.RoutedPlugin` uses :meth:`RoutedPlugin.route` decorator to dispatch callback functions
-    depending on a plugin callback URL (passed via ``sys.argv[0]`` and ``sys.argv[2]``.
-    A plugin must have at least one root route with ``'/'`` matching pattern.
-
-    Minimal example:
-
-    .. code-block:: python
-
-        from simpleplugin import RoutedPlugin
-
-        plugin = RoutedPlugin()
-
-        @plugin.route('/')  # Mandatory item!
-        def root():
-            return [{'label': 'Foo',
-                    'url': plugin.url_for('some_func', label='Foo')},
-                    {'label': 'Bar',
-                    'url': plugin.url_for('some_func', label='Bar')}]
-
-        @plugin.route('/foo/<label>')
-        def some_func(label):
-            return [{'label': label]
-
-        plugin.run()
-
-    A callback function can return
-    either a list/generator of dictionaries representing Kodi virtual directory items
-    or a resolved playable path (:class:`str` or :obj:`unicode`) for Kodi to play.
-
-    Example 1::
-
-        @plugin.route('/list')
-        def list_func():
-            listing = get_listing()  # Some external function to create listing
-            return listing
-
-    The ``listing`` variable is a Python list/generator of dict items.
-
-    Example 2::
-
-        @plugin.route('/play')
-        def play_func():
-            path = get_path()  # Some external function to get a playable path
-            return path
-
-    Media items and function return values are defined the same way as in
-    :class:`Plugin <simpleplugin.Plugin>` class.
     """
     def __init__(self, id_=''):
         """
@@ -1373,9 +1002,9 @@ class RoutedPlugin(Plugin):
         """
         Build a URL for a plugin route
 
-        This method performs reverse resolving a plugin callback URL for the named route.
-        If route's name is not set explicitly, then the name of a decorated function
-        is used as the name of the corresponding route.
+        This method performs reverse resolving a plugin callback URL for
+        the named route. If route's name is not set explicitly, then the name
+        of a decorated function is used as the name of the corresponding route.
         The method can optionally take positional args and kwargs.
         If any positional args are provided their values replace
         variable placeholders by position.
@@ -1383,14 +1012,16 @@ class RoutedPlugin(Plugin):
         .. warning:: The number of positional args must not exceed
             the number of variable placeholders!
 
-        If any kwargs are provided their values replace variable placeholders by name.
-        If the number of kwargs provided exceeds the number of variable placeholders,
-        then the rest of the kwargs are added to the URL as a query string.
+        If any kwargs are provided their values replace variable placeholders
+        by name. If the number of kwargs provided exceeds the number of variable
+        placeholders, then the rest of the kwargs are added to the URL
+        as a query string.
 
         .. note:: All :class:`unicode` arguments are encoded with UTF-8 encoding.
 
-        Let's assume that the ID of our plugin is ``plugin.acme``. The following examples
-        will show how to use this method to resolve callback URLs for this plugin.
+        Let's assume that the ID of our plugin is ``plugin.acme``.
+        The following examples will show how to use this method to resolve
+        callback URLs for this plugin.
 
         Example 1::
 
@@ -1420,8 +1051,8 @@ class RoutedPlugin(Plugin):
         :type name_: str
         :return: full plugin callback URL for the route.
         :rtype: str
-        :raises simpleplugin.SimplePluginError: if a route with such name does not exist
-            or on arguments mismatch.
+        :raises simpleplugin.SimplePluginError: if a route with such name
+            does not exist or on arguments mismatch.
         """
         try:
             pattern = self._routes[name_].pattern
@@ -1458,13 +1089,14 @@ class RoutedPlugin(Plugin):
         Route decorator for plugin callback routes
 
         The route decorator is used to define plugin callback routes
-        similar to a URL routing mechanism in Flask and Bottle Python web-frameworks.
-        The plugin routing mechanism calls decorated functions by matching a path
-        in a plugin callback URL (passed as ``sys.argv[0]``) to a route pattern.
-        A route pattern *must* start with a forward slash ``/``. An end slash is optional.
-        A plugin must have at least the root route with ``'/'`` pattern.
-        Bu default a route is named by the decorated function, but route's name can
-        be set explicitly by providing the 2nd optional ``name`` argument.
+        similar to a URL routing mechanism in Flask and Bottle Python
+        web-frameworks. The plugin routing mechanism calls decorated functions
+        by matching a path in a plugin callback URL (passed as ``sys.argv[0]``)
+        to a route pattern. A route pattern *must* start with a forward slash
+        ``/``. An end slash is optional. A plugin must have at least the root
+        route with ``'/'`` pattern. Bu default a route is named by the decorated
+        function, but route's name can be set explicitly by providing
+        the 2nd optional ``name`` argument.
 
         .. warning:: Route names must be unique!
 
@@ -1474,10 +1106,11 @@ class RoutedPlugin(Plugin):
             def foo_function():
                 pass
 
-        In the preceding example ``foo_function`` will be called when the plugin is invoked
-        with ``plugin://plugin.acme/foo/`` callback URL.
-        A route pattern can contain variable placeholders (marked with angular brackets ``<>``)
-        that are used to pass arguments to a route function.
+        In the preceding example ``foo_function`` will be called when the plugin
+        is invoked with ``plugin://plugin.acme/foo/`` callback URL.
+        A route pattern can contain variable placeholders
+        (marked with angular brackets ``<>``) that are used to pass arguments
+        to a route function.
 
         Example 2::
 
@@ -1485,13 +1118,13 @@ class RoutedPlugin(Plugin):
             def foo_function(param):
                 pass
 
-        In the preceding example the part of a callback path marked with ``<param>`` placeholder
-        will be passed to the function as an argument. The name of a placeholder must be the same
-        as the name of the corresponding parameter. By default arguments are passed as strings.
+        In the preceding example the part of a callback path marked with
+        ``<param>`` placeholder will be passed to the function as an argument.
+        The name of a placeholder must be the same as the name of
+        the corresponding parameter. By default arguments are passed as strings.
         The ``int`` and ``float`` prefixes can be used to pass arguments
-        as :class:`int` and :class:`float` numbers, for example ``<int:foo>`` or ``<float:bar>``.
-        The ``unicode`` prefix allows to pass Unicode strings correctly, for example
-        ``<unicode:foo>``.
+        as :class:`int` and :class:`float` numbers, for example ``<int:foo>``
+        or ``<float:bar>``.
 
         Example 3::
 
@@ -1499,9 +1132,10 @@ class RoutedPlugin(Plugin):
             def addition(param1, param2):
                 sum = param1 + param2
 
-        A function can have multiple route decorators. In this case additional routes
-        must have explicitly defined names. If a route has less variable placeholders
-        than function parameters, "missing" function parameters must have default values.
+        A function can have multiple route decorators. In this case additional
+        routes must have explicitly defined names. If a route has less variable
+        placeholders than function parameters, "missing" function parameters
+        must have default values.
 
         Example 4::
 
@@ -1510,14 +1144,16 @@ class RoutedPlugin(Plugin):
             def some_function(param='spam'):
                 # Do something
 
-        In the preceding example ``some_function`` can be called through 2 possible routes.
-        If the function is called through the 1st route (``'foo_route'``)
-        ``<param>`` value will be passed as an argument. The 2nd route will call the function
-        with the default argument ``'spam'`` because this route has no variable placeholders
-        to pass arguments to the function. The order of the ``route`` decorators does not matter
-        but each route must have a unique name.
+        In the preceding example ``some_function`` can be called through
+        2 possible routes. If the function is called through the 1st route
+        (``'foo_route'``) ``<param>`` value will be passed as an argument.
+        The 2nd route will call the function with the default argument
+        ``'spam'`` because this route has no variable placeholders to pass
+        arguments to the function. The order of the ``route`` decorators
+        does not matter but each route must have a unique name.
 
-        .. note:: A forward slash ``/`` at the end of a route pattern is optional.
+        .. note:: A forward slash ``/`` at the end of a route pattern
+            is optional.
 
         :param pattern: route matching pattern
         :type pattern: str
@@ -1536,16 +1172,15 @@ class RoutedPlugin(Plugin):
             if not pattern.endswith('/'):
                 pattern += '/'
             pattern = pattern.replace('int:', 'int__'
-                                      ).replace('float:', 'float__'
-                                                ).replace('unicode:',
-                                                          'unicode__')
+                                      ).replace('float:', 'float__')
             self._routes[name] = Route(pattern, func)
             return func
         return wrap
 
     def _resolve_function(self):
         """
-        Resolve route from plugin callback path and call the respective route function
+        Resolve route from plugin callback path and call the respective
+        route function
 
         :return: route function's return value
         """
@@ -1586,5 +1221,7 @@ class RoutedPlugin(Plugin):
         )
 
     def action(self, name=None):
-        raise NotImplementedError('RoutedPlugin does not support action decorator. '
-                                  'Use route decorator instead.')
+        raise NotImplementedError(
+            'RoutedPlugin does not support action decorator. '
+            'Use route decorator instead.'
+        )
