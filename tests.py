@@ -88,9 +88,9 @@ sys.modules['xbmcplugin'] = mock_xbmcplugin
 sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
-sys.path.append(os.path.join(cwd, 'script.module.simpleplugin', 'libs'))
-from simpleplugin import (Storage, Addon, Plugin, RoutedPlugin, SimplePluginError,
-                          ListContext, PlayContext, MemStorage)
+sys.path.append(os.path.join(cwd, 'script.module.simpleplugin3', 'libs'))
+from simpleplugin import (Storage, Addon, Plugin, RoutedPlugin,
+                          SimplePluginError, MemStorage)
 
 
 # Begin tests
@@ -333,136 +333,6 @@ class PluginTestCase(unittest.TestCase):
         # Test unregistered action
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=invalid']):
             self.assertRaises(SimplePluginError, plugin.run)
-
-    def test_create_list_item(self):
-        item = {
-            'label': 'Label',
-            'label2': 'Label2',
-            'path': '/path/foo',
-            'thumb': 'thumb.png',
-            'icon': 'icon.png',
-            'fanart': 'fanart.jpg',
-            'art': {'poster': 'poster.jpg', 'banner': 'banner.jpg'},
-            'stream_info': {'video': {'codec': 'h264'}},
-            'info': {'video': {'genre': 'Comedy'}},
-            'context_menu': ['item1', 'item2'],
-            'subtitles': 'subs.srt',
-            'mime': 'video/x-matroska',
-            'content_lookup': True,
-            'cast': [{
-                'name': 'Michael C. Hall',
-                'role': 'Dexter',
-                'thumbnail': '/foo/dexter.jpg'
-            }],
-            'online_db_ids': {'imdb': 'tt12345', 'tvdb': '12345'},
-            'ratings': [
-                {'type': 'imdb', 'rating': 8.8},
-                {'type': 'tvdb', 'rating': 9.9}
-            ]
-        }
-        mock_xbmc.getInfoLabel.return_value = '15.0'
-        Plugin.create_list_item(item)
-        mock_xbmcgui.ListItem.assert_called_with(label='Label', label2='Label2', path='/path/foo')
-        mock_ListItem.setThumbnailImage.assert_called_with('thumb.png')
-        mock_ListItem.setIconImage.assert_called_with('icon.png')
-        mock_ListItem.setProperty.assert_called_with('fanart_image', 'fanart.jpg')
-        mock_ListItem.setArt.assert_called_with(item['art'])
-        mock_ListItem.addStreamInfo.assert_called_with('video', {'codec': 'h264'})
-        mock_ListItem.setInfo('video', {'genre': 'Comedy'})
-        mock_ListItem.addContextMenuItems.assert_called_with(['item1', 'item2'])
-        mock_ListItem.setSubtitles.assert_called_with('subs.srt')
-        mock_ListItem.setMimeType.assert_called_with('video/x-matroska')
-        # Test for Kodi Jarvis API
-        mock_xbmc.getInfoLabel.return_value = '18.0'
-        mock_ListItem.setArt.reset_mock()
-        Plugin.create_list_item(item)
-        mock_ListItem.setArt.assert_called_with({'icon': 'icon.png',
-                                                 'thumb': 'thumb.png',
-                                                 'fanart': 'fanart.jpg',
-                                                 'poster': 'poster.jpg',
-                                                 'banner': 'banner.jpg'})
-
-    def test_add_directory_items(self):
-        list_item1 = mock.MagicMock()
-        context1 = ListContext(
-            [{
-                'url': 'plugin://foo',
-                'list_item': list_item1,
-                'is_folder': True
-            }],
-            True,
-            True,
-            True,
-            (0,),
-            50,
-            'movies',
-            'Action',
-        )
-        plugin = Plugin('test.plugin')
-        plugin._handle = 1
-        plugin.create_list_item = mock.MagicMock()
-        plugin._add_directory_items(context1)
-        mock_xbmcplugin.setContent.assert_called_with(1, 'movies')
-        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item1, True)
-        mock_xbmcplugin.addSortMethod.assert_called_with(1, 0)
-        mock_xbmcplugin.endOfDirectory.assert_called_with(1, True, True, True)
-        mock_xbmc.executebuiltin.assert_called_with('Container.SetViewMode(50)')
-        mock_xbmcplugin.addDirectoryItems.reset_mock()
-        context2 = ListContext(
-            [{
-                'url' : 'plugin://foo',
-                'label': 'Foo',
-                'is_folder': True
-            }],
-            True,
-            True,
-            True,
-            (0,),
-            50,
-            'movies',
-            'Action'
-        )
-        list_item2 = mock.MagicMock()
-        plugin.create_list_item.return_value = list_item2
-        plugin._add_directory_items(context2)
-        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item2, True)
-        mock_xbmcplugin.addDirectoryItems.reset_mock()
-        list_item2.reset_mock()
-        context3 = ListContext(
-            [{
-                'url' : 'plugin://foo',
-                'label': 'Foo',
-                'is_playable': True
-            }],
-            True,
-            True,
-            True,
-            (0,),
-            50,
-            'movies',
-            'Action'
-        )
-        plugin._add_directory_items(context3)
-        list_item2.setProperty.assert_called_with('IsPlayable', 'true')
-        mock_xbmcplugin.addDirectoryItem.assert_called_with(1, 'plugin://foo', list_item2, False)
-
-    def test_set_resolved_url(self):
-        context1 = PlayContext('http://foo.bar', None, True)
-        plugin = Plugin('test.plugin')
-        plugin._handle = 1
-        mock_xbmcgui.ListItem.reset_mock()
-        plugin._set_resolved_url(context1)
-        mock_xbmcgui.ListItem.assert_called_with(path='http://foo.bar')
-        mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, mock_ListItem)
-        mock_xbmcplugin.setResolvedUrl.reset_mock()
-        play_item = mock.MagicMock()
-        context2 = PlayContext('http://foo.bar', play_item, True)
-        list_item = mock.MagicMock()
-        plugin.create_list_item = mock.MagicMock()
-        plugin.create_list_item.return_value = list_item
-        plugin._set_resolved_url(context2)
-        plugin.create_list_item.assert_called_with(play_item)
-        mock_xbmcplugin.setResolvedUrl.assert_called_with(1, True, list_item)
 
     def test_action_decorator(self):
         plugin = Plugin('test.plugin')

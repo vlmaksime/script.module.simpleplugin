@@ -8,14 +8,20 @@ SimplePlugin micro-framework for Kodi content plugins
 **License**: `GPL v.3 <https://www.gnu.org/copyleft/gpl.html>`_
 """
 
+from __future__ import absolute_import, division, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 import os
 import sys
 import re
 import inspect
 import time
-import cPickle as pickle
-from urlparse import parse_qs, urlparse
-from urllib import urlencode, quote_plus, unquote_plus
+import pickle as pickle
+from urllib.parse import parse_qs, urlparse, urlencode, quote_plus, unquote_plus
 from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
@@ -47,7 +53,7 @@ def _format_vars(variables):
     :return: formatted string with sorted ``var = val`` pairs
     :rtype: str
     """
-    var_list = [(var, val) for var, val in variables.iteritems()]
+    var_list = [(var, val) for var, val in variables.items()]
     lines = []
     for var, val in sorted(var_list, key=lambda i: i[0]):
         if not (var.startswith('__') or var.endswith('__')):
@@ -290,7 +296,7 @@ class MemStorage(MutableMapping):
         :rtype: str
         """
         lines = []
-        for key, val in self.iteritems():
+        for key, val in self.items():
             lines.append('{0}: {1}'.format(repr(key), repr(val)))
         return ', '.join(lines)
 
@@ -504,7 +510,7 @@ class Addon(object):
             elif setting == 'false':
                 return False
             elif re.search(r'^-?\d+$', setting) is not None:
-                return long(setting)  # Convert numeric strings to long
+                return int(setting)  # Convert numeric strings to long
             elif re.search(r'^-?\d+\.\d+$', setting) is not None:
                 return float(setting)  # Convert numeric strings with a dot to float
         return setting
@@ -540,7 +546,7 @@ class Addon(object):
             symbolic constants. Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
-        if isinstance(message, unicode):
+        if isinstance(message, str):
             message = message.encode('utf-8')
         xbmc.log(
             '{0} [v.{1}]: {2}'.format(self.id, self.version, message),
@@ -879,7 +885,7 @@ class Plugin(Addon):
         """
         raw_params = parse_qs(paramstring)
         params = Params()
-        for key, value in raw_params.iteritems():
+        for key, value in raw_params.items():
             params[key] = value[0] if len(value) == 1 else value
         return params
 
@@ -965,7 +971,7 @@ class Plugin(Addon):
 
         :return: action callable's return value
         """
-        self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
+        self.log_debug('Actions: {0}'.format(str(list(self.actions.keys()))))
         action = self._params.get('action', 'root')
         self.log_debug('Called action "{0}" with params "{1}"'.format(
             action, str(self._params))
@@ -1066,14 +1072,14 @@ class RoutedPlugin(Plugin):
             )
         if matches:
             for arg, match in zip(args, matches):
-                if isinstance(arg, unicode):
+                if isinstance(arg, str):
                     arg = arg.encode('utf-8')
                 pattern = pattern.replace(match, quote_plus(str(arg)))
             # items() allows to manipulate the dict during iteration
-            for key, value in kwargs.items():
+            for key, value in list(kwargs.items()):
                 for match in matches[len(args):]:
                     if key in match:
-                        if isinstance(value, unicode):
+                        if isinstance(value, str):
                             value = value.encode('utf-8')
                         pattern = pattern.replace(match, quote_plus(str(value)))
                         del kwargs[key]
@@ -1186,7 +1192,7 @@ class RoutedPlugin(Plugin):
         """
         path = urlparse(sys.argv[0]).path
         self.log_debug('Routes: {0}'.format(self._routes))
-        for route in self._routes.itervalues():
+        for route in self._routes.values():
             pattern = route.pattern
             while True:
                 pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
@@ -1196,7 +1202,7 @@ class RoutedPlugin(Plugin):
             if match is not None:
                 kwargs = match.groupdict()
                 # items() allows to manipulate the dict during iteration
-                for key, value in kwargs.items():
+                for key, value in list(kwargs.items()):
                     if (key.startswith('int__') or key.startswith('float__') or
                             key.startswith('unicode__')):
                         del kwargs[key]
