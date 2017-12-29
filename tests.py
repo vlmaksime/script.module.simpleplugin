@@ -121,7 +121,7 @@ class StorageTestCase(unittest.TestCase):
             storage['bar'] = 'bar'
             storage['baz'] = 'baz'
             i = 0
-            for key, value in storage.iteritems():
+            for key, value in storage.items():
                 self.assertEqual(key, value)
                 i += 1
             self.assertEqual(i, 3)
