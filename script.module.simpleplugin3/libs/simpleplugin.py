@@ -1238,9 +1238,8 @@ class RoutedPlugin(Plugin):
             if match is not None:
                 kwargs = match.groupdict()
                 # items() allows to manipulate the dict during iteration
-                for key, value in kwargs.items():
-                    if (key.startswith('int__') or key.startswith('float__') or
-                            key.startswith('unicode__')):
+                for key, value in list(kwargs.items()):
+                    if key.startswith('int__') or key.startswith('float__'):
                         del kwargs[key]
                         if key.startswith('int__'):
                             key = key.lstrip('int__')
