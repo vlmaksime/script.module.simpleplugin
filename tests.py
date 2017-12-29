@@ -229,8 +229,8 @@ class AddonTestCase(unittest.TestCase):
     def test_gettext_initialized(self):
         addon = Addon()
         _ = addon.initialize_gettext()
-        self.assertEqual(_('Hello World!'), u'Привет, мир!'.encode('utf-8'))
-        self.assertEqual(_('I love you.'), u'Я тебя люблю.'.encode('utf-8'))
+        self.assertEqual(_('Hello World!'), u'Привет, мир!')
+        self.assertEqual(_('I love you.'), u'Я тебя люблю.')
         self.assertRaises(SimplePluginError, _, 'Foo Bar')
 
 

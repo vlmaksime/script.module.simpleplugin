@@ -8,27 +8,35 @@ SimplePlugin micro-framework for Kodi content plugins
 **License**: `GPL v.3 <https://www.gnu.org/copyleft/gpl.html>`_
 """
 
+from __future__ import unicode_literals
 import os
 import sys
 import re
 import inspect
 import time
-import cPickle as pickle
-from urlparse import parse_qs, urlparse
-from urllib import urlencode, quote_plus, unquote_plus
+import hashlib
+from io import open
 from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
-from hashlib import md5
 from shutil import move
 from contextlib import contextmanager
 from pprint import pformat
+from six import (PY2, PY3, python_2_unicode_compatible, iteritems, itervalues,
+                 text_type, binary_type, string_types)
+from six.moves import cPickle as pickle
+from six.moves.urllib.parse import (parse_qs, urlparse, urlencode, quote_plus,
+                                    unquote_plus)
 import xbmcaddon
 import xbmc
 import xbmcgui
 
-__all__ = ['SimplePluginError', 'Storage', 'MemStorage',
-           'Addon', 'Plugin', 'RoutedPlugin', 'Params', 'debug_exception']
+__all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin',
+           'RoutedPlugin', 'Params', 'debug_exception', 'py2_encode',
+           'py2_decode']
+
+if PY3:
+    long = int
 
 Route = namedtuple('Route', ['pattern', 'func'])
 
@@ -47,12 +55,34 @@ def _format_vars(variables):
     :return: formatted string with sorted ``var = val`` pairs
     :rtype: str
     """
-    var_list = [(var, val) for var, val in variables.iteritems()]
+    var_list = [(var, val) for var, val in iteritems(variables)]
     lines = []
     for var, val in sorted(var_list, key=lambda i: i[0]):
         if not (var.startswith('__') or var.endswith('__')):
             lines.append('{0} = {1}'.format(var, pformat(val)))
     return '\n'.join(lines)
+
+
+def py2_encode(s, encoding='utf-8'):
+    """
+    Encode Python 2 ``unicode`` to ``str``
+
+    In Python 3 the string is not changed.
+    """
+    if PY2 and isinstance(s, text_type):
+        s = s.encode(encoding)
+    return s
+
+
+def py2_decode(s, encoding='utf-8'):
+    """
+    Decode Python 2 ``str`` to ``unicode``
+
+    In Python 3 the string is not changed.
+    """
+    if PY2 and isinstance(s, binary_type):
+        s = s.decode(encoding)
+    return s
 
 
 @contextmanager
@@ -85,7 +115,7 @@ def debug_exception(logger=None):
         yield
     except:
         if logger is None:
-            logger = lambda msg: xbmc.log(msg, xbmc.LOGERROR)
+            logger = lambda msg: xbmc.log(py2_encode(msg), xbmc.LOGERROR)
         logger('Unhandled exception detected!')
         logger('*** Start diagnostic info ***')
         frame_info = inspect.trace(5)[-1]
@@ -103,6 +133,7 @@ def debug_exception(logger=None):
         raise
 
 
+@python_2_unicode_compatible
 class Params(dict):
     """
     Params(**kwargs)
@@ -135,6 +166,7 @@ class Params(dict):
         )
 
 
+@python_2_unicode_compatible
 class Storage(MutableMapping):
     """
     Storage(storage_dir, filename='storage.pcl')
@@ -173,7 +205,7 @@ class Storage(MutableMapping):
             with open(self._filename, 'rb') as fo:
                 contents = fo.read()
             self._storage = pickle.loads(contents)
-            self._hash = md5(contents).hexdigest()
+            self._hash = hashlib.md5(contents).hexdigest()
         except (IOError, pickle.PickleError, EOFError, AttributeError):
             pass
 
@@ -213,7 +245,7 @@ class Storage(MutableMapping):
         but simply invalidated.
         """
         contents = pickle.dumps(self._storage)
-        if self._hash is None or md5(contents).hexdigest() != self._hash:
+        if self._hash is None or hashlib.md5(contents).hexdigest() != self._hash:
             tmp = self._filename + '.tmp'
             try:
                 with open(tmp, 'wb') as fo:
@@ -236,6 +268,7 @@ class Storage(MutableMapping):
         return deepcopy(self._storage)
 
 
+@python_2_unicode_compatible
 class MemStorage(MutableMapping):
     """
     MemStorage(storage_id)
@@ -282,7 +315,7 @@ class MemStorage(MutableMapping):
         """
         :type key: str
         """
-        if not isinstance(key, str):
+        if not isinstance(key, string_types):
             raise TypeError('Storage key must be of str type!')
 
     def _format_contents(self):
@@ -304,7 +337,7 @@ class MemStorage(MutableMapping):
 
     def __getitem__(self, key):
         self._check_key(key)
-        full_key = '{0}__{1}'.format(self._id, key)
+        full_key = py2_encode('{0}__{1}'.format(self._id, key))
         raw_item = self._window.getProperty(full_key)
         if raw_item:
             return pickle.loads(raw_item)
@@ -313,7 +346,7 @@ class MemStorage(MutableMapping):
 
     def __setitem__(self, key, value):
         self._check_key(key)
-        full_key = '{0}__{1}'.format(self._id, key)
+        full_key = py2_encode('{0}__{1}'.format(self._id, key))
         self._window.setProperty(full_key, pickle.dumps(value))
         if key != '__keys__':
             keys = self['__keys__']
@@ -322,7 +355,7 @@ class MemStorage(MutableMapping):
 
     def __delitem__(self, key):
         self._check_key(key)
-        full_key = '{0}__{1}'.format(self._id, key)
+        full_key = py2_encode('{0}__{1}'.format(self._id, key))
         item = self._window.getProperty(full_key)
         if item:
             self._window.clearProperty(full_key)
@@ -335,7 +368,7 @@ class MemStorage(MutableMapping):
 
     def __contains__(self, key):
         self._check_key(key)
-        full_key = '{0}__{1}'.format(self._id, key)
+        full_key = py2_encode('{0}__{1}'.format(self._id, key))
         item = self._window.getProperty(full_key)
         if item:
             return True
@@ -348,6 +381,7 @@ class MemStorage(MutableMapping):
         return len(self['__keys__'])
 
 
+@python_2_unicode_compatible
 class Addon(object):
     """
     Base addon class
@@ -364,9 +398,9 @@ class Addon(object):
         :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
-        self._configdir = xbmc.translatePath(
-            self._addon.getAddonInfo('profile')
-        ).decode('utf-8')
+        self._configdir = py2_decode(
+            xbmc.translatePath(self._addon.getAddonInfo('profile'))
+        )
         self._ui_strings_map = None
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
@@ -473,9 +507,9 @@ class Addon(object):
         :param id_: UI string ID
         :type id_: int
         :return: UI string in the current language
-        :rtype: str
+        :rtype: unicode
         """
-        return self._addon.getLocalizedString(id_).encode('utf-8')
+        return self._addon.getLocalizedString(id_)
 
     def get_setting(self, id_, convert=True):
         """
@@ -526,7 +560,7 @@ class Addon(object):
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
-        elif not isinstance(value, basestring):
+        elif not isinstance(value, string_types):
             value = str(value)
         self._addon.setSetting(id_, value)
 
@@ -540,10 +574,8 @@ class Addon(object):
             symbolic constants. Default: ``xbmc.LOGDEBUG``
         :type level: int
         """
-        if isinstance(message, unicode):
-            message = message.encode('utf-8')
         xbmc.log(
-            '{0} [v.{1}]: {2}'.format(self.id, self.version, message),
+            py2_encode('{0} [v.{1}]: {2}'.format(self.id, self.version, message)),
             level
         )
 
@@ -788,12 +820,14 @@ class Addon(object):
         if os.path.exists(strings_po):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
-            raw_strings_hash = md5(raw_strings).hexdigest()
+            raw_strings_hash = hashlib.md5(raw_strings).hexdigest()
             gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
                 if (not os.path.exists(os.path.join(self._configdir, gettext_pcl)) or
                         raw_strings_hash != ui_strings_map['hash']):
-                    ui_strings = self._parse_po(raw_strings.split('\n'))
+                    ui_strings = self._parse_po(
+                        raw_strings.decode('utf-8').split('\n')
+                    )
                     self._ui_strings_map = {
                         'hash': raw_strings_hash,
                         'strings': ui_strings
@@ -815,13 +849,14 @@ class Addon(object):
         string_id = None
         for string in strings:
             if string_id is None and 'msgctxt' in string:
-                string_id = int(re.search(r'"#(\d+)"', string).group(1))
+                string_id = int(re.search(r'"#(\d+)"', string, re.U).group(1))
             elif string_id is not None and 'msgid' in string:
                 ui_strings[re.search(r'"(.*?)"', string, re.U).group(1)] = string_id
                 string_id = None
         return ui_strings
 
 
+@python_2_unicode_compatible
 class Plugin(Addon):
     """
     Plugin class
@@ -879,7 +914,7 @@ class Plugin(Addon):
         """
         raw_params = parse_qs(paramstring)
         params = Params()
-        for key, value in raw_params.iteritems():
+        for key, value in iteritems(raw_params):
             params[key] = value[0] if len(value) == 1 else value
         return params
 
@@ -983,6 +1018,7 @@ class Plugin(Addon):
                 return action_callable(self._params)
 
 
+@python_2_unicode_compatible
 class RoutedPlugin(Plugin):
     """
     Plugin class that implements "pretty URL" routing
@@ -997,6 +1033,12 @@ class RoutedPlugin(Plugin):
         """
         super(RoutedPlugin, self).__init__(id_)
         self._routes = {}
+
+    def __str__(self):
+        return '<RotuedPlugin {0}>'.format(sys.argv)
+
+    def __repr__(self):
+        return '<simpleplugin.RotuedPlugin object {0}>'.format(sys.argv)
 
     def url_for(self, name_, *args, **kwargs):
         """
@@ -1066,15 +1108,15 @@ class RoutedPlugin(Plugin):
             )
         if matches:
             for arg, match in zip(args, matches):
-                if isinstance(arg, unicode):
-                    arg = arg.encode('utf-8')
+                if isinstance(arg, text_type):
+                    arg = py2_encode(arg)
                 pattern = pattern.replace(match, quote_plus(str(arg)))
             # items() allows to manipulate the dict during iteration
-            for key, value in kwargs.items():
+            for key, value in list(kwargs.items()):
                 for match in matches[len(args):]:
                     if key in match:
-                        if isinstance(value, unicode):
-                            value = value.encode('utf-8')
+                        if isinstance(value, text_type):
+                            value = py2_encode(value)
                         pattern = pattern.replace(match, quote_plus(str(value)))
                         del kwargs[key]
         url = 'plugin://{0}{1}'.format(self.id, pattern)
@@ -1186,7 +1228,7 @@ class RoutedPlugin(Plugin):
         """
         path = urlparse(sys.argv[0]).path
         self.log_debug('Routes: {0}'.format(self._routes))
-        for route in self._routes.itervalues():
+        for route in itervalues(self._routes):
             pattern = route.pattern
             while True:
                 pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
@@ -1203,12 +1245,9 @@ class RoutedPlugin(Plugin):
                         if key.startswith('int__'):
                             key = key.lstrip('int__')
                             value = int(value)
-                        elif key.startswith('float__'):
+                        else:
                             key = key.lstrip('float__')
                             value = float(value)
-                        else:
-                            key = key.lstrip('unicode__')
-                            value = unquote_plus(value).decode('utf-8')
                         kwargs[key] = value
                     else:
                         kwargs[key] = unquote_plus(value)

@@ -5,6 +5,7 @@
    provider-name="Roman V.M.">
   <requires>
     <import addon="xbmc.python" version="2.25.0"/>
+    <import addon="script.module.six" />
   </requires>
   <extension point="xbmc.python.module" library="libs" />
   <extension point="xbmc.addon.metadata">
