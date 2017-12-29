@@ -11,7 +11,6 @@ import shutil
 import time
 from datetime import datetime
 from collections import defaultdict
-from urllib import quote_plus
 import mock
 
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -22,11 +21,6 @@ configdir = os.path.join(cwd, 'config')
 
 def fake_translate_path(path):
     return path
-
-
-def test_generator():
-    for i in xrange(6):
-        yield {'label': 'item {0}'.format(i)}
 
 
 class FakeAddon(object):
@@ -75,8 +69,6 @@ mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = fake_translate_path
 
-mock_xbmcplugin = mock.MagicMock()
-
 mock_xbmcgui = mock.MagicMock()
 mock_ListItem = mock.MagicMock()
 mock_xbmcgui.ListItem.return_value = mock_ListItem
@@ -84,7 +76,6 @@ mock_xbmcgui.Window = FakeWindow
 
 sys.modules['xbmcaddon'] = mock_xbmcaddon
 sys.modules['xbmc'] = mock_xbmc
-sys.modules['xbmcplugin'] = mock_xbmcplugin
 sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
@@ -263,76 +254,17 @@ class PluginTestCase(unittest.TestCase):
 
     def test_run(self):
         plugin = Plugin('test.plugin')
-        plugin.create_listing = mock.MagicMock()
-        plugin.resolve_url = mock.MagicMock()
-        plugin._add_directory_items = mock.MagicMock()
-        plugin._set_resolved_url = mock.MagicMock()
         mock_actions = mock.MagicMock()
+        plugin.actions['root'] = mock_actions.root
+        plugin.actions['foo'] = mock_actions.foo
         # Test calling 'root' action
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '']):
-            mock_actions.root.return_value = [{'label': 'root'}]
-            plugin.actions['root'] = mock_actions.root
             plugin.run()
             mock_actions.root.assert_called_with({})
-            plugin.create_listing.assert_called_with([{'label': 'root'}])
-        # Test calling 'root' action with no params
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '']):
-            plugin.actions['root'] = lambda: [{'label': 'root'}]
-            plugin.run()
-            plugin.create_listing.assert_called_with([{'label': 'root'}])
-        # Test calling a child action returning list or generator
+        # Test calling an action with parameters
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo&param=bar']):
-            plugin.create_listing.reset_mock()
-            mock_actions.foo.return_value = [{'label': 'foo'}]
-            plugin.actions['foo'] = mock_actions.foo
             plugin.run()
             mock_actions.foo.assert_called_with({'action': 'foo', 'param': 'bar'})
-            plugin.create_listing.assert_called_with([{'label': 'foo'}])
-            plugin.create_listing.reset_mock()
-            generator = test_generator()
-            mock_actions.foo.return_value = generator
-            plugin.run()
-            mock_actions.foo.assert_called_with({'action': 'foo', 'param': 'bar'})
-            plugin.create_listing.assert_called_with(generator)
-        # Test calling a child action returning a str
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=play_str']):
-            mock_actions.play_str.return_value = '/play/path'
-            plugin.actions['play_str'] = mock_actions.play_str
-            plugin.run()
-            plugin.resolve_url.assert_called_with('/play/path')
-        # Test calling a child action returning ListContext namedtuple
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=tuple_listing']):
-            plugin._add_directory_items.reset_mock()
-            list_context = ListContext(
-                [{
-                    'url': 'plugin://foo',
-                    'label': 'Foo',
-                    'is_folder': True
-                }],
-                True,
-                True,
-                True,
-                (0,),
-                50,
-                'movies',
-                'Comedy'
-            )
-
-            mock_actions.dict_listing.return_value = list_context
-            plugin.actions['tuple_listing'] = mock_actions.dict_listing
-            plugin.run()
-            plugin._add_directory_items.assert_called_with(list_context)
-        # Test calling a child action returning PlayContext namedtuple
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=tuple_play']):
-            plugin._set_resolved_url.reset_mock()
-            play_context = PlayContext('http://foo.bar', None, True)
-            mock_actions.dict_play.return_value = play_context
-            plugin.actions['tuple_play'] = mock_actions.dict_play
-            plugin.run()
-            plugin._set_resolved_url.assert_called_with(play_context)
-        # Test unregistered action
-        with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=invalid']):
-            self.assertRaises(SimplePluginError, plugin.run)
 
     def test_action_decorator(self):
         plugin = Plugin('test.plugin')
@@ -390,20 +322,6 @@ class RoutedPluginTestCase(unittest.TestCase):
             return []
 
         with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416/', '1', '']):
-            plugin.run()
-
-    def test_passing_unicode(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo/<unicode:param>')
-        def test_func(param):
-            assert param == u'Тест'
-            return []
-
-        with mock.patch('simpleplugin.sys.argv',
-                        ['plugin://test.plugin/foo/{0}/'.format(u'Тест'.encode('utf-8')),
-                        '1',
-                        '']):
             plugin.run()
 
     def test_multiple_routes(self):
@@ -486,15 +404,15 @@ class PluginUrlForTestCase(unittest.TestCase):
         url = plugin.url_for('test', 'foo', param2='bar', param3='spam', param4='ham')
         self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/?param4=ham')
 
-    def test_building_url_int_float_unicode(self):
+    def test_building_url_int_float(self):
         plugin = RoutedPlugin('test.plugin')
 
-        @plugin.route('/<int:param1>/<float:param2>/<unicode:param3>')
+        @plugin.route('/<int:param1>/<float:param2>/')
         def test():
             pass
 
-        url = plugin.url_for('test', param1=1, param2=3.14, param3=u'Тест')
-        self.assertEqual(url, 'plugin://test.plugin/1/3.14/{0}/'.format(quote_plus(u'Тест'.encode('utf-8'))))
+        url = plugin.url_for('test', param1=1, param2=3.14)
+        self.assertEqual(url, 'plugin://test.plugin/1/3.14/')
 
 
 if __name__ == '__main__':
