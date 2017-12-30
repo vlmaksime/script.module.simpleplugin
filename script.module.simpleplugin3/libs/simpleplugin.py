@@ -36,6 +36,9 @@ __all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin',
 
 if PY3:
     long = int
+    getargspec = inspect.getfullargspec
+else:
+    getargspec = inspect.getargspec
 
 Route = namedtuple('Route', ['pattern', 'func'])
 
@@ -1014,7 +1017,7 @@ class Plugin(Addon):
         else:
             # inspect.isfunction is needed for tests
             if (inspect.isfunction(action_callable) and
-                    not inspect.getargspec(action_callable).args):
+                    not getargspec(action_callable).args):
                 return action_callable()
             else:
                 return action_callable(self._params)
