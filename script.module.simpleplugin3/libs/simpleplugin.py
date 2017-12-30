@@ -16,14 +16,13 @@ import inspect
 import time
 import hashlib
 from io import open
-from functools import wraps
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from shutil import move
 from contextlib import contextmanager
 from pprint import pformat
 from six import (PY2, PY3, python_2_unicode_compatible, iteritems, itervalues,
-                 text_type, binary_type, string_types)
+                 text_type, binary_type, string_types, wraps, raise_from)
 from six.moves import cPickle as pickle
 from six.moves.urllib.parse import (parse_qs, urlparse, urlencode, quote_plus,
                                     unquote_plus)
@@ -771,11 +770,13 @@ class Addon(object):
                 return self.get_localized_string(
                     self._ui_strings_map['strings'][ui_string]
                 )
-            except KeyError:
-                raise SimplePluginError(
+            except KeyError as ex:
+                raise_from(
+                    SimplePluginError(
                     'UI string "{0}" is not found in strings.po!'.format(
-                        ui_string
-                    )
+                        ui_string)
+                    ),
+                    ex
                 )
         else:
             raise SimplePluginError('Addon localization is not initialized!')
@@ -1007,8 +1008,11 @@ class Plugin(Addon):
         )
         try:
             action_callable = self.actions[action]
-        except KeyError:
-            raise SimplePluginError('Invalid action: "{0}"!'.format(action))
+        except KeyError as ex:
+            raise_from(
+                SimplePluginError('Invalid action: "{0}"!'.format(action)),
+                ex
+            )
         else:
             # inspect.isfunction is needed for tests
             if (inspect.isfunction(action_callable) and
@@ -1098,8 +1102,11 @@ class RoutedPlugin(Plugin):
         """
         try:
             pattern = self._routes[name_].pattern
-        except KeyError:
-            raise SimplePluginError('Route "{0}" does not exist!'.format(name_))
+        except KeyError as ex:
+            raise_from(
+                SimplePluginError('Route "{0}" does not exist!'.format(name_)),
+                ex
+            )
         matches = re.findall(r'/(<.+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
@@ -1237,7 +1244,7 @@ class RoutedPlugin(Plugin):
             match = re.search(r'^' + pattern + r'$', path)
             if match is not None:
                 kwargs = match.groupdict()
-                # items() allows to manipulate the dict during iteration
+                # list allows to manipulate the dict during iteration
                 for key, value in list(kwargs.items()):
                     if key.startswith('int__') or key.startswith('float__'):
                         del kwargs[key]
@@ -1255,7 +1262,7 @@ class RoutedPlugin(Plugin):
                 return route.func(**kwargs)
 
         raise SimplePluginError(
-            'No route matches the path {0}!'.format(repr(path))
+            'No route matches the path "{0}"!'.format(path)
         )
 
     def action(self, name=None):
