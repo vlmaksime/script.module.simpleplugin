@@ -122,9 +122,9 @@ def debug_exception(logger=None):
         context = ''
         for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
             if i == frame_info[2]:
-                context += '{0}:>{1}'.format(str(i).rjust(5), line)
+                context += '{0}:>{1}'.format(text_type(i).rjust(5), line)
             else:
-                context += '{0}: {1}'.format(str(i).rjust(5), line)
+                context += '{0}: {1}'.format(text_type(i).rjust(5), line)
         logger('Code context:\n' + context)
         logger('Global variables:\n' + _format_vars(frame_info[0].f_globals))
         logger('Local variables:\n' + _format_vars(frame_info[0].f_locals))
@@ -684,9 +684,7 @@ class Addon(object):
         key = func.__name__ + str(args) + str(kwargs)
         try:
             data, timestamp = cache[key]
-            # Invalidate old cached object with datetime timestamp
-            if (not isinstance(timestamp, float) or
-                    current_time - timestamp > duration * 60):
+            if current_time - timestamp > duration * 60:
                 raise KeyError
             self.log_debug('Cache hit: {0}'.format(key))
         except KeyError:
