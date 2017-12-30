@@ -560,7 +560,7 @@ class Addon(object):
         if isinstance(value, bool):
             value = 'true' if value else 'false'
         elif not isinstance(value, string_types):
-            value = str(value)
+            value = text_type(value)
         self._addon.setSetting(id_, value)
 
     def log(self, message, level=xbmc.LOGDEBUG):
@@ -681,7 +681,7 @@ class Addon(object):
         if duration <= 0:
             raise ValueError('Caching duration cannot be zero or negative!')
         current_time = time.time()
-        key = func.__name__ + str(args) + str(kwargs)
+        key = func.__name__ + text_type(args) + text_type(kwargs)
         try:
             data, timestamp = cache[key]
             if current_time - timestamp > duration * 60:
@@ -987,7 +987,7 @@ class Plugin(Addon):
         """
         self._handle = int(sys.argv[1])
         self._params = self.get_params(sys.argv[2][1:])
-        self.log_debug(str(self))
+        self.log_debug(text_type(self))
         result = self._resolve_function()
         if result is not None:
             self.log_warning('A decorated function must not return any value!')
@@ -999,10 +999,10 @@ class Plugin(Addon):
 
         :return: action callable's return value
         """
-        self.log_debug('Actions: {0}'.format(str(self.actions.keys())))
+        self.log_debug('Actions: {0}'.format(text_type(self.actions.keys())))
         action = self._params.get('action', 'root')
         self.log_debug('Called action "{0}" with params "{1}"'.format(
-            action, str(self._params))
+            action, text_type(self._params))
         )
         try:
             action_callable = self.actions[action]
@@ -1108,21 +1108,22 @@ class RoutedPlugin(Plugin):
         matches = re.findall(r'/(<.+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
-                'Arguments for the route {0} do not match placeholders!'.format(
-                    name_)
+                'Arguments for the route "{0}" '
+                'do not match placeholders!'.format(name_)
             )
         if matches:
             for arg, match in zip(args, matches):
-                if isinstance(arg, text_type):
-                    arg = py2_encode(arg)
-                pattern = pattern.replace(match, quote_plus(str(arg)))
-            # items() allows to manipulate the dict during iteration
+                pattern = pattern.replace(
+                    match,
+                    quote_plus(py2_encode(text_type(arg)))
+                )
+            # list allows to manipulate the dict during iteration
             for key, value in list(kwargs.items()):
                 for match in matches[len(args):]:
                     if key in match:
-                        if isinstance(value, text_type):
-                            value = py2_encode(value)
-                        pattern = pattern.replace(match, quote_plus(str(value)))
+                        pattern = pattern.replace(
+                            match, quote_plus(py2_encode(text_type(value)))
+                        )
                         del kwargs[key]
         url = 'plugin://{0}{1}'.format(self.id, pattern)
         if kwargs:
@@ -1254,7 +1255,7 @@ class RoutedPlugin(Plugin):
                             value = float(value)
                         kwargs[key] = value
                     else:
-                        kwargs[key] = unquote_plus(value)
+                        kwargs[key] = py2_decode(unquote_plus(value))
                 self.log_debug(
                     'Calling {0} with kwargs {1}'.format(route, kwargs))
                 return route.func(**kwargs)

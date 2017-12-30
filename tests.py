@@ -305,11 +305,11 @@ class RoutedPluginTestCase(unittest.TestCase):
 
         @plugin.route('/foo/<param1>/<param2>')
         def test_func(param1, param2):
-            assert param1 == 'ham'
-            assert param2 == 'spam'
-            return []
+            self.assertEqual(param1, 'ham')
+            self.assertEqual(param2, u'спам')
 
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/ham/spam/', '1', '']):
+        with mock.patch('simpleplugin.sys.argv',
+                        ['plugin://test.plugin/foo/ham/%D1%81%D0%BF%D0%B0%D0%BC/', '1', '']):
             plugin.run()
 
     def test_passing_int_and_float(self):
@@ -317,9 +317,8 @@ class RoutedPluginTestCase(unittest.TestCase):
 
         @plugin.route('/foo/<int:param1>/<float:param2>')
         def test_func(param1, param2):
-            assert param1 == 28
-            assert param2 == 3.1416
-            return []
+            self.assertEqual(param1, 28)
+            self.assertEqual(param2, 3.1416)
 
         with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416/', '1', '']):
             plugin.run()
@@ -330,8 +329,7 @@ class RoutedPluginTestCase(unittest.TestCase):
         @plugin.route('/foo', name='foo_route')
         @plugin.route('/bar/<param>')
         def test_func(param='ham'):
-            assert param == 'ham'
-            return []
+            self.assertEqual(param, 'ham')
 
         with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
             plugin.run()
@@ -371,8 +369,8 @@ class PluginUrlForTestCase(unittest.TestCase):
         def test():
             pass
 
-        url = plugin.url_for('test', 'foo', 'bar')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
+        url = plugin.url_for('test', 'foo', u'тест')
+        self.assertEqual(url, u'plugin://test.plugin/foo/%D1%82%D0%B5%D1%81%D1%82/')
 
     def test_building_url_kwargs(self):
         plugin = RoutedPlugin('test.plugin')
