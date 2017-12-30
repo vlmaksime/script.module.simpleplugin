@@ -398,12 +398,12 @@ class Addon(object):
         :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
-        self._configdir = py2_decode(
+        self._profile_dir = py2_decode(
             xbmc.translatePath(self._addon.getAddonInfo('profile'))
         )
         self._ui_strings_map = None
-        if not os.path.exists(self._configdir):
-            os.mkdir(self._configdir)
+        if not os.path.exists(self._profile_dir):
+            os.mkdir(self._profile_dir)
 
     def __getattr__(self, item):
         """
@@ -481,14 +481,14 @@ class Addon(object):
             return ''
 
     @property
-    def config_dir(self):
+    def profile_dir(self):
         """
         Addon config dir
 
-        :return: path to the addon config dir
+        :return: path to the addon profile dir
         :rtype: str
         """
-        return self._configdir
+        return self._profile_dir
 
     @property
     def version(self):
@@ -636,7 +636,7 @@ class Addon(object):
         :return: Storage object
         :rtype: Storage
         """
-        return Storage(self.config_dir, filename)
+        return Storage(self.profile_dir, filename)
 
     def get_mem_storage(self, storage_id='', window_id=10000):
         """
@@ -823,7 +823,7 @@ class Addon(object):
             raw_strings_hash = hashlib.md5(raw_strings).hexdigest()
             gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
-                if (not os.path.exists(os.path.join(self._configdir, gettext_pcl)) or
+                if (not os.path.exists(os.path.join(self._profile_dir, gettext_pcl)) or
                         raw_strings_hash != ui_strings_map['hash']):
                     ui_strings = self._parse_po(
                         raw_strings.decode('utf-8').split('\n')
@@ -991,7 +991,7 @@ class Plugin(Addon):
         self.log_debug(str(self))
         result = self._resolve_function()
         if result is not None:
-            self.log_warning('Decorated function must not return any value!')
+            self.log_warning('A decorated function must not return any value!')
 
     def _resolve_function(self):
         """
