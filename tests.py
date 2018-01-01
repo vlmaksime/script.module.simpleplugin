@@ -11,7 +11,6 @@ import shutil
 import time
 from datetime import datetime
 from collections import defaultdict
-from urllib import quote_plus
 import mock
 
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -89,7 +88,7 @@ sys.modules['xbmcgui'] = mock_xbmcgui
 
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin', 'libs'))
-from simpleplugin import (Storage, Addon, Plugin, RoutedPlugin, SimplePluginError,
+from simpleplugin import (Storage, Addon, Plugin, SimplePluginError,
                           ListContext, PlayContext, MemStorage)
 
 
@@ -482,149 +481,6 @@ class PluginTestCase(unittest.TestCase):
 
         with mock.patch('simpleplugin.sys.argv', ['test.plugin', '1', '?action=foo']):
             self.assertRaises(AssertionError, plugin.run)
-
-
-class RoutedPluginTestCase(unittest.TestCase):
-    def tearDown(self):
-        shutil.rmtree(configdir, True)
-
-    def test_simple_routing(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo')
-        def test_func():
-            raise AssertionError('Test passed!')
-
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
-            self.assertRaises(AssertionError, plugin.run)
-
-    def test_passing_arguments(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo/<param1>/<param2>')
-        def test_func(param1, param2):
-            assert param1 == 'ham'
-            assert param2 == 'spam'
-            return []
-
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/ham/spam/', '1', '']):
-            plugin.run()
-
-    def test_passing_int_and_float(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo/<int:param1>/<float:param2>')
-        def test_func(param1, param2):
-            assert param1 == 28
-            assert param2 == 3.1416
-            return []
-
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416/', '1', '']):
-            plugin.run()
-
-    def test_passing_unicode(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo/<unicode:param>')
-        def test_func(param):
-            assert param == u'Тест'
-            return []
-
-        with mock.patch('simpleplugin.sys.argv',
-                        ['plugin://test.plugin/foo/{0}/'.format(u'Тест'.encode('utf-8')),
-                        '1',
-                        '']):
-            plugin.run()
-
-    def test_multiple_routes(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo', name='foo_route')
-        @plugin.route('/bar/<param>')
-        def test_func(param='ham'):
-            assert param == 'ham'
-            return []
-
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
-            plugin.run()
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/bar/spam/', '1', '']):
-            self.assertRaises(AssertionError, plugin.run)
-
-    def test_routes_with_same_name(self):
-        plugin = RoutedPlugin('test.plugin')
-        try:
-            @plugin.route('/foo')
-            @plugin.route('/bar')
-            def test_func():
-                pass
-        except SimplePluginError:
-            pass
-        else:
-            self.fail('Added 2 routes with the same name!')
-
-
-class PluginUrlForTestCase(unittest.TestCase):
-    def tearDown(self):
-        shutil.rmtree(configdir, True)
-
-    def test_building_simple_url(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/foo')
-        def test():
-            pass
-
-        self.assertEqual(plugin.url_for('test'), 'plugin://test.plugin/foo/')
-
-    def test_building_url_args(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/<param1>/<param2>')
-        def test():
-            pass
-
-        url = plugin.url_for('test', 'foo', 'bar')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
-
-    def test_building_url_kwargs(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/<param1>/<param2>')
-        def test():
-            pass
-
-        url = plugin.url_for('test', param1='foo', param2='bar')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
-
-    def test_building_url_args_kwargs(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/<param1>/<param2>/<param3>')
-        def test():
-            pass
-
-        url = plugin.url_for('test', 'foo', param2='bar', param3='spam')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/')
-
-    def test_building_url_args_kwargs_query(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/<param1>/<param2>/<param3>')
-        def test():
-            pass
-
-        url = plugin.url_for('test', 'foo', param2='bar', param3='spam', param4='ham')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/?param4=ham')
-
-    def test_building_url_int_float_unicode(self):
-        plugin = RoutedPlugin('test.plugin')
-
-        @plugin.route('/<int:param1>/<float:param2>/<unicode:param3>')
-        def test():
-            pass
-
-        url = plugin.url_for('test', param1=1, param2=3.14, param3=u'Тест')
-        self.assertEqual(url, 'plugin://test.plugin/1/3.14/{0}/'.format(quote_plus(u'Тест'.encode('utf-8'))))
 
 
 if __name__ == '__main__':
