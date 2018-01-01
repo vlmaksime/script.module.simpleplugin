@@ -3,20 +3,22 @@
 # Author: Roman Miroshnychenko aka Roman V.M.
 # E-mail: romanvm@yandex.ua
 
+from __future__ import unicode_literals
 import re
 import os
 import shutil
+from io import open
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
-addon_dir = os.path.join(this_dir, 'script.module.simpleplugin')
+addon_dir = os.path.join(this_dir, 'script.module.simpleplugin3')
 
 
 def get_version():
-    with open(os.path.join(addon_dir, 'addon.xml'), 'rb') as addon_xml:
+    with open(os.path.join(addon_dir, 'addon.xml'), 'r', encoding='utf-8') as addon_xml:
         return re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
 
 

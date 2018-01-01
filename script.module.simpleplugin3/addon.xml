@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="script.module.simpleplugin"
+<addon id="script.module.simpleplugin3"
    name="SimplePlugin"
-   version="2.3.2"
+   version="3.0.0"
    provider-name="Roman V.M.">
   <requires>
-    <import addon="xbmc.python" version="2.19.0"/>
+    <import addon="xbmc.python" version="2.25.0"/>
+    <import addon="script.module.six" />
   </requires>
   <extension point="xbmc.python.module" library="libs" />
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary lang="en">SimplePlugin micro-framework</summary>
-    <description lang="en">SimplePlugin micro-framework that simplifies Kodi content plugin programming.</description>
+    <summary lang="en_GB">SimplePlugin micro-framework</summary>
+    <description lang="en_GB">SimplePlugin micro-framework that simplifies Kodi content plugin programming.</description>
     <license>GNU GPL v.3</license>
-    <forum>http://forum.kodi.tv/showthread.php?tid=237532</forum>
+    <forum></forum>
     <website>http://romanvm.github.io/script.module.simpleplugin</website>
-    <email>romanvm@yandex.ua</email>
+    <email>roman1972@gmail.com</email>
     <source>https://github.com/romanvm/script.module.simpleplugin</source>
   </extension>
 </addon>
