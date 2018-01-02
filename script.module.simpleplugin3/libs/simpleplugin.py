@@ -986,9 +986,9 @@ class Plugin(Addon):
 
         :return: action callable's return value
         """
-        self.log_debug('Actions: {0}'.format(text_type(self.actions.keys())))
+        self.log_debug('Actions: {0}'.format(text_type(list(self.actions.keys()))))
         action = self._params.get('action', 'root')
-        self.log_debug('Called action "{0}" with params "{1}"'.format(
+        self.log_debug('Called action {0} with params {1}'.format(
             action, text_type(self._params))
         )
         try:
