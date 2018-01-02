@@ -834,7 +834,11 @@ class Addon(object):
 @python_2_unicode_compatible
 class Plugin(Addon):
     """
-    Plugin class
+    Plugin class with URL query string routing.
+
+    It provides a simplified plugin call routing mechanism using URL query strings.
+    A URL query string must contain "action" parameter that defines which function
+    will be invoked during this plugin call.
 
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
@@ -1000,7 +1004,8 @@ class Plugin(Addon):
 @python_2_unicode_compatible
 class RoutedPlugin(Plugin):
     """
-    Plugin class that implements "pretty URL" routing
+    Plugin class that implements "pretty URL" routing similar to Flask and Bottle
+    web-frameworks
 
     :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
     :type id_: str
