@@ -1097,7 +1097,7 @@ class RoutedPlugin(Plugin):
                     quote_plus(py2_encode(text_type(arg)))
                 )
             # list allows to manipulate the dict during iteration
-            for key, value in list(kwargs.items()):
+            for key, value in list(iteritems(kwargs)):
                 for match in matches[len(args):]:
                     if key in match:
                         pattern = pattern.replace(
