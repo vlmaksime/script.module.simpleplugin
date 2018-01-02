@@ -6,27 +6,87 @@
 SimplePlugin micro-framework simplifies creating addons and content plugins for [Kodi](www.kodi.tv) mediacenter.
 It was inspired by [xbmcswift2](https://github.com/jbeluch/xbmcswift2) and has some similar features
 but SimplePlugin has different concept. Its 2 main goals are simplicity and support for
-both content plugins and general purpose addons. SimplePlugin consists of one module
-with no third-party dependencies, so you can simply include it in your plugin/addon.
-Or you can install it in Kodi as a library module addon.
+both content plugins and general purpose addons. It supports routing plugin
+calls using "pretty" URLs or URL query strings.
 
+## Important Information!
+
+`Plugin` class in SimplePlugin v.3.x is not compatible with earlier versions!
+Previously `Plugin` class supported defining content listings as Python lists
+of dictionaries with necessary properties. However, such excessive abstraction has
+proved to be brittle and prone to breakage with Kodi Python API changes. So
+now this abstraction has been removed and media content listings must be defined
+with `xbmcplugin` module functions. That is why SimplePlugin v.3.x has
+a different addon ID (`script.module.simpleplugin3`) sot that
+not to break existing plugins that depend on it.
+For SimplePlugin v.2.x code see `legacy` branch.
 
 ## Main Features
 
-* Simplified creating of content lists: each list item is defined as a dictionary and the properties of the list item
-  are set as dictionary `key: value` pairs.
-* Automated plugin callback routing based on actions, that is, functions marked with
-  a special decorator.
+* Automated plugin call routing based on "pretty" URLs or URL query strings
+  using function decorators.
 * Convenience methods for simplified access to addon/plugin parameters and settings.
 * Persistent dictionary-like storage for storing addon's data.
 * Caching decorator that allows to cache function return data for a specified amount time,
   for example, to reduce the frequency of polling data from some website.
-* GNU Gettext emulation for simplified addon GUI localization: you can use English source strings in your Python code
-  instead of non-obvious numeric string codes.
-
-## Minimal Plugin Example
+* GNU Gettext emulation for simplified addon GUI localization: you can use
+  English source strings in your Python code instead of non-obvious numeric string codes.
+* Compatible with Python 3 for future Kodi versions.
+  
+## Minimal Plugin Example with "Pretty" URL Routing
 
 ```python
+import xbmcgui
+import xbmcplugin
+from simpleplugin import RoutedPlugin
+
+plugin = RoutedPlugin()
+
+# Free video sample is provided by www.vidsplay.com
+
+@plugin.route('/')
+def root():
+    """
+    Root virtual folder
+    
+    This is a mandatory item.
+    """
+    li = xbmcgui.ListItem('My Videos')
+    li.setArt({'thumb': 'DefaultFolder.png'})
+    # URL: plugin://plugin.video.foo/subfolder/
+    url = plugin.url_for('subfolder')
+    xbmcplugin.addDirectoryItem(plugin.handle, url, li, isFolder=True)
+    xbmcplugin.endOfDirectory(plugin.handle)
+
+
+@plugin.route('/subfolder')
+def subfolder():
+    """Virtual subfolder"""
+    li = xbmcgui.ListItem('Ocean Birds')
+    li.setArt({'thumb': 'http://www.vidsplay.com/vids/ocean_birds.jpg'})
+    li.setProperty('isPlayable', 'true')
+    url = plugin.url_for('play', video='http://www.vidsplay.com/vids/ocean_birds.mp4')
+    xbmcplugin.addDirectoryItem(plugin.handle, url, li, isFolder=False)
+    xbmcplugin.endOfDirectory(plugin.handle)
+
+
+# An action can take an optional argument.
+@plugin.route('/play/<video>')
+def play(video):
+    """Play video"""
+    li = xbmcgui.ListItem(path=video)
+    xbmcplugin.setResolvedUrl(plugin.handle, True, li)
+
+
+if __name__ == '__main__':
+    plugin.run()  # Start plugin
+```
+
+## Minimal Plugin Example with URL Query String Routing
+
+```python
+import xbmcgui
+import xbmcplugin
 from simpleplugin import Plugin
 
 plugin = Plugin()
@@ -38,21 +98,25 @@ def root():
     """
     Root virtual folder
     
-    This is mandatory item.
+    This is a mandatory item.
     """
-    # Create 1-item list with a link to subfolder item
-    return [{'label': 'Subfolder',
-            'url': plugin.get_url(action='subfolder')}]
+    li = xbmcgui.ListItem('My Videos')
+    li.setArt({'thumb': 'DefaultFolder.png'})
+    # URL: plugin://plugin.video.foo/?action=subfolder
+    url = plugin.get_url(action=subfolder)
+    xbmcplugin.addDirectoryItem(plugin.handle, url, li, isFolder=True)
+    xbmcplugin.endOfDirectory(plugin.handle)
 
 
 @plugin.action()
 def subfolder():
     """Virtual subfolder"""
-    # Create 1-item list with a link to a playable video.
-    return [{'label': 'Ocean Birds',
-            'thumb': 'http://www.vidsplay.com/vids/ocean_birds.jpg',
-            'url': plugin.get_url(action='play', url='http://www.vidsplay.com/vids/ocean_birds.mp4'),
-            'is_playable': True}]
+    li = xbmcgui.ListItem('Ocean Birds')
+    li.setArt({'thumb': 'http://www.vidsplay.com/vids/ocean_birds.jpg'})
+    li.setProperty('isPlayable', 'true')
+    url = plugin.get_url(action=play, video='http://www.vidsplay.com/vids/ocean_birds.mp4')
+    xbmcplugin.addDirectoryItem(plugin.handle, url, li, isFolder=False)
+    xbmcplugin.endOfDirectory(plugin.handle)
 
 
 # An action can take an optional argument that contain
@@ -61,8 +125,8 @@ def subfolder():
 @plugin.action()
 def play(params):
     """Play video"""
-    # Return a string containing a playable video URL
-    return params.url
+    li = xbmcgui.ListItem(path=params.video)
+    xbmcplugin.setResolvedUrl(plugin.handle, True, li)
 
 
 if __name__ == '__main__':
