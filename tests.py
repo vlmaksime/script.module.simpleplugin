@@ -67,7 +67,7 @@ mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = lambda path: path
-mock_xbmc.log = lambda msg, level: print(msg)
+# mock_xbmc.log = lambda msg, level: print(msg)
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
