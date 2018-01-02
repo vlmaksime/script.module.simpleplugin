@@ -1239,7 +1239,6 @@ class RoutedPlugin(Plugin):
                     'Calling {0} with kwargs {1}'.format(route, kwargs))
                 with debug_exception(self.log_error):
                     return route.func(**kwargs)
-
         raise SimplePluginError(
             'No route matches the path "{0}"!'.format(path)
         )
