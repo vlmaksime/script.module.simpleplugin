@@ -999,12 +999,13 @@ class Plugin(Addon):
                 ex
             )
         else:
-            # inspect.isfunction is needed for tests
-            if (inspect.isfunction(action_callable) and
-                    not getargspec(action_callable).args):
-                return action_callable()
-            else:
-                return action_callable(self._params)
+            with debug_exception(self.log_error):
+                # inspect.isfunction is needed for tests
+                if (inspect.isfunction(action_callable) and
+                        not getargspec(action_callable).args):
+                    return action_callable()
+                else:
+                    return action_callable(self._params)
 
 
 @python_2_unicode_compatible
@@ -1242,7 +1243,8 @@ class RoutedPlugin(Plugin):
                         kwargs[key] = py2_decode(unquote_plus(value))
                 self.log_debug(
                     'Calling {0} with kwargs {1}'.format(route, kwargs))
-                return route.func(**kwargs)
+                with debug_exception(self.log_error):
+                    return route.func(**kwargs)
 
         raise SimplePluginError(
             'No route matches the path "{0}"!'.format(path)
