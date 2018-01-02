@@ -1,3 +1,5 @@
+2.3.2:
+  - Fixed various bugs.
 2.3.1:
   - Fixed NOTICE logging.
 2.3.0:
