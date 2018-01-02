@@ -423,9 +423,9 @@ class Addon(object):
         Addon path
 
         :return: path to the addon folder
-        :rtype: str
+        :rtype: unicode
         """
-        return self._addon.getAddonInfo('path').decode('utf-8')
+        return py2_decode(self._addon.getAddonInfo('path'))
 
     @property
     def icon(self):
