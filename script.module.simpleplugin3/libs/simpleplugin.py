@@ -1223,7 +1223,7 @@ class RoutedPlugin(Plugin):
             if match is not None:
                 kwargs = match.groupdict()
                 # list allows to manipulate the dict during iteration
-                for key, value in list(kwargs.items()):
+                for key, value in list(iteritems(kwargs)):
                     if key.startswith('int__') or key.startswith('float__'):
                         del kwargs[key]
                         if key.startswith('int__'):
