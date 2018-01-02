@@ -1019,7 +1019,7 @@ class RoutedPlugin(Plugin):
         self._routes = {}
 
     def __str__(self):
-        return '<RotuedPlugin {0}>'.format(sys.argv)
+        return '<RoutedPlugin {0}>'.format(sys.argv)
 
     def url_for(self, name_, *args, **kwargs):
         """
@@ -1052,7 +1052,7 @@ class RoutedPlugin(Plugin):
             def foo():
                 pass
             url = plugin.url_for('foo')
-            # url = 'plugin://plugin.acme/foo/'
+            # url = 'plugin://plugin.acme/foo'
 
         Example 2::
 
@@ -1060,7 +1060,7 @@ class RoutedPlugin(Plugin):
             def foo(param):
                 pass
             url = plugin.url_for('foo', param='bar')
-            # url = 'plugin://plugin.acme/foo/bar/'
+            # url = 'plugin://plugin.acme/foo/bar'
 
         Example 3::
 
@@ -1068,7 +1068,7 @@ class RoutedPlugin(Plugin):
             def foo(param):
                 pass
             url = plugin.url_for('foo', param='bar', ham='spam')
-            # url = 'plugin://plugin.acme/foo/bar/?ham=spam
+            # url = 'plugin://plugin.acme/foo/bar?ham=spam
 
         :param name_: route's name.
         :type name_: str
@@ -1084,7 +1084,7 @@ class RoutedPlugin(Plugin):
                 SimplePluginError('Route "{0}" does not exist!'.format(name_)),
                 ex
             )
-        matches = re.findall(r'/(<.+?>)', pattern)
+        matches = re.findall(r'/(<\w+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
                 'Arguments for the route "{0}" '
@@ -1179,8 +1179,7 @@ class RoutedPlugin(Plugin):
         arguments to the function. The order of the ``route`` decorators
         does not matter but each route must have a unique name.
 
-        .. note:: A forward slash ``/`` at the end of a route pattern
-            is optional.
+        .. warning:: A route pattern must not end with a forward slash ``/``!
 
         :param pattern: route matching pattern
         :type pattern: str
@@ -1196,8 +1195,6 @@ class RoutedPlugin(Plugin):
                 raise SimplePluginError(
                     'The route "{0}" already exists!'.format(name)
                 )
-            if not pattern.endswith('/'):
-                pattern += '/'
             pattern = pattern.replace('int:', 'int__'
                                       ).replace('float:', 'float__')
             self._routes[name] = Route(pattern, func)
@@ -1216,7 +1213,7 @@ class RoutedPlugin(Plugin):
         for route in itervalues(self._routes):
             pattern = route.pattern
             while True:
-                pattern, count = re.subn(r'/(<.+?>)/', r'/(?P\1.+?)/', pattern)
+                pattern, count = re.subn(r'/(<\w+?>)', r'/(?P\1.+?)', pattern)
                 if not count:
                     break
             match = re.search(r'^' + pattern + r'$', path)
@@ -1236,7 +1233,7 @@ class RoutedPlugin(Plugin):
                     else:
                         kwargs[key] = py2_decode(unquote_plus(value))
                 self.log_debug(
-                    'Calling {0} with kwargs {1}'.format(route, kwargs))
+                    'Calling route {0} with kwargs {1}'.format(route, kwargs))
                 with debug_exception(self.log_error):
                     return route.func(**kwargs)
         raise SimplePluginError(

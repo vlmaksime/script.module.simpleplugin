@@ -297,7 +297,7 @@ class RoutedPluginTestCase(unittest.TestCase):
         def test_func():
             raise AssertionError('Test passed!')
 
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo', '1', '']):
             self.assertRaises(AssertionError, plugin.run)
 
     def test_passing_arguments(self):
@@ -309,7 +309,7 @@ class RoutedPluginTestCase(unittest.TestCase):
             self.assertEqual(param2, u'спам')
 
         with mock.patch('simpleplugin.sys.argv',
-                        ['plugin://test.plugin/foo/ham/%D1%81%D0%BF%D0%B0%D0%BC/', '1', '']):
+                        ['plugin://test.plugin/foo/ham/%D1%81%D0%BF%D0%B0%D0%BC', '1', '']):
             plugin.run()
 
     def test_passing_int_and_float(self):
@@ -320,7 +320,7 @@ class RoutedPluginTestCase(unittest.TestCase):
             self.assertEqual(param1, 28)
             self.assertEqual(param2, 3.1416)
 
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416/', '1', '']):
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/28/3.1416', '1', '']):
             plugin.run()
 
     def test_multiple_routes(self):
@@ -331,9 +331,9 @@ class RoutedPluginTestCase(unittest.TestCase):
         def test_func(param='ham'):
             self.assertEqual(param, 'ham')
 
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo/', '1', '']):
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/foo', '1', '']):
             plugin.run()
-        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/bar/spam/', '1', '']):
+        with mock.patch('simpleplugin.sys.argv', ['plugin://test.plugin/bar/spam', '1', '']):
             self.assertRaises(AssertionError, plugin.run)
 
     def test_routes_with_same_name(self):
@@ -360,7 +360,7 @@ class PluginUrlForTestCase(unittest.TestCase):
         def test():
             pass
 
-        self.assertEqual(plugin.url_for('test'), 'plugin://test.plugin/foo/')
+        self.assertEqual(plugin.url_for('test'), 'plugin://test.plugin/foo')
 
     def test_building_url_args(self):
         plugin = RoutedPlugin('test.plugin')
@@ -370,7 +370,7 @@ class PluginUrlForTestCase(unittest.TestCase):
             pass
 
         url = plugin.url_for('test', 'foo', u'тест')
-        self.assertEqual(url, u'plugin://test.plugin/foo/%D1%82%D0%B5%D1%81%D1%82/')
+        self.assertEqual(url, u'plugin://test.plugin/foo/%D1%82%D0%B5%D1%81%D1%82')
 
     def test_building_url_kwargs(self):
         plugin = RoutedPlugin('test.plugin')
@@ -380,7 +380,7 @@ class PluginUrlForTestCase(unittest.TestCase):
             pass
 
         url = plugin.url_for('test', param1='foo', param2='bar')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar')
 
     def test_building_url_args_kwargs(self):
         plugin = RoutedPlugin('test.plugin')
@@ -390,7 +390,7 @@ class PluginUrlForTestCase(unittest.TestCase):
             pass
 
         url = plugin.url_for('test', 'foo', param2='bar', param3='spam')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam')
 
     def test_building_url_args_kwargs_query(self):
         plugin = RoutedPlugin('test.plugin')
@@ -400,17 +400,17 @@ class PluginUrlForTestCase(unittest.TestCase):
             pass
 
         url = plugin.url_for('test', 'foo', param2='bar', param3='spam', param4='ham')
-        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam/?param4=ham')
+        self.assertEqual(url, 'plugin://test.plugin/foo/bar/spam?param4=ham')
 
     def test_building_url_int_float(self):
         plugin = RoutedPlugin('test.plugin')
 
-        @plugin.route('/<int:param1>/<float:param2>/')
+        @plugin.route('/<int:param1>/<float:param2>')
         def test():
             pass
 
         url = plugin.url_for('test', param1=1, param2=3.14)
-        self.assertEqual(url, 'plugin://test.plugin/1/3.14/')
+        self.assertEqual(url, 'plugin://test.plugin/1/3.14')
 
 
 class DebugExceptionTestCase(unittest.TestCase):
