@@ -1189,7 +1189,7 @@ class RoutedPlugin(Plugin):
             The name must be unique.
         :type name: str
         """
-        def wrap(func, pattern=pattern, name=name):
+        def wrapper(func, pattern=pattern, name=name):
             if name is None:
                 name = func.__name__
             if name in self._routes:
@@ -1202,7 +1202,7 @@ class RoutedPlugin(Plugin):
                                       ).replace('float:', 'float__')
             self._routes[name] = Route(pattern, func)
             return func
-        return wrap
+        return wrapper
 
     def _resolve_function(self):
         """
