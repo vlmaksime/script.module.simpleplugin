@@ -974,7 +974,10 @@ class Plugin(Addon):
         self.log_debug(text_type(self))
         result = self._resolve_function()
         if result is not None:
-            self.log_warning('A decorated function must not return any value!')
+            raise SimplePluginError(
+                'A decorated function must not return any value! '
+                'It returned {0} instead.'.format(result)
+            )
 
     def _resolve_function(self):
         """

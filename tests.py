@@ -67,6 +67,7 @@ mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = lambda path: path
+mock_xbmc.log = lambda msg, level: print(msg)
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
@@ -252,6 +253,8 @@ class PluginTestCase(unittest.TestCase):
     def test_run(self):
         plugin = Plugin('test.plugin')
         mock_actions = mock.MagicMock()
+        mock_actions.root.return_value = None
+        mock_actions.foo.return_value = None
         plugin.actions['root'] = mock_actions.root
         plugin.actions['foo'] = mock_actions.foo
         # Test calling 'root' action
