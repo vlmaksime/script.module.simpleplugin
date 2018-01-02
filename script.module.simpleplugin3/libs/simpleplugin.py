@@ -160,12 +160,7 @@ class Params(dict):
         return self.get(key)
 
     def __str__(self):
-        return '<Params {0}>'.format(super(Params, self).__repr__())
-
-    def __repr__(self):
-        return '<simpleplugin.Params object {0}>'.format(
-            super(Params, self).__repr__()
-        )
+        return '<Params {0}>'.format(super(Params, self).__str__())
 
 
 @python_2_unicode_compatible
@@ -234,9 +229,6 @@ class Storage(MutableMapping):
 
     def __str__(self):
         return '<Storage {0}>'.format(self._storage)
-
-    def __repr__(self):
-        return '<simpleplugin.Storage object {0}>'.format(self._storage)
 
     def flush(self):
         """
@@ -332,11 +324,6 @@ class MemStorage(MutableMapping):
     def __str__(self):
         return '<MemStorage {{{0}}}>'.format(self._format_contents())
 
-    def __repr__(self):
-        return '<simpleplugin.MemStorage object {{{0}}}'.format(
-            self._format_contents()
-        )
-
     def __getitem__(self, key):
         self._check_key(key)
         full_key = py2_encode('{0}__{1}'.format(self._id, key))
@@ -420,9 +407,6 @@ class Addon(object):
 
     def __str__(self):
         return '<Addon [{0}]>'.format(self.id)
-
-    def __repr__(self):
-        return '<simpleplugin.Addon object [{0}]>'.format(self.id)
 
     @property
     def addon(self):
@@ -881,9 +865,6 @@ class Plugin(Addon):
     def __str__(self):
         return '<Plugin {0}>'.format(sys.argv)
 
-    def __repr__(self):
-        return '<simpleplugin.Plugin object {0}>'.format(sys.argv)
-
     @property
     def params(self):
         """
@@ -1041,9 +1022,6 @@ class RoutedPlugin(Plugin):
 
     def __str__(self):
         return '<RotuedPlugin {0}>'.format(sys.argv)
-
-    def __repr__(self):
-        return '<simpleplugin.RotuedPlugin object {0}>'.format(sys.argv)
 
     def url_for(self, name_, *args, **kwargs):
         """
