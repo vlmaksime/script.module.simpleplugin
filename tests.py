@@ -9,7 +9,6 @@ import sys
 import unittest
 import shutil
 import time
-from datetime import datetime
 from collections import defaultdict
 import mock
 
@@ -18,10 +17,6 @@ configdir = os.path.join(cwd, 'config')
 
 
 # Fake test objects
-
-def fake_translate_path(path):
-    return path
-
 
 class FakeAddon(object):
     def __init__(self, id_='test.addon'):
@@ -35,6 +30,10 @@ class FakeAddon(object):
             return configdir
         elif info_id == 'id':
             return self._id
+        elif info_id == 'version':
+            return '0.0.1'
+        else:
+            return ''
 
     def getSetting(self, setting_id):
         return self._settings.get(setting_id, '')
@@ -67,7 +66,7 @@ mock_xbmcaddon.Addon.side_effect = FakeAddon
 mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
-mock_xbmc.translatePath.side_effect = fake_translate_path
+mock_xbmc.translatePath.side_effect = lambda path: path
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
@@ -191,7 +190,7 @@ class AddonTestCase(unittest.TestCase):
 
         @addon.cached()
         def tester(*args):
-            return str(datetime.now())
+            return str(time.time())
 
         test1 = tester('arg1')
         time.sleep(0.5)
@@ -204,7 +203,7 @@ class AddonTestCase(unittest.TestCase):
 
             @addon.mem_cached()
             def tester(*args):
-                return str(datetime.now())
+                return str(time.time())
 
             test1 = tester('arg1')
             time.sleep(0.5)
