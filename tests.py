@@ -70,8 +70,6 @@ mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = fake_translate_path
 
 mock_xbmcgui = mock.MagicMock()
-mock_ListItem = mock.MagicMock()
-mock_xbmcgui.ListItem.return_value = mock_ListItem
 mock_xbmcgui.Window = FakeWindow
 
 sys.modules['xbmcaddon'] = mock_xbmcaddon
