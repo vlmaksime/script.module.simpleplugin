@@ -1,3 +1,5 @@
+3.0.0
+  - Reworked ans simplified API that is incompatible with previous versions.
 2.3.2:
   - Fixed various bugs.
 2.3.1:
