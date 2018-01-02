@@ -394,17 +394,6 @@ class Addon(object):
         if not os.path.exists(self._profile_dir):
             os.mkdir(self._profile_dir)
 
-    def __getattr__(self, item):
-        """
-        Get addon setting as an Addon instance attribute
-
-        E.g. addon.my_setting is equal to addon.get_setting('my_setting')
-
-        :param item:
-        :type item: str
-        """
-        return self.get_setting(item)
-
     def __str__(self):
         return '<Addon [{0}]>'.format(self.id)
 
