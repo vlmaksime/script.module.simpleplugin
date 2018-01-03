@@ -1243,7 +1243,7 @@ class RoutedPlugin(Plugin):
                     else:
                         kwargs[key] = py2_decode(unquote_plus(value))
                 self.log_debug(
-                    'Calling route {0} with kwargs {1}'.format(route, kwargs))
+                    'Calling {0} with kwargs {1}'.format(route, kwargs))
                 with debug_exception(self.log_error):
                     return route.func(**kwargs)
         raise SimplePluginError(
