@@ -1179,7 +1179,8 @@ class RoutedPlugin(Plugin):
         arguments to the function. The order of the ``route`` decorators
         does not matter but each route must have a unique name.
 
-        .. warning:: A route pattern must not end with a forward slash ``/``!
+        .. note:: A route pattern must start with a forward slash ``/``
+            and must not have a slash at the end.
 
         :param pattern: route matching pattern
         :type pattern: str
