@@ -1021,7 +1021,7 @@ class RoutedPlugin(Plugin):
     def __str__(self):
         return '<RoutedPlugin {0}>'.format(sys.argv)
 
-    def url_for(self, name_, *args, **kwargs):
+    def url_for(self, func_, *args, **kwargs):
         """
         Build a URL for a plugin route
 
@@ -1070,25 +1070,34 @@ class RoutedPlugin(Plugin):
             url = plugin.url_for('foo', param='bar', ham='spam')
             # url = 'plugin://plugin.acme/foo/bar?ham=spam
 
-        :param name_: route's name.
-        :type name_: str
-        :return: full plugin callback URL for the route.
+        :param func_: route's name or a decorated function object.
+        :type func_: str or types.FunctionType
+        :param args: positional arguments.
+        :param kwargs: keyword arguments.
+        :return: full plugin call URL for the route.
         :rtype: str
         :raises simpleplugin.SimplePluginError: if a route with such name
             does not exist or on arguments mismatch.
         """
+        if isinstance(func_, string_types):
+            name = func_
+        elif inspect.isfunction(func_) or inspect.ismethod(func_):
+            name = func_.__name__
+        else:
+            raise TypeError('The first argument to url_for must be '
+                            'a route\'s name or a route function object!')
         try:
-            pattern = self._routes[name_].pattern
+            pattern = self._routes[name].pattern
         except KeyError as ex:
             raise_from(
-                SimplePluginError('Route "{0}" does not exist!'.format(name_)),
+                SimplePluginError('Route "{0}" does not exist!'.format(name)),
                 ex
             )
         matches = re.findall(r'/(<\w+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
                 'Arguments for the route "{0}" '
-                'do not match placeholders!'.format(name_)
+                'do not match placeholders!'.format(name)
             )
         if matches:
             for arg, match in zip(args, matches):

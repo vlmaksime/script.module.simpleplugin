@@ -361,6 +361,7 @@ class PluginUrlForTestCase(unittest.TestCase):
             pass
 
         self.assertEqual(plugin.url_for('test'), 'plugin://test.plugin/foo')
+        self.assertEqual(plugin.url_for(test), 'plugin://test.plugin/foo')
 
     def test_building_url_args(self):
         plugin = RoutedPlugin('test.plugin')
