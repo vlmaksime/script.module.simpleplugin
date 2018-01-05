@@ -359,9 +359,7 @@ class MemStorage(MutableMapping):
         self._check_key(key)
         full_key = py2_encode('{0}__{1}'.format(self._id, key))
         item = self._window.getProperty(full_key)
-        if item:
-            return True
-        return False
+        return bool(item)
 
     def __iter__(self):
         return iter(self['__keys__'])
