@@ -10,7 +10,7 @@ SimplePlugin micro-framework for Kodi content plugins
 
 from __future__ import unicode_literals
 from builtins import *
-from past.types import basestring
+from past.types import basestring, long
 from future.utils import (PY2, PY3, iteritems, itervalues,
                           python_2_unicode_compatible)
 from future.standard_library import install_aliases
@@ -40,7 +40,6 @@ __all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin',
            'py2_decode']
 
 if PY3:
-    long = int
     getargspec = inspect.getfullargspec
 else:
     getargspec = inspect.getargspec
