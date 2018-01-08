@@ -18,6 +18,11 @@ configdir = os.path.join(cwd, 'config')
 
 # Fake test objects
 
+def fake_log(msg, level=0):
+    if not isinstance(msg, str):
+        raise TypeError('log message must be of str type!')
+
+
 class FakeAddon(object):
     def __init__(self, id_='test.addon'):
         self._id = id_
@@ -67,7 +72,7 @@ mock_xbmc = mock.MagicMock()
 mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = lambda path: path
-# mock_xbmc.log = lambda msg, level: print(msg)
+mock_xbmc.log = fake_log
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
