@@ -2,7 +2,7 @@ language: python
 python:
   - "2.7"
   - "3.6"
-install: pip install codecov mock six
+install: pip install codecov mock future
 script: coverage run tests.py
 after_success: codecov
 before_deploy:

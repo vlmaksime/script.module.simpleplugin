@@ -9,23 +9,28 @@ SimplePlugin micro-framework for Kodi content plugins
 """
 
 from __future__ import unicode_literals
+from builtins import *
+from past.types import basestring
+from future.utils import (PY2, PY3, iteritems, itervalues,
+                          python_2_unicode_compatible)
+from future.standard_library import install_aliases
+install_aliases()
+
 import os
 import sys
 import re
 import inspect
 import time
 import hashlib
+import pickle
 from io import open
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
+from functools import wraps
 from shutil import move
 from contextlib import contextmanager
 from pprint import pformat
-from six import (PY2, PY3, python_2_unicode_compatible, iteritems, itervalues,
-                 text_type, binary_type, string_types, wraps, raise_from)
-from six.moves import cPickle as pickle
-from six.moves.urllib.parse import (parse_qs, urlparse, urlencode, quote_plus,
-                                    unquote_plus)
+from urllib.parse import parse_qs, urlencode, quote_plus, urlparse, unquote_plus
 import xbmcaddon
 import xbmc
 import xbmcgui
@@ -71,7 +76,7 @@ def py2_encode(s, encoding='utf-8'):
 
     In Python 3 the string is not changed.
     """
-    if PY2 and isinstance(s, text_type):
+    if PY2 and isinstance(s, str):
         s = s.encode(encoding)
     return s
 
@@ -82,7 +87,7 @@ def py2_decode(s, encoding='utf-8'):
 
     In Python 3 the string is not changed.
     """
-    if PY2 and isinstance(s, binary_type):
+    if PY2 and isinstance(s, bytes):
         s = s.decode(encoding)
     return s
 
@@ -125,9 +130,9 @@ def debug_exception(logger=None):
         context = ''
         for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
             if i == frame_info[2]:
-                context += '{0}:>{1}'.format(text_type(i).rjust(5), line)
+                context += '{0}:>{1}'.format(str(i).rjust(5), line)
             else:
-                context += '{0}: {1}'.format(text_type(i).rjust(5), line)
+                context += '{0}: {1}'.format(str(i).rjust(5), line)
         logger('Code context:\n' + context)
         logger('Global variables:\n' + _format_vars(frame_info[0].f_globals))
         logger('Local variables:\n' + _format_vars(frame_info[0].f_locals))
@@ -309,7 +314,7 @@ class MemStorage(MutableMapping):
         """
         :type key: str
         """
-        if not isinstance(key, string_types):
+        if not isinstance(key, basestring):
             raise TypeError('Storage key must be of str type!')
 
     def _format_contents(self):
@@ -504,7 +509,7 @@ class Addon(object):
         :type convert: bool
         :return: setting value
         """
-        setting = self._addon.getSetting(id_)
+        setting = py2_decode(self._addon.getSetting(id_))
         if convert:
             if setting == 'true':
                 return True  # Convert boolean strings to bool
@@ -533,9 +538,9 @@ class Addon(object):
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
-        elif not isinstance(value, string_types):
-            value = text_type(value)
-        self._addon.setSetting(id_, value)
+        elif not isinstance(value, basestring):
+            value = str(value)
+        self._addon.setSetting(id_, py2_encode(value))
 
     def log(self, message, level=xbmc.LOGDEBUG):
         """
@@ -655,7 +660,7 @@ class Addon(object):
         if duration <= 0:
             raise ValueError('Caching duration cannot be zero or negative!')
         current_time = time.time()
-        key = func.__name__ + text_type(args) + text_type(kwargs)
+        key = func.__name__ + str(args) + str(kwargs)
         try:
             data, timestamp = cache[key]
             if current_time - timestamp > duration * 60:
@@ -742,14 +747,11 @@ class Addon(object):
                 return self.get_localized_string(
                     self._ui_strings_map['strings'][ui_string]
                 )
-            except KeyError as ex:
-                raise_from(
-                    SimplePluginError(
+            except KeyError:
+                raise SimplePluginError(
                     'UI string "{0}" is not found in strings.po!'.format(
                         ui_string)
-                    ),
-                    ex
-                )
+                    )
         else:
             raise SimplePluginError('Addon localization is not initialized!')
 
@@ -962,7 +964,7 @@ class Plugin(Addon):
         """
         self._handle = int(sys.argv[1])
         self._params = self.get_params(sys.argv[2][1:])
-        self.log_debug(text_type(self))
+        self.log_debug(str(self))
         result = self._resolve_function()
         if result is not None:
             raise SimplePluginError(
@@ -977,18 +979,15 @@ class Plugin(Addon):
 
         :return: action callable's return value
         """
-        self.log_debug('Actions: {0}'.format(text_type(list(self.actions.keys()))))
+        self.log_debug('Actions: {0}'.format(str(list(self.actions.keys()))))
         action = self._params.get('action', 'root')
         self.log_debug('Called action {0} with params {1}'.format(
-            action, text_type(self._params))
+            action, str(self._params))
         )
         try:
             action_callable = self.actions[action]
-        except KeyError as ex:
-            raise_from(
-                SimplePluginError('Invalid action: "{0}"!'.format(action)),
-                ex
-            )
+        except KeyError:
+            raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
             with debug_exception(self.log_error):
                 # inspect.isfunction is needed for tests
@@ -1077,7 +1076,7 @@ class RoutedPlugin(Plugin):
         :raises simpleplugin.SimplePluginError: if a route with such name
             does not exist or on arguments mismatch.
         """
-        if isinstance(func_, string_types):
+        if isinstance(func_, basestring):
             name = func_
         elif inspect.isfunction(func_) or inspect.ismethod(func_):
             name = func_.__name__
@@ -1086,11 +1085,8 @@ class RoutedPlugin(Plugin):
                             'a route\'s name or a route function object!')
         try:
             pattern = self._routes[name].pattern
-        except KeyError as ex:
-            raise_from(
-                SimplePluginError('Route "{0}" does not exist!'.format(name)),
-                ex
-            )
+        except KeyError:
+            raise SimplePluginError('Route "{0}" does not exist!'.format(name))
         matches = re.findall(r'/(<\w+?>)', pattern)
         if len(args) + len(kwargs) < len(matches) or len(args) > len(matches):
             raise SimplePluginError(
@@ -1101,14 +1097,14 @@ class RoutedPlugin(Plugin):
             for arg, match in zip(args, matches):
                 pattern = pattern.replace(
                     match,
-                    quote_plus(py2_encode(text_type(arg)))
+                    quote_plus(py2_encode(str(arg)))
                 )
             # list allows to manipulate the dict during iteration
             for key, value in list(iteritems(kwargs)):
                 for match in matches[len(args):]:
                     if key in match:
                         pattern = pattern.replace(
-                            match, quote_plus(py2_encode(text_type(value)))
+                            match, quote_plus(py2_encode(str(value)))
                         )
                         del kwargs[key]
         url = 'plugin://{0}{1}'.format(self.id, pattern)
