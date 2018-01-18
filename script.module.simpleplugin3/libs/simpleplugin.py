@@ -30,6 +30,7 @@ from functools import wraps
 from shutil import copyfile
 from contextlib import contextmanager
 from pprint import pformat
+from platform import uname
 from urllib.parse import parse_qs, urlencode, quote_plus, urlparse, unquote_plus
 import xbmcaddon
 import xbmc
@@ -126,9 +127,14 @@ def debug_exception(logger=None):
     except:
         if logger is None:
             logger = lambda msg: xbmc.log(py2_encode(msg), xbmc.LOGERROR)
+        frame_info = inspect.trace(5)[-1]
         logger('Unhandled exception detected!')
         logger('*** Start diagnostic info ***')
-        frame_info = inspect.trace(5)[-1]
+        logger('System info: {0}'.format(uname()))
+        logger('OS info: {0}'.format(xbmc.getInfoLabel('System.OSVersionInfo')))
+        logger('Kodi version: {0}'.format(
+            xbmc.getInfoLabel('System.BuildVersion'))
+        )
         logger('File: {0}'.format(frame_info[1]))
         context = ''
         for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
