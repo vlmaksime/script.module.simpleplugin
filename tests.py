@@ -136,6 +136,7 @@ class MemStorageTestCase(unittest.TestCase):
         storage['ham'] = 'spam'
         self.assertEqual(storage['ham'], 'spam')
         self.assertTrue('ham' in storage)
+        print(storage)  # Test __str__ method
         del storage['ham']
         self.assertFalse('ham' in storage)
         self.assertRaises(KeyError, storage.__getitem__, 'bar')
