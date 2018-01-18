@@ -242,7 +242,7 @@ class Storage(MutableMapping):
         and invalidates the Storage instance. Unchanged Storage is not saved
         but simply invalidated.
         """
-        contents = pickle.dumps(self._storage)
+        contents = pickle.dumps(self._storage, protocol=2)
         if self._hash is None or hashlib.md5(contents).hexdigest() != self._hash:
             tmp = self._filename + '.tmp'
             try:
@@ -340,7 +340,8 @@ class MemStorage(MutableMapping):
     def __setitem__(self, key, value):
         self._check_key(key)
         full_key = py2_encode('{0}__{1}'.format(self._id, key))
-        self._window.setProperty(full_key, pickle.dumps(value))
+        # protocol=0 is needed for safe string handling in Python 3
+        self._window.setProperty(full_key, pickle.dumps(value, protocol=0))
         if key != '__keys__':
             keys = self['__keys__']
             keys.append(key)
