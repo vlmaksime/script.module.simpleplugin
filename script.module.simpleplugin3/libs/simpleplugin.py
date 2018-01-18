@@ -27,7 +27,7 @@ from io import open
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from functools import wraps
-from shutil import move
+from shutil import copyfile
 from contextlib import contextmanager
 from pprint import pformat
 from urllib.parse import parse_qs, urlencode, quote_plus, urlparse, unquote_plus
@@ -49,6 +49,10 @@ Route = namedtuple('Route', ['pattern', 'func'])
 
 class SimplePluginError(Exception):
     """Custom exception"""
+    pass
+
+
+class TimeoutError(SimplePluginError):
     pass
 
 
@@ -245,13 +249,19 @@ class Storage(MutableMapping):
         contents = pickle.dumps(self._storage, protocol=2)
         if self._hash is None or hashlib.md5(contents).hexdigest() != self._hash:
             tmp = self._filename + '.tmp'
+            start = time.time()
+            while os.path.exists(tmp):
+                if time.time() - start > 2.0:
+                    raise TimeoutError(
+                        'Exceeded timeout for saving {0} contents!'.format(self)
+                    )
+                xbmc.sleep(100)
             try:
                 with open(tmp, 'wb') as fo:
                     fo.write(contents)
-            except:
+                copyfile(tmp, self._filename)
+            finally:
                 os.remove(tmp)
-                raise
-            move(tmp, self._filename)  # Atomic save
         del self._storage
 
     def copy(self):
