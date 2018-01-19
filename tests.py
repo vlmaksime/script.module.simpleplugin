@@ -84,7 +84,7 @@ sys.modules['xbmcgui'] = mock_xbmcgui
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin3', 'libs'))
 from simpleplugin import (Storage, Addon, Plugin, RoutedPlugin,
-                          SimplePluginError, MemStorage, debug_exception)
+                          SimplePluginError, MemStorage, log_exception)
 
 
 # Begin tests
@@ -423,7 +423,7 @@ class PluginUrlForTestCase(unittest.TestCase):
 class DebugExceptionTestCase(unittest.TestCase):
     def test_debug_exception(self):
         def test_func():
-            with debug_exception():
+            with log_exception():
                 raise RuntimeError
 
         self.assertRaises(RuntimeError, test_func)

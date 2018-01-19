@@ -37,7 +37,7 @@ import xbmc
 import xbmcgui
 
 __all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin',
-           'RoutedPlugin', 'Params', 'debug_exception', 'py2_encode',
+           'RoutedPlugin', 'Params', 'log_exception', 'py2_encode',
            'py2_decode']
 
 if PY3:
@@ -97,7 +97,7 @@ def py2_decode(s, encoding='utf-8'):
 
 
 @contextmanager
-def debug_exception(logger=None):
+def log_exception(logger=None):
     """
     Diagnostic helper context manager
 
@@ -105,6 +105,8 @@ def debug_exception(logger=None):
     diagnostic info to the Kodi log if an unhandled exception
     happens within the context. The info includes the following items:
 
+    - System info
+    - Kodi version
     - Module path.
     - Code fragment where the exception has happened.
     - Global variables.
@@ -114,7 +116,7 @@ def debug_exception(logger=None):
 
     Example::
 
-        with debug_exception():
+        with log_exception():
             # Some risky code
             raise RuntimeError('Fatal error!')
 
@@ -1005,7 +1007,7 @@ class Plugin(Addon):
         except KeyError:
             raise SimplePluginError('Invalid action: "{0}"!'.format(action))
         else:
-            with debug_exception(self.log_error):
+            with log_exception(self.log_error):
                 # inspect.isfunction is needed for tests
                 if (inspect.isfunction(action_callable) and
                         not getargspec(action_callable).args):
@@ -1254,7 +1256,7 @@ class RoutedPlugin(Plugin):
                         kwargs[key] = py2_decode(unquote_plus(value))
                 self.log_debug(
                     'Calling {0} with kwargs {1}'.format(route, kwargs))
-                with debug_exception(self.log_error):
+                with log_exception(self.log_error):
                     return route.func(**kwargs)
         raise SimplePluginError(
             'No route matches the path "{0}"!'.format(path)
