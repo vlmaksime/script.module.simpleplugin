@@ -9,7 +9,7 @@ SimplePlugin micro-framework for Kodi content plugins
 """
 
 from __future__ import unicode_literals
-from builtins import *
+from future.builtins import *
 from past.types import basestring, long
 from future.utils import (PY2, PY3, iteritems, itervalues,
                           python_2_unicode_compatible)
