@@ -10,11 +10,14 @@ SimplePlugin micro-framework for Kodi content plugins
 
 from __future__ import unicode_literals
 from future.builtins import *
-from past.types import basestring, long
 from future.utils import (PY2, PY3, iteritems, itervalues,
                           python_2_unicode_compatible)
 from future.standard_library import install_aliases
 install_aliases()
+
+if PY3:
+    basestring = str
+    long = int
 
 import os
 import sys
