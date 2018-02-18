@@ -136,17 +136,18 @@ def log_exception(logger=None):
         logger('Unhandled exception detected!')
         logger('*** Start diagnostic info ***')
         logger('System info: {0}'.format(uname()))
-        logger('OS info: {0}'.format(xbmc.getInfoLabel('System.OSVersionInfo')))
+        logger('OS info: {0}'.format(py2_decode(xbmc.getInfoLabel('System.OSVersionInfo'))))
         logger('Kodi version: {0}'.format(
             xbmc.getInfoLabel('System.BuildVersion'))
         )
         logger('File: {0}'.format(frame_info[1]))
         context = ''
-        for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
-            if i == frame_info[2]:
-                context += '{0}:>{1}'.format(str(i).rjust(5), line)
-            else:
-                context += '{0}: {1}'.format(str(i).rjust(5), line)
+        if frame_info[4] is not None:
+            for i, line in enumerate(frame_info[4], frame_info[2] - frame_info[5]):
+                if i == frame_info[2]:
+                    context += '{0}:>{1}'.format(str(i).rjust(5), line)
+                else:
+                    context += '{0}: {1}'.format(str(i).rjust(5), line)
         logger('Code context:\n' + context)
         logger('Global variables:\n' + _format_vars(frame_info[0].f_globals))
         logger('Local variables:\n' + _format_vars(frame_info[0].f_locals))
