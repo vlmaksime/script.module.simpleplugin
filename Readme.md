@@ -1,5 +1,14 @@
 # SimplePlugin micro-framework for Kodi plugins
 
+## The Project Is Suspended!
+
+Unfortunately, at this moment I have don't have time or desire to develop
+or maintain this project.
+This may change in the future but now I suspend the project until further notice.
+It means that from now on the project won't receive any updates and any new issues
+will be ignored. Fell free to do with the code whatever you like within GPL v.3
+terms and conditions.
+
 [![Build Status](https://travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master)](https://travis-ci.org/romanvm/script.module.simpleplugin)
 [![codecov.io](https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master)](https://codecov.io/github/romanvm/script.module.simpleplugin?branch=master)
 
