@@ -18,6 +18,9 @@ install_aliases()
 if PY3:
     basestring = str
     long = int
+    from urllib.parse import parse_qs
+else:
+    from urlparse import parse_qs
 
 import os
 import sys
@@ -34,7 +37,7 @@ from shutil import copyfile
 from contextlib import contextmanager
 from pprint import pformat
 from platform import uname
-from urllib.parse import parse_qs, urlencode, quote_plus, urlparse, unquote_plus
+from urllib.parse import urlencode, quote_plus, urlparse, unquote_plus
 import xbmcaddon
 import xbmc
 import xbmcgui
@@ -913,7 +916,8 @@ class Plugin(Addon):
         raw_params = parse_qs(paramstring)
         params = Params()
         for key, value in iteritems(raw_params):
-            params[key] = value[0] if len(value) == 1 else value
+            param_value = value[0] if len(value) == 1 else value
+            params[key] = py2_decode(param_value)
         return params
 
     def get_url(self, plugin_url='', **kwargs):

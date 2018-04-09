@@ -313,9 +313,10 @@ class RoutedPluginTestCase(unittest.TestCase):
         def test_func(param1, param2):
             self.assertEqual(param1, 'ham')
             self.assertEqual(param2, u'спам')
+            self.assertEqual(plugin.params.param3, u'Привет, мир!')
 
         with mock.patch('simpleplugin.sys.argv',
-                        ['plugin://test.plugin/foo/ham/%D1%81%D0%BF%D0%B0%D0%BC', '1', '']):
+                        ['plugin://test.plugin/foo/ham/%D1%81%D0%BF%D0%B0%D0%BC', '1', '?param3=%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82%2C+%D0%BC%D0%B8%D1%80%21']):
             plugin.run()
 
     def test_passing_int_and_float(self):
