@@ -463,7 +463,10 @@ class Addon(object):
         :return: path to the addon icon image
         :rtype: str
         """
-        icon = os.path.join(self.path, 'icon.png')
+        icon = self._addon.getAddonInfo('icon')
+        print(icon)
+        if not icon:
+            icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
             return icon
         else:
@@ -477,7 +480,9 @@ class Addon(object):
         :return: path to the addon fanart image
         :rtype: str
         """
-        fanart = os.path.join(self.path, 'fanart.jpg')
+        fanart = self._addon.getAddonInfo('fanart')
+        if not fanart :
+            fanart = os.path.join(self.path, 'fanart.jpg')
         if os.path.exists(fanart):
             return fanart
         else:
@@ -502,6 +507,86 @@ class Addon(object):
         :rtype: str
         """
         return self._addon.getAddonInfo('version')
+
+    @property
+    def name(self):
+        """
+        Addon name
+
+        :return: addon name
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('name')
+
+    @property
+    def author(self):
+        """
+        Addon author
+
+        :return: addon author
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('author')
+
+    @property
+    def changelog(self):
+        """
+        Addon changelog
+
+        :return: addon changelog
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('changelog')
+
+    @property
+    def description(self):
+        """
+        Addon description
+
+        :return: addon description
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('description')
+
+    @property
+    def disclaimer(self):
+        """
+        Addon disclaimer
+
+        :return: addon disclaimer
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('disclaimer')
+
+    @property
+    def stars(self):
+        """
+        Addon stars
+
+        :return: addon stars
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('stars')
+
+    @property
+    def summary(self):
+        """
+        Addon summary
+
+        :return: addon summary
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('summary')
+
+    @property
+    def type(self):
+        """
+        Addon type
+
+        :return: addon type
+        :rtype: str
+        """
+        return self._addon.getAddonInfo('type')
 
     def get_localized_string(self, id_):
         """
