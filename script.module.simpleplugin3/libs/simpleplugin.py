@@ -464,7 +464,6 @@ class Addon(object):
         :rtype: str
         """
         icon = self._addon.getAddonInfo('icon')
-        print(icon)
         if not icon:
             icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
@@ -1327,6 +1326,8 @@ class RoutedPlugin(Plugin):
         self.log_debug('Routes: {0}'.format(self._routes))
         for route in itervalues(self._routes):
             pattern = route.pattern
+            if not pattern.count('/') == path.count('/'):
+                continue
             while True:
                 pattern, count = re.subn(r'/(<\w+?>)', r'/(?P\1.+?)', pattern)
                 if not count:
