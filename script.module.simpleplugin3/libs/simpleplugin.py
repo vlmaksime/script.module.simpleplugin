@@ -908,7 +908,7 @@ class Addon(object):
             gettext_pcl = '__gettext__.pcl'
             with self.get_storage(gettext_pcl) as ui_strings_map:
                 if (not os.path.exists(os.path.join(self._profile_dir, gettext_pcl)) or
-                        raw_strings_hash != ui_strings_map['hash']):
+                        raw_strings_hash != ui_strings_map.get('hash', '')):
                     ui_strings = self._parse_po(
                         raw_strings.decode('utf-8').split('\n')
                     )
