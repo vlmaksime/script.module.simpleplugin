@@ -1,3 +1,5 @@
+2.3.4:
+  - Fixed '__gettext__.pcl' hash error.
 2.3.3:
   - Fixed various bugs.
 2.3.2:
