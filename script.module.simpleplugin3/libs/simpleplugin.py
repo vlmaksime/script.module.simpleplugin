@@ -1212,7 +1212,7 @@ class RoutedPlugin(Plugin):
             # list allows to manipulate the dict during iteration
             for key, value in list(iteritems(kwargs)):
                 for match in matches[len(args):]:
-                    if key in match:
+                    if key == match[1:-1]:
                         pattern = pattern.replace(
                             match, quote_plus(py2_encode(str(value)))
                         )
@@ -1324,6 +1324,14 @@ class RoutedPlugin(Plugin):
         """
         path = urlparse(sys.argv[0]).path
         self.log_debug('Routes: {0}'.format(self._routes))
+        for route in itervalues(self._routes):
+            if route.pattern == path:
+                kwargs = {}
+                self.log_debug(
+                    'Calling {0} with kwargs {1}'.format(route, kwargs))
+                with log_exception(self.log_error):
+                    return route.func(**kwargs)
+
         for route in itervalues(self._routes):
             pattern = route.pattern
             if not pattern.count('/') == path.count('/'):
