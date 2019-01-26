@@ -1212,7 +1212,13 @@ class RoutedPlugin(Plugin):
             # list allows to manipulate the dict during iteration
             for key, value in list(iteritems(kwargs)):
                 for match in matches[len(args):]:
-                    if key == match[1:-1]:
+
+                    match_string = match[1:-1]
+                    match_parts = match_string.split('__')
+                    if len(match_parts) > 1:
+                        match_string = match_parts[1]
+
+                    if key == match_string:
                         pattern = pattern.replace(
                             match, quote_plus(py2_encode(str(value)))
                         )
