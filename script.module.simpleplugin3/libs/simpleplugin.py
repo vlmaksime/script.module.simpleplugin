@@ -12,15 +12,12 @@ from __future__ import unicode_literals
 from future.builtins import *
 from future.utils import (PY2, PY3, iteritems, itervalues,
                           python_2_unicode_compatible)
-from future.standard_library import install_aliases
-install_aliases()
+# from future.standard_library import install_aliases
+# install_aliases()
 
 if PY3:
     basestring = str
     long = int
-    from urllib.parse import parse_qs
-else:
-    from urlparse import parse_qs
 
 import os
 import sys
@@ -37,7 +34,11 @@ from shutil import copyfile
 from contextlib import contextmanager
 from pprint import pformat
 from platform import uname
-from urllib.parse import urlencode, quote_plus, urlparse, unquote_plus
+if PY3:
+    from urllib.parse import urlencode, quote_plus, urlparse, unquote_plus, parse_qs
+else:
+    from future.backports.urllib.parse import urlencode, quote_plus, urlparse, unquote_plus
+    from urlparse import parse_qs
 import xbmcaddon
 import xbmc
 import xbmcgui
