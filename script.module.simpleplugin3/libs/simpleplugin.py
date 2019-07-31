@@ -1355,10 +1355,10 @@ class RoutedPlugin(Plugin):
                     if key.startswith('int__') or key.startswith('float__'):
                         del kwargs[key]
                         if key.startswith('int__'):
-                            key = key.lstrip('int__')
+                            key = key[5:]
                             value = int(value)
                         else:
-                            key = key.lstrip('float__')
+                            key = key[7:]
                             value = float(value)
                         kwargs[key] = value
                     else:
