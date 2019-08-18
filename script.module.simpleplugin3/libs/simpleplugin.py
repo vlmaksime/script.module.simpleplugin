@@ -906,21 +906,20 @@ class Addon(object):
             with open(strings_po, 'rb') as fo:
                 raw_strings = fo.read()
             raw_strings_hash = hashlib.md5(raw_strings).hexdigest()
-            gettext_pcl = '__gettext__.pcl'
-            with self.get_storage(gettext_pcl) as ui_strings_map:
-                if (not os.path.exists(os.path.join(self._profile_dir, gettext_pcl)) or
-                        raw_strings_hash != ui_strings_map.get('hash', '')):
-                    ui_strings = self._parse_po(
-                        raw_strings.decode('utf-8').split('\n')
-                    )
-                    self._ui_strings_map = {
-                        'hash': raw_strings_hash,
-                        'strings': ui_strings
-                    }
-                    ui_strings_map['hash'] = raw_strings_hash
-                    ui_strings_map['strings'] = ui_strings.copy()
-                else:
-                    self._ui_strings_map = deepcopy(ui_strings_map)
+            ui_strings_map = self.get_mem_storage('__gettext__')
+            if raw_strings_hash != ui_strings_map.get('hash', ''):
+                ui_strings = self._parse_po(
+                    raw_strings.decode('utf-8').split('\n')
+                )
+                self._ui_strings_map = {
+                    'hash': raw_strings_hash,
+                    'strings': ui_strings
+                }
+                ui_strings_map['hash'] = raw_strings_hash
+                ui_strings_map['strings'] = ui_strings.copy()
+            else:
+                self._ui_strings_map = {}
+                self._ui_strings_map.update(ui_strings_map)
         else:
             raise SimplePluginError('Unable to initialize localization because '
                                     'of missing English strings.po!')
