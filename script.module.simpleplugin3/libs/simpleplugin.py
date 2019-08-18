@@ -359,7 +359,10 @@ class MemStorage(MutableMapping):
         full_key = py2_encode('{0}__{1}'.format(self._id, key))
         raw_item = self._window.getProperty(full_key)
         if raw_item:
-            return pickle.loads(bytes(raw_item))
+            try:
+                return pickle.loads(bytes(raw_item))
+            except TypeError as e:
+                return pickle.loads(bytes(raw_item, 'utf-8'))
         else:
             raise KeyError(key)
 
