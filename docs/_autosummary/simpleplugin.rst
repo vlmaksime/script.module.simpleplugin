@@ -11,6 +11,7 @@ simpleplugin
       Addon
       Params
       Plugin
+      RoutedPlugin
       Storage
       MemStorage
    

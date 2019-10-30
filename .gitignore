@@ -55,6 +55,24 @@ __pycache__/
 # C extensions
 *.so
 
+# =========================
+# Eclipse Specific GitIgnore
+# =========================
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
 # Distribution / packaging
 .Python
 .venv/

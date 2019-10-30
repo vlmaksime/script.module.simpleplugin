@@ -9,7 +9,7 @@ import os
 
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.insert(0, os.path.join(basedir, 'script.module.simpleplugin', 'libs'))
+sys.path.insert(0, os.path.join(basedir, 'script.module.simpleplugin3', 'libs'))
 sys.path.insert(0, basedir)
 import tests
 
@@ -36,7 +36,7 @@ project = u'SimplePlugin'
 copyright = u'2016, Roman Miroshnychenko'
 author = u'Roman Miroshnychenko'
 
-with open(os.path.join(basedir, 'script.module.simpleplugin', 'addon.xml'), 'rb') as addon_xml:
+with open(os.path.join(basedir, 'script.module.simpleplugin3', 'addon.xml'), 'rb') as addon_xml:
     version = re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
 
 release = version

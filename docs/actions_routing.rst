@@ -1,7 +1,7 @@
-Actions
-=======
+Actions Routing
+===============
 
-In SimplePlugin **actions** are Python callable objects -- functions or methods -- that are called
+Plugin **actions** are Python callable objects -- functions or methods -- that are called
 when a SimplePlugin-based plugin is invoked in Kodi. "root" action is called when a user opens the plugin from Kodi UI,
 e.g. from "Video Addons" or "Music Addons" section. Child actions are called via a plugin callback URL
 containing "action" parameter in its paramstring, e.g. the :file:`plugin://plugin.video.foo/?action=bar`
@@ -53,11 +53,3 @@ as in a :class:`dict` or as instance properties, for example:
   but a property will return ``None`` if a parameter with such name is missing.
 
 If an action does not use ``params`` parameter, it can be omitted.
-
-Kodi supports 3 types of actions:
-
-.. toctree::
-
-  _actions/vf
-  _actions/playback
-  _actions/misc
