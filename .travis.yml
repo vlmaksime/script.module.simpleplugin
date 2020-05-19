@@ -1,14 +1,18 @@
 language: python
 python:
   - "2.7"
-  - "3.6"
+  - "3.7"
+env:
+  global:
+    - ADDON_ID=script.module.simpleplugin3
 install: pip install codecov mock future
 script: coverage run tests.py
 after_success: codecov
 before_deploy:
   - pip install Sphinx
   - wget https://raw.githubusercontent.com/romanvm/travis_scripts/master/deploy_addon.py
-  - python deploy_addon.py -z
+  - pip install -q git+https://github.com/romanvm/kodi-addon-submitter.git
+  - submit-addon -s -z -m $ADDON_ID
   - export RELEASE_ZIP=$(ls *.zip)
 deploy:
   - provider: releases
@@ -18,7 +22,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-      python: "2.7"
+      python: "3.7"
   # Deploy to my Kodi repo
   - provider: script
     skip_cleanup: true
