@@ -9,7 +9,8 @@ SimplePlugin micro-framework for Kodi content plugins
 """
 
 from __future__ import unicode_literals
-from future.builtins import *
+from future.builtins import (zip, super,
+                             bytes, dict, int, list, object, str)
 from future.utils import (PY2, PY3, iteritems, itervalues,
                           python_2_unicode_compatible)
 # from future.standard_library import install_aliases
@@ -26,7 +27,6 @@ import inspect
 import time
 import hashlib
 import pickle
-from io import open
 from collections import MutableMapping, namedtuple
 from copy import deepcopy
 from functools import wraps

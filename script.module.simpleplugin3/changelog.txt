@@ -1,3 +1,7 @@
+3.0.2
+  - Fixed compatibility with Kodi for XBox One.
+3.0.1
+  - Addon compatibility downgraded to Helix.
 3.0.0
   - Reworked ans simplified API that is incompatible with previous versions.
 2.3.4:
