@@ -1,3 +1,5 @@
+3.0.3
+  - Changed loglevel for NOTICE at Kodi Matrix.
 3.0.2
   - Fixed compatibility with Kodi for XBox One.
 3.0.1

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="script.module.simpleplugin3"
    name="SimplePlugin 3"
-   version="3.0.2"
+   version="3.0.3"
    provider-name="Roman V.M.">
   <requires>
     <import addon="xbmc.python" version="2.19.0"/>
@@ -12,7 +12,7 @@
     <platform>all</platform>
     <summary lang="en_GB">SimplePlugin micro-framework</summary>
     <description lang="en_GB">SimplePlugin micro-framework that simplifies Kodi content plugin programming.</description>
-    <license>GNU GPL v.3</license>
+    <license>GPL-3.0-only</license>
     <forum></forum>
     <website>http://romanvm.github.io/script.module.simpleplugin</website>
     <email>roman1972@gmail.com</email>
