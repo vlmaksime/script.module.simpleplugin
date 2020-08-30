@@ -1,0 +1,169 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Working with Plugin Settings &#8212; SimplePlugin 3.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plugin Localization" href="gettext.html" />
+    <link rel="prev" title="Cached Decorator" href="cached.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="working-with-plugin-settings">
+<h1>Working with Plugin Settings<a class="headerlink" href="#working-with-plugin-settings" title="Permalink to this headline">¶</a></h1>
+<p>Plugin settings can be accessed using <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.get_setting" title="simpleplugin.Addon.get_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_setting</span></code></a>
+and <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.set_setting" title="simpleplugin.Addon.set_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_setting</span></code></a> instance methods.</p>
+<p><a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.get_setting" title="simpleplugin.Addon.get_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_setting</span></code></a> method returns a <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plugin</span></code></a> setting
+with the given <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> ID. By default <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.get_setting" title="simpleplugin.Addon.get_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_setting</span></code></a>
+converts <code class="docutils literal notranslate"><span class="pre">'true'</span></code> and <code class="docutils literal notranslate"><span class="pre">'false'</span></code> strings to Python <code class="docutils literal notranslate"><span class="pre">True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code>
+respectively.
+Numeric strings are converted to Python <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#long" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">long</span></code></a> or <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> depending on their format,
+i.e. <code class="docutils literal notranslate"><span class="pre">'100'</span></code> will be converted to <code class="docutils literal notranslate"><span class="pre">100L</span></code> and <code class="docutils literal notranslate"><span class="pre">'3.14'</span></code> to <code class="docutils literal notranslate"><span class="pre">3.14</span></code>.
+This behavior can be disabled by passing <code class="docutils literal notranslate"><span class="pre">False</span></code> as the 2-nd positional argument to get a raw setting string.</p>
+<p><a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.set_setting" title="simpleplugin.Addon.set_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_setting</span></code></a> stores a value in Plugin’s setting under a given ID.
+<a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.set_setting" title="simpleplugin.Addon.set_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_setting</span></code></a> accepts data of any type. Boolean <code class="docutils literal notranslate"><span class="pre">True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code> are
+converted to <code class="docutils literal notranslate"><span class="pre">'true'</span></code> and <code class="docutils literal notranslate"><span class="pre">'false'</span></code> respectively. Other non-string/non-unicode data will be converted
+to strings using Python <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> class constructor.</p>
+<p>Plugin’s settings can also be retrieved via a <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plugin</span></code></a> instance properties,
+i.e. <code class="docutils literal notranslate"><span class="pre">plugin.setting</span></code> is equal to <code class="docutils literal notranslate"><span class="pre">plugin.get_setting('setting')</span></code>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">It is not possible assign settings values to arbitrary <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plugin</span></code></a>
+instance properties. An exception will be raised if you try to do so.
+To store a setting you need to use <a class="reference internal" href="_autosummary/simpleplugin.html#simpleplugin.Addon.set_setting" title="simpleplugin.Addon.set_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_setting</span></code></a> method.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can store any settings in Plugin’s configuration file, not only those that have visual controls
+in the Plugin’s “Settings” panel.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SimplePlugin</a></h1>
+
+
+
+<p class="blurb">A plugin micro-framework for Kodi mediacenter</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=romanvm&repo=script.module.simpleplugin&type=star&v=2&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/romanvm/script.module.simpleplugin">
+    <img
+        alt="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+        src="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/romanvm/script.module.simpleplugin">
+    <img
+    alt="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    src="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_routing.html">Actions Routing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Persistent And In-Memory Storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cached.html">Cached Decorator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with Plugin Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettext.html">Plugin Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debug.html">Debugging Addons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using.html">Using SimplePlugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrapers.html">Python Scrapers and Subtitle Addons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Useful Links</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Roman Miroshnychenko.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/settings.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/romanvm/script.module.simpleplugin" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

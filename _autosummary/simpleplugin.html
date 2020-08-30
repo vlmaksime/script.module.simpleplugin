@@ -1,0 +1,1351 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simpleplugin &#8212; SimplePlugin 3.0.3 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Useful Links" href="../links.html" />
+    <link rel="prev" title="API Reference" href="../api.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-simpleplugin">
+<span id="simpleplugin"></span><h1>simpleplugin<a class="headerlink" href="#module-simpleplugin" title="Permalink to this headline">¶</a></h1>
+<p>SimplePlugin micro-framework for Kodi content plugins</p>
+<p><strong>Author</strong>: Roman Miroshnychenko aka Roman V.M.</p>
+<p><strong>License</strong>: <a class="reference external" href="https://www.gnu.org/copyleft/gpl.html">GPL v.3</a></p>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#simpleplugin.Addon" title="simpleplugin.Addon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Addon</span></code></a>([id_])</td>
+<td>Base addon class</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#simpleplugin.Params" title="simpleplugin.Params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Params</span></code></a>(**kwargs)</td>
+<td>A class that stores parsed plugin call parameters</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plugin</span></code></a>([id_])</td>
+<td>Plugin class with URL query string routing.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#simpleplugin.RoutedPlugin" title="simpleplugin.RoutedPlugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RoutedPlugin</span></code></a>([id_])</td>
+<td>Plugin class that implements “pretty URL” routing similar to Flask and Bottle web-frameworks</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Storage</span></code></a>(storage_dir[,&nbsp;filename])</td>
+<td>Persistent storage for arbitrary data with a dictionary-like interface</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#simpleplugin.MemStorage" title="simpleplugin.MemStorage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MemStorage</span></code></a>(storage_id)</td>
+<td>In-memory storage with dict-like interface</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Exceptions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimplePluginError</span></code></a></td>
+<td>Custom exception</td>
+</tr>
+</tbody>
+</table>
+<dl class="exception">
+<dt id="simpleplugin.SimplePluginError">
+<em class="property">exception </em><code class="descclassname">simpleplugin.</code><code class="descname">SimplePluginError</code><a class="reference internal" href="../_modules/simpleplugin.html#SimplePluginError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.SimplePluginError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2.7/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.Exception</span></code></a></p>
+<p>Custom exception</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="simpleplugin.py2_encode">
+<code class="descclassname">simpleplugin.</code><code class="descname">py2_encode</code><span class="sig-paren">(</span><em>s</em>, <em>encoding=u'utf-8'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#py2_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.py2_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode Python 2 <code class="docutils literal notranslate"><span class="pre">unicode</span></code> to <code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+<p>In Python 3 the string is not changed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="simpleplugin.py2_decode">
+<code class="descclassname">simpleplugin.</code><code class="descname">py2_decode</code><span class="sig-paren">(</span><em>s</em>, <em>encoding=u'utf-8'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#py2_decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.py2_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode Python 2 <code class="docutils literal notranslate"><span class="pre">str</span></code> to <code class="docutils literal notranslate"><span class="pre">unicode</span></code></p>
+<p>In Python 3 the string is not changed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="simpleplugin.log_exception">
+<code class="descclassname">simpleplugin.</code><code class="descname">log_exception</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#log_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.log_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diagnostic helper context manager</p>
+<p>It controls execution within its context and writes extended
+diagnostic info to the Kodi log if an unhandled exception
+happens within the context. The info includes the following items:</p>
+<ul class="simple">
+<li>System info</li>
+<li>Kodi version</li>
+<li>Module path.</li>
+<li>Code fragment where the exception has happened.</li>
+<li>Global variables.</li>
+<li>Local variables.</li>
+</ul>
+<p>After logging the diagnostic info the exception is re-raised.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">log_exception</span><span class="p">():</span>
+    <span class="c1"># Some risky code</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Fatal error!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>logger</strong> – logger function which must accept a single argument
+which is a log message. By default it is <a class="reference external" href="http://romanvm.github.io/Kodistubs/_autosummary/xbmc.html#xbmc.log" title="(in Kodistubs v18.0.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xbmc.log()</span></code></a>
+with <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> level.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.Params">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">Params</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">future.types.newdict.newdict</span></code></p>
+<p>A class that stores parsed plugin call parameters</p>
+<p>Parameters can be accessed both through <a class="reference external" href="https://docs.python.org/2.7/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> keys and
+instance properties.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For a missing parameter an instance property returns <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>  <span class="c1"># Access by key</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">bar</span>  <span class="c1"># Access through property. Both variants are equal</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.Storage">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">Storage</code><span class="sig-paren">(</span><em>storage_dir</em>, <em>filename='storage.pcl'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Storage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Storage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_abcoll.MutableMapping</span></code></p>
+<p>Persistent storage for arbitrary data with a dictionary-like interface</p>
+<p>It is designed as a context manager and better be used
+with ‘with’ statement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>storage_dir</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – directory for storage</li>
+<li><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – the name of a storage file (optional)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">Storage</span><span class="p">(</span><span class="s1">&#39;/foo/bar/storage/&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">storage</span><span class="p">:</span>
+    <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;key1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value1</span>
+    <span class="n">value2</span> <span class="o">=</span> <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;key2&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">After exiting <a class="reference external" href="https://docs.python.org/2.7/reference/compound_stmts.html#with" title="(in Python v2.7)"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> block a <a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a> instance
+is invalidated. Storage contents are saved to disk only for
+a new storage or if the contents have been changed.</p>
+</div>
+<dl class="method">
+<dt id="simpleplugin.Storage.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Storage.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Storage.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save storage contents to disk</p>
+<p>This method saves new and changed <a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a> contents to disk
+and invalidates the Storage instance. Unchanged Storage is not saved
+but simply invalidated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Storage.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Storage.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Storage.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a copy of storage contents</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">this method performs a <em>deep</em> copy operation.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a copy of storage contents</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.MemStorage">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">MemStorage</code><span class="sig-paren">(</span><em>storage_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#MemStorage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.MemStorage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_abcoll.MutableMapping</span></code></p>
+<p>In-memory storage with dict-like interface</p>
+<p>The data is stored in the Kodi core so contents of a MemStorage instance
+with the same ID can be shared between different Python processes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Keys are case-insensitive</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><a class="reference internal" href="#simpleplugin.MemStorage" title="simpleplugin.MemStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemStorage</span></code></a> does not allow to modify mutable objects
+in place! You need to assign them to variables first, modify and
+store them back to a MemStorage instance.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">storage</span> <span class="o">=</span> <span class="n">MemStorage</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="n">some_list</span> <span class="o">=</span> <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span>
+<span class="n">some_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;spam&#39;</span><span class="p">)</span>
+<span class="n">storage</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">some_list</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>storage_id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – ID of this storage instance</li>
+<li><strong>window_id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – the ID of a Kodi Window object where storage contents
+will be stored.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.Addon">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">Addon</code><span class="sig-paren">(</span><em>id_=u''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">future.types.newobject.newobject</span></code></p>
+<p>Base addon class</p>
+<p>Provides access to basic addon parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – addon id, e.g. ‘plugin.video.foo’ (optional)</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="simpleplugin.Addon.addon">
+<code class="descname">addon</code><a class="headerlink" href="#simpleplugin.Addon.addon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kodi Addon instance that represents this Addon</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Addon instance</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://romanvm.github.io/Kodistubs/_autosummary/xbmcaddon.html#xbmcaddon.Addon" title="(in Kodistubs v18.0.0)">xbmcaddon.Addon</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.id">
+<code class="descname">id</code><a class="headerlink" href="#simpleplugin.Addon.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Addon ID, e.g. ‘plugin.video.foo’</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.path">
+<code class="descname">path</code><a class="headerlink" href="#simpleplugin.Addon.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">path to the addon folder</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.icon">
+<code class="descname">icon</code><a class="headerlink" href="#simpleplugin.Addon.icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon icon</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">path to the addon icon image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.fanart">
+<code class="descname">fanart</code><a class="headerlink" href="#simpleplugin.Addon.fanart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon fanart</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">path to the addon fanart image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.profile_dir">
+<code class="descname">profile_dir</code><a class="headerlink" href="#simpleplugin.Addon.profile_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon config dir</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">path to the addon profile dir</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.version">
+<code class="descname">version</code><a class="headerlink" href="#simpleplugin.Addon.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon version</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon version</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.name">
+<code class="descname">name</code><a class="headerlink" href="#simpleplugin.Addon.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.author">
+<code class="descname">author</code><a class="headerlink" href="#simpleplugin.Addon.author" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon author</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon author</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.changelog">
+<code class="descname">changelog</code><a class="headerlink" href="#simpleplugin.Addon.changelog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon changelog</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon changelog</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.description">
+<code class="descname">description</code><a class="headerlink" href="#simpleplugin.Addon.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon description</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.disclaimer">
+<code class="descname">disclaimer</code><a class="headerlink" href="#simpleplugin.Addon.disclaimer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon disclaimer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon disclaimer</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.stars">
+<code class="descname">stars</code><a class="headerlink" href="#simpleplugin.Addon.stars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon stars</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon stars</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.summary">
+<code class="descname">summary</code><a class="headerlink" href="#simpleplugin.Addon.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon summary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Addon.type">
+<code class="descname">type</code><a class="headerlink" href="#simpleplugin.Addon.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addon type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">addon type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.get_localized_string">
+<code class="descname">get_localized_string</code><span class="sig-paren">(</span><em>id_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.get_localized_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.get_localized_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get localized UI string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – UI string ID</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">UI string in the current language</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.get_setting">
+<code class="descname">get_setting</code><span class="sig-paren">(</span><em>id_</em>, <em>convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.get_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.get_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get addon setting</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">convert=True</span></code>, ‘bool’ settings are converted to Python
+<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#bool" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> values, and numeric strings to Python <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#long" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">long</span></code></a> or
+<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> depending on their format.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Settings can also be read via <a class="reference internal" href="#simpleplugin.Addon" title="simpleplugin.Addon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Addon</span></code></a> instance
+poperties named as the respective settings. I.e. <code class="docutils literal notranslate"><span class="pre">addon.foo</span></code>
+is equal to <code class="docutils literal notranslate"><span class="pre">addon.get_setting('foo')</span></code>.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – setting ID</li>
+<li><strong>convert</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – try to guess and convert the setting to an appropriate type
+E.g. <code class="docutils literal notranslate"><span class="pre">'1.0'</span></code> will be converted to float <code class="docutils literal notranslate"><span class="pre">1.0</span></code> number,
+<code class="docutils literal notranslate"><span class="pre">'true'</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> and so on.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">setting value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.set_setting">
+<code class="descname">set_setting</code><span class="sig-paren">(</span><em>id_</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.set_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.set_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set addon setting</p>
+<p>Python <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#bool" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> type are converted to <code class="docutils literal notranslate"><span class="pre">'true'</span></code> or <code class="docutils literal notranslate"><span class="pre">'false'</span></code>
+Non-string/non-unicode values are converted to strings.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Setting values via <a class="reference internal" href="#simpleplugin.Addon" title="simpleplugin.Addon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Addon</span></code></a> instance properties
+is not supported! Values can only be set using
+<a class="reference internal" href="#simpleplugin.Addon.set_setting" title="simpleplugin.Addon.set_setting"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Addon.set_setting()</span></code></a> method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – setting ID</li>
+<li><strong>value</strong> – setting value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.log">
+<code class="descname">log</code><span class="sig-paren">(</span><em>message</em>, <em>level=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add message to Kodi log starting with Addon ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – message to be written into the Kodi log</li>
+<li><strong>level</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – log level. <a class="reference external" href="http://romanvm.github.io/Kodistubs/_autosummary/xbmc.html#module-xbmc" title="(in Kodistubs v18.0.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xbmc</span></code></a> module provides the necessary
+symbolic constants. Default: <code class="docutils literal notranslate"><span class="pre">xbmc.LOGDEBUG</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.log_notice">
+<code class="descname">log_notice</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.log_notice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.log_notice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add NOTICE message to the Kodi log</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – message to write to the Kodi log</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.log_warning">
+<code class="descname">log_warning</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.log_warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.log_warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add WARNING message to the Kodi log</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – message to write to the Kodi log</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.log_error">
+<code class="descname">log_error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.log_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.log_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add ERROR message to the Kodi log</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – message to write to the Kodi log</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.log_debug">
+<code class="descname">log_debug</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.log_debug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.log_debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add debug message to the Kodi log</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – message to write to the Kodi log</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.get_storage">
+<code class="descname">get_storage</code><span class="sig-paren">(</span><em>filename=u'storage.pcl'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.get_storage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.get_storage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a persistent <a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a> instance for storing arbitrary values
+between addon calls.</p>
+<p>A <a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a> instance can be used as a context manager.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_storage</span><span class="p">()</span> <span class="k">as</span> <span class="n">storage</span><span class="p">:</span>
+    <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;param1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value1</span>
+    <span class="n">value2</span> <span class="o">=</span> <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;param2&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">After exiting <a class="reference external" href="https://docs.python.org/2.7/reference/compound_stmts.html#with" title="(in Python v2.7)"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a> block a <a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a>
+instance is invalidated.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – the name of a storage file (optional)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Storage object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.Storage" title="simpleplugin.Storage">Storage</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.get_mem_storage">
+<code class="descname">get_mem_storage</code><span class="sig-paren">(</span><em>storage_id=u''</em>, <em>window_id=10000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.get_mem_storage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.get_mem_storage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an in-memory storage for this addon with <a class="reference external" href="https://docs.python.org/2.7/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>-like
+interface</p>
+<p>The storage can store picklable Python objects as long as
+Kodi is running and storage contents can be shared between
+Python processes. Different addons have separate storages,
+so storages with the same names created with this method
+do not conflict.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">addon</span> <span class="o">=</span> <span class="n">Addon</span><span class="p">()</span>
+<span class="n">storage</span> <span class="o">=</span> <span class="n">addon</span><span class="o">.</span><span class="n">get_mem_storage</span><span class="p">()</span>
+<span class="n">foo</span> <span class="o">=</span> <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="n">storage</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bar</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>storage_id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – optional storage ID (case-insensitive).</li>
+<li><strong>window_id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – the ID of a Kodi Window object where storage contents
+will be stored.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">in-memory storage for this addon</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#simpleplugin.MemStorage" title="simpleplugin.MemStorage">MemStorage</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.cached">
+<code class="descname">cached</code><span class="sig-paren">(</span><em>duration=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.cached"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.cached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached decorator</p>
+<p>Used to cache function return data</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">cached</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># Do some stuff</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – caching duration in min (positive values only)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> – if duration is zero or negative</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.mem_cached">
+<code class="descname">mem_cached</code><span class="sig-paren">(</span><em>duration=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.mem_cached"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.mem_cached" title="Permalink to this definition">¶</a></dt>
+<dd><p>In-memory cache decorator</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">mem_cached</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># Do some stuff</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – caching duration in min (positive values only)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> – if duration is zero or negative</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.gettext">
+<code class="descname">gettext</code><span class="sig-paren">(</span><em>ui_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.gettext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.gettext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a translated UI string from addon localization files.</p>
+<p>This function emulates GNU Gettext for more convenient access
+to localized addon UI strings. To reduce typing this method object
+can be assigned to a <code class="docutils literal notranslate"><span class="pre">_</span></code> (single underscore) variable.</p>
+<p>For using gettext emulation <a class="reference internal" href="#simpleplugin.Addon.initialize_gettext" title="simpleplugin.Addon.initialize_gettext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Addon.initialize_gettext()</span></code></a> method
+needs to be called first. See documentation for that method for more
+info about Gettext emulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ui_string</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – a UI string from English <code class="file docutils literal notranslate"><span class="pre">strings.po</span></code>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a UI string from translated <code class="file docutils literal notranslate"><span class="pre">strings.po</span></code>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">unicode</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>SimplePluginError</strong></a> – if <a class="reference internal" href="#simpleplugin.Addon.initialize_gettext" title="simpleplugin.Addon.initialize_gettext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Addon.initialize_gettext()</span></code></a>
+wasn’t called first or if a string is not found in
+English <code class="file docutils literal notranslate"><span class="pre">strings.po</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Addon.initialize_gettext">
+<code class="descname">initialize_gettext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Addon.initialize_gettext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Addon.initialize_gettext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize GNU gettext emulation in addon</p>
+<p>Kodi localization system for addons is not very convenient
+because you need to operate with numeric string codes instead
+of UI strings themselves which reduces code readability and
+may lead to errors. The <a class="reference internal" href="#simpleplugin.Addon" title="simpleplugin.Addon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Addon</span></code></a> class provides facilities
+for emulating GNU Gettext localization system.</p>
+<p>This allows to use UI strings from addon’s English <code class="file docutils literal notranslate"><span class="pre">strings.po</span></code>
+file instead of numeric codes to return localized strings from
+respective localized <code class="file docutils literal notranslate"><span class="pre">.po</span></code> files.</p>
+<p>This method returns <a class="reference internal" href="#simpleplugin.Addon.gettext" title="simpleplugin.Addon.gettext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Addon.gettext()</span></code></a> method object that
+can be assigned to a short alias to reduce typing. Traditionally,
+<code class="docutils literal notranslate"><span class="pre">_</span></code> (a single underscore) is used for this purpose.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">addon</span> <span class="o">=</span> <span class="n">simpleplugin</span><span class="o">.</span><span class="n">Addon</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">addon</span><span class="o">.</span><span class="n">initialize_gettext</span><span class="p">()</span>
+
+<span class="n">xbmcgui</span><span class="o">.</span><span class="n">Dialog</span><span class="p">()</span><span class="o">.</span><span class="n">notification</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Warning!&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Something happened&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In the preceding example the notification strings will be replaced
+with localized versions if these strings are translated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.Addon.gettext" title="simpleplugin.Addon.gettext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Addon.gettext()</span></code></a> method object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>SimplePluginError</strong></a> – if the addon’s English <code class="file docutils literal notranslate"><span class="pre">strings.po</span></code>
+file is missing</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.Plugin">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">Plugin</code><span class="sig-paren">(</span><em>id_=u''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simpleplugin.Addon" title="simpleplugin.Addon"><code class="xref py py-class docutils literal notranslate"><span class="pre">simpleplugin.Addon</span></code></a></p>
+<p>Plugin class with URL query string routing.</p>
+<p>It provides a simplified plugin call routing mechanism using URL query strings.
+A URL query string must contain “action” parameter that defines which function
+will be invoked during this plugin call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – plugin’s id, e.g. ‘plugin.video.foo’ (optional)</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="simpleplugin.Plugin.params">
+<code class="descname">params</code><a class="headerlink" href="#simpleplugin.Plugin.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plugin call parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">plugin call parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.Params" title="simpleplugin.Params">Params</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="simpleplugin.Plugin.handle">
+<code class="descname">handle</code><a class="headerlink" href="#simpleplugin.Plugin.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plugin handle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">plugin handle</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="simpleplugin.Plugin.get_params">
+<em class="property">static </em><code class="descname">get_params</code><span class="sig-paren">(</span><em>paramstring</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Plugin.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Plugin.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a URL-encoded paramstring to a Python dict</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>paramstring</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – URL-encoded paramstring</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">parsed paramstring</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.Params" title="simpleplugin.Params">Params</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Plugin.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>plugin_url=u''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Plugin.get_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Plugin.get_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a callable URL for a virtual directory item</p>
+<p>If plugin_url is empty, a current plugin URL is used.
+kwargs are converted to a URL-encoded string of plugin call parameters
+To call a plugin action, ‘action’ parameter must be used,
+if ‘action’ parameter is missing, then the plugin root action is called
+If the action is not added to <a class="reference internal" href="#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plugin</span></code></a> actions,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">PluginError</span></code> will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plugin_url</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – plugin URL with trailing / (optional)</li>
+<li><strong>kwargs</strong> – pairs of key=value items</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a full plugin callback URL</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Plugin.action">
+<code class="descname">action</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Plugin.action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Plugin.action" title="Permalink to this definition">¶</a></dt>
+<dd><p>Action decorator</p>
+<p>Defines plugin callback action. If action’s name is not defined
+explicitly, then the action is named after the decorated function.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Action’s name must be unique.</p>
+</div>
+<p>A plugin must have at least one action named <code class="docutils literal notranslate"><span class="pre">'root'</span></code>
+implicitly or explicitly.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The action is implicitly named &#39;root&#39; after the decorated function</span>
+<span class="nd">@plugin</span><span class="o">.</span><span class="n">action</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@plugin</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>  <span class="c1"># The action name is set explicitly</span>
+<span class="k">def</span> <span class="nf">foo_action</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – action’s name (optional).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>SimplePluginError</strong></a> – if the action with such name is already defined.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.Plugin.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#Plugin.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.Plugin.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run plugin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>SimplePluginError</strong></a> – if unknown action string is provided.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simpleplugin.RoutedPlugin">
+<em class="property">class </em><code class="descclassname">simpleplugin.</code><code class="descname">RoutedPlugin</code><span class="sig-paren">(</span><em>id_=u''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#RoutedPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.RoutedPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simpleplugin.Plugin" title="simpleplugin.Plugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">simpleplugin.Plugin</span></code></a></p>
+<p>Plugin class that implements “pretty URL” routing similar to Flask and Bottle
+web-frameworks</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – plugin’s id, e.g. ‘plugin.video.foo’ (optional)</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="simpleplugin.RoutedPlugin.url_for">
+<code class="descname">url_for</code><span class="sig-paren">(</span><em>func_</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#RoutedPlugin.url_for"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.RoutedPlugin.url_for" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a URL for a plugin route</p>
+<p>This method performs reverse resolving a plugin callback URL for
+the named route. If route’s name is not set explicitly, then the name
+of a decorated function is used as the name of the corresponding route.
+The method can optionally take positional args and kwargs.
+If any positional args are provided their values replace
+variable placeholders by position.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The number of positional args must not exceed
+the number of variable placeholders!</p>
+</div>
+<p>If any kwargs are provided their values replace variable placeholders
+by name. If the number of kwargs provided exceeds the number of variable
+placeholders, then the rest of the kwargs are added to the URL
+as a query string.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All <code class="xref py py-class docutils literal notranslate"><span class="pre">unicode</span></code> arguments are encoded with UTF-8 encoding.</p>
+</div>
+<p>Let’s assume that the ID of our plugin is <code class="docutils literal notranslate"><span class="pre">plugin.acme</span></code>.
+The following examples will show how to use this method to resolve
+callback URLs for this plugin.</p>
+<p>Example 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo&#39;</span>
+</pre></div>
+</div>
+<p>Example 2:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo/bar&#39;</span>
+</pre></div>
+</div>
+<p>Example 3:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">ham</span><span class="o">=</span><span class="s1">&#39;spam&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo/bar?ham=spam</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em> or </em><em>types.FunctionType</em>) – route’s name or a decorated function object.</li>
+<li><strong>args</strong> – positional arguments.</li>
+<li><strong>kwargs</strong> – keyword arguments.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">full plugin call URL for the route.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>simpleplugin.SimplePluginError</strong></a> – if a route with such name
+does not exist or on arguments mismatch.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.RoutedPlugin.get_url">
+<code class="descname">get_url</code><span class="sig-paren">(</span><em>func_</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#simpleplugin.RoutedPlugin.get_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a URL for a plugin route</p>
+<p>This method performs reverse resolving a plugin callback URL for
+the named route. If route’s name is not set explicitly, then the name
+of a decorated function is used as the name of the corresponding route.
+The method can optionally take positional args and kwargs.
+If any positional args are provided their values replace
+variable placeholders by position.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The number of positional args must not exceed
+the number of variable placeholders!</p>
+</div>
+<p>If any kwargs are provided their values replace variable placeholders
+by name. If the number of kwargs provided exceeds the number of variable
+placeholders, then the rest of the kwargs are added to the URL
+as a query string.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All <code class="xref py py-class docutils literal notranslate"><span class="pre">unicode</span></code> arguments are encoded with UTF-8 encoding.</p>
+</div>
+<p>Let’s assume that the ID of our plugin is <code class="docutils literal notranslate"><span class="pre">plugin.acme</span></code>.
+The following examples will show how to use this method to resolve
+callback URLs for this plugin.</p>
+<p>Example 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo&#39;</span>
+</pre></div>
+</div>
+<p>Example 2:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo/bar&#39;</span>
+</pre></div>
+</div>
+<p>Example 3:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">ham</span><span class="o">=</span><span class="s1">&#39;spam&#39;</span><span class="p">)</span>
+<span class="c1"># url = &#39;plugin://plugin.acme/foo/bar?ham=spam</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em> or </em><em>types.FunctionType</em>) – route’s name or a decorated function object.</li>
+<li><strong>args</strong> – positional arguments.</li>
+<li><strong>kwargs</strong> – keyword arguments.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">full plugin call URL for the route.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#simpleplugin.SimplePluginError" title="simpleplugin.SimplePluginError"><strong>simpleplugin.SimplePluginError</strong></a> – if a route with such name
+does not exist or on arguments mismatch.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simpleplugin.RoutedPlugin.route">
+<code class="descname">route</code><span class="sig-paren">(</span><em>pattern</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simpleplugin.html#RoutedPlugin.route"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simpleplugin.RoutedPlugin.route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route decorator for plugin callback routes</p>
+<p>The route decorator is used to define plugin callback routes
+similar to a URL routing mechanism in Flask and Bottle Python
+web-frameworks. The plugin routing mechanism calls decorated functions
+by matching a path in a plugin callback URL (passed as <code class="docutils literal notranslate"><span class="pre">sys.argv[0]</span></code>)
+to a route pattern. A route pattern <em>must</em> start with a forward slash
+<code class="docutils literal notranslate"><span class="pre">/</span></code>. An end slash is optional. A plugin must have at least the root
+route with <code class="docutils literal notranslate"><span class="pre">'/'</span></code> pattern. Bu default a route is named by the decorated
+function, but route’s name can be set explicitly by providing
+the 2nd optional <code class="docutils literal notranslate"><span class="pre">name</span></code> argument.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Route names must be unique!</p>
+</div>
+<p>Example 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>In the preceding example <code class="docutils literal notranslate"><span class="pre">foo_function</span></code> will be called when the plugin
+is invoked with <code class="docutils literal notranslate"><span class="pre">plugin://plugin.acme/foo/</span></code> callback URL.
+A route pattern can contain variable placeholders
+(marked with angular brackets <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code>) that are used to pass arguments
+to a route function.</p>
+<p>Example 2:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">foo_function</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>In the preceding example the part of a callback path marked with
+<code class="docutils literal notranslate"><span class="pre">&lt;param&gt;</span></code> placeholder will be passed to the function as an argument.
+The name of a placeholder must be the same as the name of
+the corresponding parameter. By default arguments are passed as strings.
+The <code class="docutils literal notranslate"><span class="pre">int</span></code> and <code class="docutils literal notranslate"><span class="pre">float</span></code> prefixes can be used to pass arguments
+as <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> and <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> numbers, for example <code class="docutils literal notranslate"><span class="pre">&lt;int:foo&gt;</span></code>
+or <code class="docutils literal notranslate"><span class="pre">&lt;float:bar&gt;</span></code>.</p>
+<p>Example 3:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/add/&lt;int:param1&gt;/&lt;int:param2&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">addition</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">):</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="n">param1</span> <span class="o">+</span> <span class="n">param2</span>
+</pre></div>
+</div>
+<p>A function can have multiple route decorators. In this case additional
+routes must have explicitly defined names. If a route has less variable
+placeholders than function parameters, “missing” function parameters
+must have default values.</p>
+<p>Example 4:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/foo/&lt;param&gt;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;foo_route&#39;</span><span class="p">)</span>
+<span class="nd">@plugin</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/bar&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">some_function</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="s1">&#39;spam&#39;</span><span class="p">):</span>
+    <span class="c1"># Do something</span>
+</pre></div>
+</div>
+<p>In the preceding example <code class="docutils literal notranslate"><span class="pre">some_function</span></code> can be called through
+2 possible routes. If the function is called through the 1st route
+(<code class="docutils literal notranslate"><span class="pre">'foo_route'</span></code>) <code class="docutils literal notranslate"><span class="pre">&lt;param&gt;</span></code> value will be passed as an argument.
+The 2nd route will call the function with the default argument
+<code class="docutils literal notranslate"><span class="pre">'spam'</span></code> because this route has no variable placeholders to pass
+arguments to the function. The order of the <code class="docutils literal notranslate"><span class="pre">route</span></code> decorators
+does not matter but each route must have a unique name.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A route pattern must start with a forward slash <code class="docutils literal notranslate"><span class="pre">/</span></code>
+and must not have a slash at the end.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – route matching pattern</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – route’s name (optional). If no name is provided,
+the route is named after the decorated function.
+The name must be unique.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">SimplePlugin</a></h1>
+
+
+
+<p class="blurb">A plugin micro-framework for Kodi mediacenter</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=romanvm&repo=script.module.simpleplugin&type=star&v=2&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/romanvm/script.module.simpleplugin">
+    <img
+        alt="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+        src="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/romanvm/script.module.simpleplugin">
+    <img
+    alt="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    src="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../actions_routing.html">Actions Routing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../storage.html">Persistent And In-Memory Storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cached.html">Cached Decorator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Working with Plugin Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettext.html">Plugin Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../log.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debug.html">Debugging Addons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../using.html">Using SimplePlugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scrapers.html">Python Scrapers and Subtitle Addons</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">simpleplugin</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../links.html">Useful Links</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Roman Miroshnychenko.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_autosummary/simpleplugin.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/romanvm/script.module.simpleplugin" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

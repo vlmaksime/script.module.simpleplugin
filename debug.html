@@ -1,0 +1,242 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Debugging Addons &#8212; SimplePlugin 3.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Using SimplePlugin" href="using.html" />
+    <link rel="prev" title="Logging" href="log.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="debugging-addons">
+<h1>Debugging Addons<a class="headerlink" href="#debugging-addons" title="Permalink to this headline">¶</a></h1>
+<p>SimplePlugin offers <code class="xref py py-func docutils literal notranslate"><span class="pre">debug_exception</span></code>
+context manager that allows to log diagnostic info about exceptions raised within its scope.
+This diagnostic info helps to better understand the root cause of a possible error
+by providing data about execution context at the moment when an exception happens.
+The diagnostic info includes the following items:</p>
+<ul class="simple">
+<li>Module path.</li>
+<li>Code fragment where the exception has happened.</li>
+<li>Global variables.</li>
+<li>Local variables.</li>
+</ul>
+<p>After logging the diagnostic info the exception is re-raised.</p>
+<p>Usage example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">debug_exception</span><span class="p">():</span>
+    <span class="c1"># Some error-prone code</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Fatal error!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">debug_exception</span></code> context manager takes
+an optional parameter that is a logger function which allows to customize log messages.
+For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simpleplugin</span> <span class="kn">import</span> <span class="n">Plugin</span><span class="p">,</span> <span class="n">debug_exception</span>
+
+<span class="n">plugin</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">()</span>
+
+<span class="o">...</span>
+
+<span class="k">with</span> <span class="n">debug_exception</span><span class="p">(</span><span class="n">plugin</span><span class="o">.</span><span class="n">log_error</span><span class="p">):</span>
+    <span class="n">plugin</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Output example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: Unhandled exception detected!
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: *** Start diagnostic info ***
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: File: D:\Kodi\portable_data\addons\plugin.video.simpleplugin.example\main.py
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: Code context:
+                                               74:     # Get video categories
+                                               75:     categories = get_categories()
+                                               76:&gt;    raise RuntimeError(&#39;Fatal error!&#39;)
+                                               77:     # Iterate through categories and yield list items for Kodi to display
+                                               78:     for category in categories:
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: Global variables:
+                                            Plugin = &lt;class &#39;simpleplugin.Plugin&#39;&gt;
+                                            VIDEOS = {&#39;Animals&#39;: [{&#39;name&#39;: &#39;Crab&#39;,
+                                                          &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/crab.jpg&#39;,
+                                                          &#39;video&#39;: &#39;http://www.vidsplay.com/vids/crab.mp4&#39;},
+                                                         {&#39;name&#39;: &#39;Alligator&#39;,
+                                                          &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/alligator.jpg&#39;,
+                                                          &#39;video&#39;: &#39;http://www.vidsplay.com/vids/alligator.mp4&#39;},
+                                                         {&#39;name&#39;: &#39;Turtle&#39;,
+                                                          &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/turtle.jpg&#39;,
+                                                          &#39;video&#39;: &#39;http://www.vidsplay.com/vids/turtle.mp4&#39;}],
+                                             &#39;Cars&#39;: [{&#39;name&#39;: &#39;Postal Truck&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/us_postal.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/us_postal.mp4&#39;},
+                                                      {&#39;name&#39;: &#39;Traffic&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/traffic1.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/traffic1.avi&#39;},
+                                                      {&#39;name&#39;: &#39;Traffic Arrows&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/traffic_arrows.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/traffic_arrows.mp4&#39;}],
+                                             &#39;Food&#39;: [{&#39;name&#39;: &#39;Chicken&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/chicken.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/bbqchicken.mp4&#39;},
+                                                      {&#39;name&#39;: &#39;Hamburger&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/hamburger.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/hamburger.mp4&#39;},
+                                                      {&#39;name&#39;: &#39;Pizza&#39;,
+                                                       &#39;thumb&#39;: &#39;http://www.vidsplay.com/vids/pizza.jpg&#39;,
+                                                       &#39;video&#39;: &#39;http://www.vidsplay.com/vids/pizza.mp4&#39;}]}
+                                            get_categories = &lt;function get_categories at 0x129764B0&gt;
+                                            get_videos = &lt;function get_videos at 0x129764F0&gt;
+                                            list_videos = &lt;function list_videos at 0x129765B0&gt;
+                                            play = &lt;function play at 0x129765F0&gt;
+                                            plugin = &lt;simpleplugin.Plugin object [&#39;plugin://plugin.video.simpleplugin.example/&#39;, &#39;8&#39;, &#39;&#39;]&gt;
+                                            root = &lt;function root at 0x12976570&gt;
+                                            sys = &lt;module &#39;sys&#39; (built-in)&gt;
+                                            xbmc = &lt;module &#39;xbmc&#39; (built-in)&gt;
+                                            xbmcout = &lt;class __main__.xbmcout at 0x134E8228&gt;
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: Local variables:
+                                            categories = [&#39;Food&#39;, &#39;Cars&#39;, &#39;Animals&#39;]
+19:13:20 T:11060   ERROR: plugin.video.simpleplugin.example [v.1.0.0]: **** End diagnostic info ****
+19:13:20 T:11060   ERROR: EXCEPTION Thrown (PythonToCppException) : --&gt;Python callback/script returned the following error&lt;--
+                                             - NOTE: IGNORING THIS CAN LEAD TO MEMORY LEAKS!
+                                            Error Type: &lt;type &#39;exceptions.RuntimeError&#39;&gt;
+                                            Error Contents: Fatal error!
+                                            Traceback (most recent call last):
+                                              File &quot;D:\Kodi\portable_data\addons\plugin.video.simpleplugin.example\main.py&quot;, line 132, in &lt;module&gt;
+                                                plugin.run()
+                                              File &quot;D:\Kodi\portable_data\addons\script.module.simpleplugin\libs\simpleplugin.py&quot;, line 986, in run
+                                                self._add_directory_items(self.create_listing(result))
+                                              File &quot;D:\Kodi\portable_data\addons\script.module.simpleplugin\libs\simpleplugin.py&quot;, line 1108, in _add_directory_items
+                                                for item in context.listing:
+                                              File &quot;D:\Kodi\portable_data\addons\plugin.video.simpleplugin.example\main.py&quot;, line 76, in root
+                                                raise RuntimeError(&#39;Fatal error!&#39;)
+                                            RuntimeError: Fatal error!
+                                            --&gt;End of Python script error report&lt;--
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SimplePlugin</a></h1>
+
+
+
+<p class="blurb">A plugin micro-framework for Kodi mediacenter</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=romanvm&repo=script.module.simpleplugin&type=star&v=2&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/romanvm/script.module.simpleplugin">
+    <img
+        alt="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+        src="https://secure.travis-ci.org/romanvm/script.module.simpleplugin.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/romanvm/script.module.simpleplugin">
+    <img
+    alt="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    src="https://codecov.io/github/romanvm/script.module.simpleplugin/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions_routing.html">Actions Routing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Persistent And In-Memory Storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cached.html">Cached Decorator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Working with Plugin Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettext.html">Plugin Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">Logging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Debugging Addons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using.html">Using SimplePlugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrapers.html">Python Scrapers and Subtitle Addons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Useful Links</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Roman Miroshnychenko.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/debug.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/romanvm/script.module.simpleplugin" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
