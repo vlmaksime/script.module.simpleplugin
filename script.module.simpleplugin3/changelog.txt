@@ -1,3 +1,5 @@
+3.0.4
+  - Add compatibiliti for xbmc.translatePath at Kodi Matrix.
 3.0.3
   - Changed loglevel for NOTICE at Kodi Matrix.
 3.0.2

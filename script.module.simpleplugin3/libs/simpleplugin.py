@@ -42,10 +42,11 @@ else:
 import xbmcaddon
 import xbmc
 import xbmcgui
+import xbmcvfs
 
 __all__ = ['SimplePluginError', 'Storage', 'MemStorage', 'Addon', 'Plugin',
            'RoutedPlugin', 'Params', 'log_exception', 'py2_encode',
-           'py2_decode']
+           'py2_decode', 'translate_path']
 
 if PY3:
     getargspec = inspect.getfullargspec
@@ -105,6 +106,13 @@ def py2_decode(s, encoding='utf-8'):
 def _kodi_major_version():
     kodi_version = xbmc.getInfoLabel('System.BuildVersion').split(' ')[0]
     return kodi_version.split('.')[0]
+
+def translate_path(*args, **kwargs):
+    if _kodi_major_version() < '19':
+        return xbmc.translatePath(*args, **kwargs)
+    else:
+        return xbmcvfs.translatePath(*args, **kwargs)
+
 
 @contextmanager
 def log_exception(logger=None):
@@ -423,7 +431,7 @@ class Addon(object):
         """
         self._addon = xbmcaddon.Addon(id_)
         self._profile_dir = py2_decode(
-            xbmc.translatePath(self._addon.getAddonInfo('profile'))
+            translate_path(self._addon.getAddonInfo('profile'))
         )
         self._ui_strings_map = None
         if not os.path.exists(self._profile_dir):
