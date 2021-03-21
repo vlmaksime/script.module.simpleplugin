@@ -373,7 +373,7 @@ class MemStorage(MutableMapping):
             try:
                 return pickle.loads(bytes(raw_item))
             except TypeError as e:
-                return pickle.loads(bytes(raw_item, 'utf-8'))
+                return pickle.loads(bytes(raw_item, 'utf-8', errors='surrogateescape'))
         else:
             raise KeyError(key)
 
