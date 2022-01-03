@@ -4,7 +4,7 @@
    version="3.0.6"
    provider-name="Roman V.M.; vl.maksime">
   <requires>
-    <import addon="xbmc.python" version="2.19.0"/>
+    <import addon="xbmc.python" version="2.25.0"/>
     <import addon="script.module.future" version="0.16.0.4"/>
   </requires>
   <extension point="xbmc.python.module" library="libs" />

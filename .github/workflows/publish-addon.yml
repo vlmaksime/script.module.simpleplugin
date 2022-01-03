@@ -26,7 +26,7 @@ jobs:
         pip install -q git+https://github.com/xbmc/kodi-addon-submitter.git
     - name: Submit addon
       run: |
-        submit-addon -r repo-scrapers -b krypton -m -s --pull-request script.module.simpleplugin3
+        submit-addon -r repo-scripts -b krypton -m -s --pull-request script.module.simpleplugin3
       env:
         GH_USERNAME: vlmaksime
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
