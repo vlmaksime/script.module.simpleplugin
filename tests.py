@@ -22,6 +22,10 @@ def fake_log(msg, level=0):
     if not isinstance(msg, str):
         raise TypeError('log message must be of str type!')
 
+def fake_getInfoLabel(label):
+    if label == 'System.BuildVersion':
+        return '18.3 Git:fake-commit'
+    return ''
 
 class FakeAddon(object):
     def __init__(self, id_='test.addon'):
@@ -73,6 +77,7 @@ mock_xbmc.LOGDEBUG = 0
 mock_xbmc.LOGNOTICE = 2
 mock_xbmc.translatePath.side_effect = lambda path: path
 mock_xbmc.log = fake_log
+mock_xbmc.getInfoLabel = fake_getInfoLabel
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
