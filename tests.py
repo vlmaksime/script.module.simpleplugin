@@ -82,9 +82,13 @@ mock_xbmc.getInfoLabel = fake_getInfoLabel
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.Window = FakeWindow
 
+mock_xbmcvfs = mock.MagicMock()
+
 sys.modules['xbmcaddon'] = mock_xbmcaddon
 sys.modules['xbmc'] = mock_xbmc
 sys.modules['xbmcgui'] = mock_xbmcgui
+sys.modules['xbmcvfs'] = mock_xbmcvfs
+
 
 # Import our module being tested
 sys.path.append(os.path.join(cwd, 'script.module.simpleplugin3', 'libs'))
